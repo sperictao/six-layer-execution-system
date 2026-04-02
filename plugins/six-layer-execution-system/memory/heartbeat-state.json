@@ -1,0 +1,26 @@
+{
+  "lastChecks": {
+    "calendar": "2026-03-27T09:31:00+08:00",
+    "activeWork": "2026-03-27T09:31:00+08:00",
+    "memory": "2026-03-27T09:31:00+08:00",
+    "proactive": "2026-03-27T09:31:00+08:00"
+  },
+  "lastNotification": {
+    "at": null,
+    "level": null,
+    "reason": null,
+    "task": null,
+    "slice": null
+  },
+  "suppression": {
+    "windowMinutes": 30,
+    "quietHours": {
+      "start": "23:00",
+      "end": "08:00",
+      "allowLevels": [
+        "P0"
+      ]
+    }
+  },
+  "lastMilestones": {}
+}

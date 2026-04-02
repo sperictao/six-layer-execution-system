@@ -1,0 +1,382 @@
+# ACTIVE.md
+
+## Ledger meta
+- version: `2`
+- mode: `multi-activity`
+- current_focus_activity_id: `waiting-ledger-review`
+- default_reply_activity_id: `waiting-ledger-review`
+- selection_policy: `focus-first`
+- updated_at: `2026-04-02 00:00 Asia/Shanghai`
+
+## Status legend
+- `ready` — agreed and ready to start
+- `in_progress` — actively being worked on
+- `blocked` — cannot proceed until something changes
+- `done` — completed and verified
+- `parked` — intentionally paused
+
+## Workspace rules
+- execution_truth: `ACTIVE.md`
+- complex_task_truth: `contract + roadmap + tasks + ACTIVE`
+- focus_execution: `focus-first`
+- progress_replies_require_repo_fact_check: `true`
+- repo_local_tests_root: `source checkout /tests`
+- repo_local_test_commands: `run from repo root with PYTHONPATH="plugins/six-layer-execution-system:plugins/six-layer-execution-system/scripts"`
+- standalone_plugin_full_tests_policy: `run_execution_system_full_tests.py may report unavailable outside source checkout`
+- roadmap_closeout_entrypoint: `scripts/complete_slice.sh`
+- roadmap_closeout_verifier: `scripts/check_slice_closeout.py`
+- notification_state_file: `memory/notifications-state.json`
+- notification_source_of_truth: `memory/last-slice-closeout.json`
+- inflight_payload_cache: `memory/last-slice-notification.json`
+- roadmap_dedupe_key: `activity_id + completed_slice_id + commit`
+- spec_reference: `docs/execution-system-spec-v1.md`
+- wave_state_fields_policy: `roadmap activities may add execution_mode/current_wave_id/ready_slices/inflight_slices/blocked_slices/integration_step/last_wave_result only when the activity is actually using parallel-wave execution; otherwise keep ACTIVE lean`
+
+## Runtime policy pointers
+- notification_levels: `P0/P1/P2/P3`
+- notification_policy_source: `skills/six-layer-execution-system/SKILL.md`
+- recovery_working_buffer: `memory/working-buffer.md`
+- closeout_flow_summary: `prepare -> payload -> send -> ack | fail`
+- last_notified:
+  - level: `P1`
+  - reason: `heartbeat execution policy upgraded for roadmap-driven progress`
+  - at: `2026-03-12 23:03 Asia/Shanghai`
+
+## Recovery pointers
+- active ledger: `ACTIVE.md`
+- daily note: `memory/2026-04-02.md`
+- working buffer: `memory/working-buffer.md`
+- consistency checker: `scripts/check_active_consistency.py`
+- parser: `scripts/active_ledger.py`
+
+## Activity index
+- `execution-system-spec-v1`
+- `execution-system-decomposition-upgrade`
+- `active-ledger-v2`
+- `waiting-ledger-review`
+- `simple-ledger-docs`
+
+## Activities
+
+### Activity: execution-system-spec-v1
+- activity_id: `execution-system-spec-v1`
+- title: `implement execution system spec v1`
+- type: `roadmap`
+- owner: `Spero`
+- status: `parked`
+- priority: `P1`
+- autopilot: `false`
+- focus_rank: `0`
+- path: `.`
+- source_doc: `docs/execution-system-spec-v1.md`
+- roadmap_doc: `roadmaps/execution-system-spec-v1-roadmap.md`
+- tasks_doc: `tasks/execution-system-spec-v1-tasks.md`
+- current_slice_id: `ES-F.F33`
+- next_slice_id: `ES-F.F34`
+- objective: `将 execution-system-spec-v1 从文档规范推进为可实施、可迁移、可验证的执行系统；在维护态下为 acceptance / summary / closeout 一体化链路冻结第一版薄整合计划`
+- done_when:
+  - `ACTIVE.md` 完成第一轮 lean runtime truth 瘦身
+  - 至少一份 execution-system-owned roadmap/tasks 样例完成模板对齐迁移
+  - `decisions/` 层落地并补关键样例
+- next_step:
+  - 仅围绕 acceptance / summary / closeout 一体化链路规划第一版薄整合步骤
+  - 保持 raw output 可见，不把 advisory 升级成 hard-fail
+  - 完成后再决定是否值得真的重开实现切片
+- validation:
+  - `python3 scripts/check_active_consistency.py`
+  - `first checker exact contract 与 non-goals 已明确`
+  - `不与现有 checker 语义冲突`
+- last_commit: `c7344bb`
+- blocked_by:
+  - maintenance mode until a concrete reopen trigger appears
+- retrieval_keys:
+  - `execution-system-spec-v1`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `docs/execution-system-spec-v1.md`
+  - `contracts/execution-system-contract.md`
+  - `references/templates.md`
+- query_recipe:
+  - exact anchors first:
+    - `execution-system-spec-v1`
+    - `roadmaps/execution-system-spec-v1-roadmap.md`
+    - `tasks/execution-system-spec-v1-tasks.md`
+  - intent / constraint refinement:
+    - `execution system spec implement lean ACTIVE`
+    - `contract roadmap tasks active completion protocol migration`
+- last_artifact:
+  - `core spec baseline: docs/execution-system-spec-v1.md (landed from 570a222 onward)`
+  - `runtime checker suite: scripts/check_active_consistency.py + scripts/check_task_slice_schema.py + scripts/run_execution_system_checks.py`
+  - `advisory/reporting layer: scripts/check_oversized_migration_slices.py + workflow summary footer`
+  - `closeout state semantics: create/check slice closeout now encode validation_state=validated and slice_state=closed_out`
+  - `acceptance baseline: docs/execution-system-spec-v1-acceptance-checklist.md`
+  - `maintenance guardrails: docs/execution-system-maintenance-guardrails.md`
+  - `migration sample and contract anchors: tasks/execution-system-testing-tasks.md + contracts/execution-system-contract.md`
+- last_decision:
+  - `ACTIVE should keep runtime truth and concise recovery pointers, not a running milestone diary`
+  - `Phase 6 is sufficiently landed; next waves default to advisory/workflow improvements before any third hard-fail checker`
+  - `slice completion semantics should move from doc-only wording into explicit closeout artifact fields`
+  - `workflow reporting may summarize outcomes, but must not replace raw checker output`
+- done_definition:
+  - roadmap/tasks landed
+  - runtime slimming rules defined and partially applied
+  - at least one execution-system-owned migration sample completed
+- notes:
+  - this activity governs implementation of the execution system itself, not external repository refactor work
+
+### Activity: execution-system-decomposition-upgrade
+- activity_id: `execution-system-decomposition-upgrade`
+- title: `upgrade execution system into a decomposition engine`
+- type: `roadmap`
+- owner: `Spero`
+- status: `ready`
+- priority: `P2`
+- autopilot: `false`
+- focus_rank: `1`
+- path: `.`
+- source_doc: `docs/execution-system-decomposition-upgrade-plan.md`
+- roadmap_doc: `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+- tasks_doc: `tasks/execution-system-decomposition-upgrade-tasks.md`
+- current_slice_id: `DX-E.E10`
+- next_slice_id: `switch-focus-waiting-ledger-review`
+- objective: `把 execution system 从强执行账本升级为可分解、可调度、可校验、可恢复的需求分解引擎，并先完成 v1 的 schema + first checker cut`
+- done_when:
+  - demand intake / decomposition guardrails / roadmap wave guidance / task DAG fields / ACTIVE wave-state fields 已进入 spec 与模板
+  - first checker cut（dependency graph + parallel safety）已落地并接入 unified runner
+  - `check_active_wave_state.py` 已实现并在低风险 pilot activity 上验证通过
+  - active-wave-state checker 已接入 unified runner，并带有明确 recovery hint
+  - synthetic single-wave `test_execution_system_path_parallel_wave.py` 已落地并进入 full suite
+  - implementation backlog、pilot path、v1 acceptance deltas 已明确
+- execution_mode: `parallel-wave`
+- current_wave_id: `W1`
+- ready_slices:
+  - `switch-focus-waiting-ledger-review`
+- inflight_slices:
+  - `DX-E.E10`
+- blocked_slices:
+  - none
+- integration_step:
+  - 将 execution-system-decomposition-upgrade 当前轮的 closeout 状态保留下来，并把下一条默认 review focus 交回 `waiting-ledger-review`
+- last_wave_result:
+  - `W10 multi-wave no-go closeout complete: later-multi-wave remains documented as a no-go discovery cut with a future reopen condition`
+- next_step:
+  - 保留 execution-system-decomposition-upgrade 的可恢复状态
+  - 下一次仅在命中 concrete reopen trigger 时再回到 execution-system-decomposition-upgrade
+  - 默认 review focus 保持在 `waiting-ledger-review`，不继续扩 execution-system 设计线
+- validation:
+  - `python3 scripts/run_execution_system_checks.py`
+  - `python3 scripts/run_execution_system_full_tests.py`
+- last_validation:
+  - `python3 scripts/check_active_consistency.py` passed
+  - `python3 scripts/run_execution_system_checks.py` passed
+  - `PYTHONPATH="plugins/six-layer-execution-system:plugins/six-layer-execution-system/scripts" python3 tests/test_check_active_wave_state.py` passed
+- blocked_by:
+  - none
+- last_commit: `c7344bb`
+- retrieval_keys:
+  - `execution-system-decomposition-upgrade`
+  - `docs/execution-system-decomposition-upgrade-plan.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - `check_task_dependency_graph.py`
+  - `check_parallel_safety.py`
+- query_recipe:
+  - exact anchors first:
+    - `execution-system-decomposition-upgrade`
+    - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+    - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - intent / constraint refinement:
+    - `decomposition engine v1 first checker cut`
+    - `active wave state checker pilot path`
+- last_artifact:
+  - `docs/execution-system-decomposition-upgrade-plan.md` landed as the full six-layer proposal
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md` + `tasks/execution-system-decomposition-upgrade-tasks.md` landed as the canonical execution backlog
+  - `scripts/check_task_dependency_graph.py` + `scripts/check_parallel_safety.py` and their smoke tests landed and are wired into `run_execution_system_checks.py`
+  - `scripts/check_active_wave_state.py` + `tests/test_check_active_wave_state.py` landed and now also run inside `run_execution_system_checks.py`
+  - `tests/test_execution_system_path_parallel_wave.py` landed as the first synthetic single-wave path test
+  - `tests/test_execution_system_path_focus_acceptance_drift.py` landed as the first broader-governance-drift test cut
+  - `tests/test_execution_system_path_maintenance_focus_drift.py` landed as the second governance-drift test cut candidate implementation entrypoint
+  - `tests/test_execution_system_path_closeout_ready_focus_drift.py` landed as the third governance-drift candidate implementation entrypoint
+  - `tests/test_execution_system_path_runner_hint_drift.py` landed as the runner/summary-hint drift implementation entrypoint
+  - `scripts/run_execution_system_full_tests.py` exists as the full-suite entrypoint; its result must be re-verified against the live ledger before quoting a clean pass
+  - `spec/templates/ACTIVE policy` now include demand intake, decomposition guardrails, roadmap wave guidance, task DAG fields, and optional ACTIVE wave-state fields
+- last_decision:
+  - first checker cut should stay narrow: dependency graph + parallel safety first
+  - active-wave-state enforcement and full parallel-wave path testing should wait until a low-risk pilot path exists
+  - `DX-E.E2` is now complete: pilot semantics, promotion gate checklist, and drafted runner recovery hint are all in place
+  - `DX-E.E3` is complete: active-wave-state checker is now inside the unified runner with the prewritten recovery hint
+  - `DX-E.E4` concluded `go`: the first parallel-wave path test should be implemented as a synthetic single-wave cut with explicit non-goals, not deferred and not widened
+  - the first decomposition-engine implementation wave is now closed out
+  - broader governance-drift expansion was selected as the next major line and now has its first wave landed
+  - `governance-drift-test-cut-1` is landed as focus/acceptance gate alignment drift coverage
+  - `governance-drift-test-cut-2` is landed as maintenance-mode drift coverage
+  - closeout-ready drift is landed as a focus-aware closeout coverage line
+  - runner/summary-hint drift is landed as summary-footer coverage
+  - the first broader-governance-drift wave is now formally closed out
+  - later multi-wave path design now has a first minimal design cut and a documented `no-go` result
+  - `DX-E.E10` completes the handoff: execution-system-decomposition-upgrade should stop expanding and return the default review focus to `waiting-ledger-review`
+- done_definition:
+  - decomposition-engine v1 planning and first checker cut are durable, recoverable, and no longer depend on chat history
+  - active-wave-state pilot has been successfully promoted from pilot-only checker to unified runner integration
+  - the next-parallel-wave-test line has a defined minimal-cut discovery slice before any broader implementation wave begins
+- notes:
+  - this activity remains the low-risk pilot path for wave-state semantics, but is no longer the immediate implementation focus after `DX-E.E10` handoff
+
+### Activity: active-ledger-v2
+- activity_id: `active-ledger-v2`
+- title: `implement ACTIVE.md v2 multi-activity ledger`
+- type: `roadmap`
+- owner: `Spero`
+- status: `done`
+- priority: `P1`
+- autopilot: `true`
+- focus_rank: `1`
+- path: `.`
+- source_doc: `tasks/active-ledger-v2-tasks.md`
+- roadmap_doc: `roadmaps/active-ledger-v2-roadmap.md`
+- tasks_doc: `tasks/active-ledger-v2-tasks.md`
+- current_slice_id: `AL-E.E2`
+- objective: `完成 active-ledger-v2 的使用文档与验收清单，并在收官后把 focus 切回 maintenance review`
+- done_when:
+  - `docs/active-ledger-v2.md` 落地
+  - `accept_active_ledger_v2.py` 验收通过
+  - `active-ledger-v2` 状态可切为 `done`，focus 可安全切回非 execution-system 的维护态 focus
+- next_slice_id: `followup-ledger-review`
+- next_step:
+  - 写 active ledger v2 使用说明
+  - 跑正式验收脚本
+  - 将 `active-ledger-v2` 标记为完成并把 focus 切回 `waiting-ledger-review`
+- validation:
+  - `python3 scripts/check_active_consistency.py`
+  - `python3 scripts/validate_focus_first.py`
+  - `python3 scripts/accept_active_ledger_v2.py`
+- last_commit: `c7344bb`
+- last_validation:
+  - `python3 scripts/check_active_consistency.py` passed
+  - `python3 -m py_compile scripts/active_ledger.py` passed
+  - `python3 scripts/validate_focus_first.py` passed after switching focus back to `active-ledger-v2`
+  - focus switch negative test failed as expected when focus was moved away from `active-ledger-v2` before the closeout path was finalized
+- blocked_by:
+  - none
+- notify_on:
+  - current slice completed
+  - validation passed
+  - auto-switch to next slice
+  - real blocker or risk escalation
+- notify_suppression_window: `30m`
+- retrieval_keys:
+  - `ACTIVE.md`
+  - `active-ledger-v2`
+  - `three-layer ledger`
+  - `focus-first`
+  - `scripts/check_active_consistency.py`
+  - `scripts/active_ledger.py`
+- query_recipe:
+  - exact anchors first:
+    - `ACTIVE.md active-ledger-v2`
+    - `roadmaps/active-ledger-v2-roadmap.md`
+    - `tasks/active-ledger-v2-tasks.md`
+  - module / file refinement:
+    - `scripts/active_ledger.py`
+    - `scripts/check_active_consistency.py focus activity`
+  - intent / constraint refinement:
+    - `ACTIVE.md multi-activity three-layer ledger`
+    - `focus-first single source of truth`
+- last_artifact:
+  - `workspace repo HEAD: f022949 (feat: enforce focus-first activity controls)`
+  - `notifications-state.json normalized to version 2`
+  - `notification helpers now default to version 2 and preserve activity_id/activity_type`
+  - `simple-ledger-docs` added as a real simple activity sample
+  - `set_focus_activity.py` and `validate_focus_first.py` landed; focus switch smoke test executed
+  - `docs/active-ledger-v2.md` and `accept_active_ledger_v2.py` landed; acceptance passed
+- last_decision:
+  - `ACTIVE.md v2 should use three-layer ledger + explicit focus activity, not a flat multi-task list`
+  - `closeout dedupe must move to activity_id + completed_slice_id + commit`
+  - `notification state must be normalized to v2 before true multi-activity closeout validation`
+- done_definition:
+  - schema skeleton landed
+  - parser skeleton landed
+  - focus-aware checker landed
+  - notification state and helper scripts are activity-aware by default
+  - docs + acceptance checklist landed and passed
+- notes:
+  - this activity is complete; focus has been handed back to `waiting-ledger-review`
+
+### Activity: waiting-ledger-review
+- activity_id: `waiting-ledger-review`
+- title: `wait for human review on multi-activity ledger direction`
+- type: `waiting`
+- owner: `Spero`
+- status: `blocked`
+- priority: `P2`
+- autopilot: `false`
+- focus_rank: `2`
+- waiting_on: `user`
+- unblock_condition: `用户给出结构反馈、改向或确认可以继续推进下一阶段`
+- next_step:
+  - 收到反馈后整理进 `ACTIVE.md` 或 roadmap/tasks
+- validation:
+  - `反馈已吸收并更新到账本或执行文档`
+- blocked_by:
+  - user feedback pending
+- retrieval_keys:
+  - `waiting-ledger-review`
+  - `multi-activity ledger feedback`
+- query_recipe:
+  - exact anchors first:
+    - `ACTIVE.md waiting-ledger-review`
+  - intent / constraint refinement:
+    - `ledger review feedback`
+- last_artifact:
+  - `three-layer ledger implementation discussion happened in direct session`
+- last_decision:
+  - `waiting activities should be first-class citizens in ACTIVE.md v2`
+- done_definition:
+  - feedback recorded and acted on
+- notes:
+  - this activity exists as a schema validation sample for non-roadmap work
+
+### Activity: simple-ledger-docs
+- activity_id: `simple-ledger-docs`
+- title: `document active ledger v2 usage notes`
+- type: `simple`
+- owner: `Spero`
+- status: `ready`
+- priority: `P3`
+- autopilot: `false`
+- focus_rank: `3`
+- goal: `补一份针对 future-you 的 active ledger v2 使用说明与切换约定`
+- scope: `总结 current focus、activity type、closeout 边界与切换规则`
+- next_step:
+  - 当 Phase 4/5 稳定后，整理成简洁说明写回文档
+- validation:
+  - `文档覆盖 focus-first、activity types、closeout 边界`
+- blocked_by:
+  - none
+- retrieval_keys:
+  - `simple-ledger-docs`
+  - `active ledger v2 usage notes`
+- query_recipe:
+  - exact anchors first:
+    - `ACTIVE.md simple-ledger-docs`
+  - intent / constraint refinement:
+    - `ledger docs usage`
+- last_artifact:
+  - `simple activity schema sample added to ACTIVE.md`
+- last_decision:
+  - `simple activities should not require repo/slice/commit but must still carry goal/next_step/validation`
+- done_definition: `文档草案完成并被吸收到工作流说明中`
+- notes:
+  - this activity exists as a schema validation sample for simple non-roadmap work
+
+## Completed / archived
+- `execution-system-testing` — testing roadmap/tasks/inventory + `run_execution_system_full_tests.py` are aligned; execution-system path naming is unified across scripts and docs; durable notes should point to the full-suite entrypoint, not quote frozen pass/fail counts
+- `decomposition-engine-v1-checker-cut` — first checker cut landed in the execution-system runner: `check_task_dependency_graph.py` + `check_parallel_safety.py` + their smoke tests are wired into `run_execution_system_checks.py`; dependency / parallel-safety schema now has real enforcement on `tasks/execution-system-decomposition-upgrade-tasks.md`
+
+## Recovery checklist
+1. Read `Ledger meta` first.
+2. Read the current focus activity.
+3. Read today's and yesterday's daily memory.
+4. In main session, read `skills/six-layer-execution-system/SKILL.md`.
+5. For progress questions, verify repo facts against the relevant activity's repo facts before answering.
+6. If state and repo facts disagree, repair `ACTIVE.md` first, then answer.

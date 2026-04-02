@@ -1,0 +1,1230 @@
+# execution system spec v1 tasks
+
+## Repo-local test layout note
+- 所有 `tests/test_*.py` 路径都相对于 source checkout 根目录。
+- 需要直接运行单测时，统一使用仓库根视角命令，并显式注入 `PYTHONPATH="plugins/six-layer-execution-system:plugins/six-layer-execution-system/scripts"`。
+
+## Current phase
+- Phase 7 - Maintenance mode planning (`ES-F / Slice F33 - plan acceptance / summary / closeout integration wave`)
+
+## PR queue
+
+### ES-A - spec landing baseline
+- goal:
+  - 落地 execution-system-spec-v1 的基础文档、contract 与模板
+- validation:
+  - 文档齐备
+  - 模板可复用
+- done_definition:
+  - `docs/execution-system-spec-v1.md`
+  - `contracts/execution-system-contract.md`
+  - `references/templates.md`
+  - 已提交 commit
+- risk:
+  - low
+
+#### Slice A1 - land spec docs and templates
+- phase_id: `PH-1`
+- goal:
+  - 先把规范、contract 和模板正式写出来
+- scope:
+  - `docs/execution-system-spec-v1.md`
+  - `contracts/execution-system-contract.md`
+  - `references/templates.md`
+- target_files:
+  - `docs/execution-system-spec-v1.md`
+  - `contracts/execution-system-contract.md`
+  - `references/templates.md`
+- depends_on:
+  - none
+- validation:
+  - 文档覆盖分层、activity schema、completion protocol、模板
+- done_definition:
+  - 三个文件成稿并可直接复用
+- rollback_strategy:
+  - revert spec landing commit
+- risk:
+  - low
+
+### ES-B - ACTIVE slimming
+- goal:
+  - 把 ACTIVE 从厚账本收紧为 lean runtime truth
+- validation:
+  - `python3 scripts/check_active_consistency.py`
+  - 恢复路径仍完整
+- done_definition:
+  - ACTIVE 规则显著瘦身，但 focus/activity/runtime truth 不丢
+- risk:
+  - medium
+
+#### Slice B1 - define lean ACTIVE boundary
+- phase_id: `PH-2`
+- goal:
+  - 明确哪些内容留在 ACTIVE，哪些外移到 spec / contract / decisions
+- scope:
+  - `ACTIVE.md`
+  - `docs/execution-system-spec-v1.md`
+- target_files:
+  - `ACTIVE.md`
+  - `docs/execution-system-spec-v1.md`
+- depends_on:
+  - `ES-A.A1`
+- validation:
+  - `python3 scripts/check_active_consistency.py`
+  - ACTIVE 可读性提升，且不丢运行真相
+- done_definition:
+  - 形成第一版 lean ACTIVE 边界，并完成一次真实瘦身
+- rollback_strategy:
+  - restore prior ACTIVE section text from git
+- risk:
+  - medium
+
+#### Slice B2 - migrate notification / WAL prose out of ACTIVE
+- phase_id: `PH-2`
+- goal:
+  - 将 ACTIVE 中过长的通知/规则说明迁移到 spec 或 docs
+- scope:
+  - `ACTIVE.md`
+  - `docs/execution-system-spec-v1.md`
+  - 相关说明文档
+- target_files:
+  - `ACTIVE.md`
+  - `docs/execution-system-spec-v1.md`
+- depends_on:
+  - `ES-B.B1`
+- validation:
+  - `python3 scripts/check_active_consistency.py`
+- done_definition:
+  - ACTIVE 只保留运行态最小完备规则
+- rollback_strategy:
+  - restore removed prose from git if recovery semantics regress
+- risk:
+  - medium
+
+### ES-C - execution-system template migration
+- goal:
+  - 用新模板收紧 execution-system-owned roadmap/tasks 样例
+- validation:
+  - 文档结构对齐模板
+  - 不引入双重真相
+- done_definition:
+  - execution-system-owned 样例成为第一份真实迁移样板
+- risk:
+  - medium
+
+#### Slice C1 - align execution-system-testing roadmap to contract-backed format
+- phase_id: `PH-3`
+- goal:
+  - 为 execution-system-testing roadmap 增加 contract reference，并去掉不该承载的运行态意味
+- scope:
+  - `contracts/execution-system-contract.md`
+  - `roadmaps/execution-system-testing-roadmap.md`
+- target_files:
+  - `contracts/execution-system-contract.md`
+  - `roadmaps/execution-system-testing-roadmap.md`
+- depends_on:
+  - `ES-A.A1`
+- validation:
+  - 文档无结构冲突
+- done_definition:
+  - roadmap 更接近 phase-only truth
+- rollback_strategy:
+  - revert roadmap edit commit
+- risk:
+  - low-to-medium
+
+#### Slice C2a - align execution-system-testing task schema
+- phase_id: `PH-3`
+- goal:
+  - 为 execution-system-testing tasks 中第一批 migrated slices 补齐 phase_id / rollback_strategy / 结构口径
+- scope:
+  - `tasks/execution-system-testing-tasks.md`
+- target_files:
+  - `tasks/execution-system-testing-tasks.md`
+- depends_on:
+  - `ES-C.C1`
+- validation:
+  - Phase 2 slices 可直接映射 phase 与 rollback strategy
+- done_definition:
+  - execution-system-testing 的 migrated slices 与模板口径更一致
+- rollback_strategy:
+  - revert tasks edit commit
+- risk:
+  - medium
+
+#### Slice C2b - align remaining execution-system-testing migrated slices
+- phase_id: `PH-3`
+- goal:
+  - 为 execution-system-testing tasks 中剩余 migrated slices 补齐 phase_id / rollback_strategy / 结构口径
+- scope:
+  - `tasks/execution-system-testing-tasks.md`
+- target_files:
+  - `tasks/execution-system-testing-tasks.md`
+- depends_on:
+  - `ES-C.C2a`
+- validation:
+  - Phase 3 hook slices 可直接映射 phase 与 rollback strategy
+- done_definition:
+  - execution-system-testing 的 migrated slices 与模板口径更一致
+- rollback_strategy:
+  - revert tasks edit commit
+- risk:
+  - medium
+
+#### Slice C2c - review remaining legacy slices for schema consistency
+- phase_id: `PH-3`
+- goal:
+  - 检查 execution-system-owned 样例中的 legacy headings 是否还存在明显 schema 缺口，并决定是否继续补齐
+- scope:
+  - `tasks/execution-system-testing-tasks.md`
+  - `tasks/active-ledger-v2-tasks.md`
+  - `roadmaps/execution-system-testing-roadmap.md`
+- target_files:
+  - `tasks/execution-system-testing-tasks.md`
+  - `tasks/active-ledger-v2-tasks.md`
+  - `roadmaps/execution-system-testing-roadmap.md`
+- depends_on:
+  - `ES-C.C2b`
+- validation:
+  - 当前文档已足以支撑 phase/slice/rollback 恢复问答
+- done_definition:
+  - 明确剩余 legacy 部分是否需要继续迁移，或可进入 Phase 5
+- rollback_strategy:
+  - revert review-only edits if they add noise without clarity
+- risk:
+  - low-to-medium
+
+### ES-D - decisions landing
+- goal:
+  - 落 decisions 层并记录关键决策样例
+- validation:
+  - 模板可复用
+  - 至少两条关键 decision 落盘
+- done_definition:
+  - `decisions/` 目录开始承载 durable rationale
+- rollback_strategy:
+  - 若 decisions 结构被证明不合适，仅回退索引与样例，不影响 ACTIVE/runtime truth
+- risk:
+  - low
+
+#### Slice D1 - land decisions template and first records
+- phase_id: `PH-4`
+- goal:
+  - 新建 decisions 目录并补关键样例
+- scope:
+  - `decisions/`
+  - `references/templates.md`
+  - `docs/execution-system-spec-v1.md`
+- target_files:
+  - `decisions/...`
+  - `decisions/README.md`
+  - `references/templates.md`
+  - `docs/execution-system-spec-v1.md`
+- depends_on:
+  - `ES-A.A1`
+- validation:
+  - 样例清晰可复用
+  - spec 对 decisions 的采用时机有明确说明
+- done_definition:
+  - 至少两条关键 decision 成稿
+  - decisions 目录具备最小索引说明
+- rollback_strategy:
+  - remove decision examples if structure is rejected
+- risk:
+  - low
+
+### ES-E - validation and migration policy
+- goal:
+  - 把 execution-system-spec-v1 的迁移与校验策略从“说明文字”推进成明确的实施 backlog
+- validation:
+  - phase 5 的规则能区分 doc-only guidance 与应进入 checker/workflow 的候选项
+  - 不引入与当前实现冲突的新硬规则
+- done_definition:
+  - 形成 enforcement backlog
+  - 明确 adoption gates 与 defer 条件
+- rollback_strategy:
+  - 若候选清单过早或过严，仅回退 backlog 文档，不改变现有运行时规则
+- risk:
+  - medium
+
+#### Slice E1 - define enforcement backlog and adoption gates
+- phase_id: `PH-5`
+- goal:
+  - 列出下一批应进入 checker/workflow 的规则候选，并标记先后顺序与前置条件
+- scope:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+- target_files:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+- depends_on:
+  - `ES-D.D1`
+- validation:
+  - 候选规则按 ACTIVE / roadmap / tasks / decisions 分组清晰
+  - adoption gates 明确
+  - 不把尚未稳定的规则过早写死进 automation
+- done_definition:
+  - 形成第一版 enforcement backlog 与 adoption gates
+  - backlog 已能支撑下一刀 `ES-E.E2`
+- rollback_strategy:
+  - revert policy backlog edits if they over-constrain migration
+- risk:
+  - medium
+
+#### Slice E2 - choose first automation candidates
+- phase_id: `PH-5`
+- goal:
+  - 从 enforcement backlog 中挑出第一批真正值得工具化的规则候选
+- scope:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `ACTIVE.md`
+- target_files:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `ACTIVE.md`
+- depends_on:
+  - `ES-E.E1`
+- validation:
+  - 候选规则数量克制
+  - 每条候选都有明确前置条件与低误报预期
+  - 候选规则与当前 workspace 的真实迁移经验一致
+- done_definition:
+  - 明确第一批值得进入 checker/workflow 的候选规则
+  - 候选清单足以支撑下一步 checker/workflow 设计
+- rollback_strategy:
+  - revert candidate selection if it overcommits unstable rules
+- risk:
+  - medium
+
+#### Slice E3 - shape first checker/workflow design backlog
+- phase_id: `PH-5`
+- goal:
+  - 把第一批 automation candidates 转成明确的 checker/workflow 设计 backlog
+- scope:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+- target_files:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+- depends_on:
+  - `ES-E.E2`
+- validation:
+  - 每个 backlog 项都能说明：目标规则、触发时机、失败方式、为何适合自动化
+  - backlog 项数量克制，不和当前脚本能力脱节
+- done_definition:
+  - 形成第一版 checker/workflow design backlog
+- rollback_strategy:
+  - revert backlog shaping if it implies premature implementation commitments
+- risk:
+  - medium
+
+#### Slice E4 - sequence first implementation wave
+- phase_id: `PH-5`
+- goal:
+  - 为第一批 checker/workflow 设计 backlog 定义实施顺序、范围边界与 defer 项
+- scope:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `ACTIVE.md`
+- target_files:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `ACTIVE.md`
+- depends_on:
+  - `ES-E.E3`
+- validation:
+  - 第一波实施项顺序清晰
+  - 范围边界明确
+  - defer 项明确列出且理由清楚
+- done_definition:
+  - 形成第一版 implementation wave plan
+- rollback_strategy:
+  - revert sequencing edits if they imply an unrealistic automation commitment
+- risk:
+  - medium
+
+### ES-F - first enforcement implementation prep
+- goal:
+  - 为第一条真正准备落地的 checker/workflow 实现切片做实施准备
+- validation:
+  - 第一条实现切片目标清晰
+  - 输入文件、触发条件、失败方式、恢复路径明确
+- done_definition:
+  - 第一条 enforcement implementation slice 定义完成
+- rollback_strategy:
+  - 若实施准备过早或过宽，只回退 implementation prep 文档，不改现有运行规则
+- risk:
+  - medium
+
+#### Slice F1 - define ACTIVE field checker implementation slice
+- phase_id: `PH-6`
+- goal:
+  - 为 ACTIVE roadmap activity field checker 定义第一条真正准备落地的实现切片
+- scope:
+  - `scripts/check_active_consistency.py`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- target_files:
+  - `scripts/check_active_consistency.py`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- depends_on:
+  - `ES-E.E4`
+- validation:
+  - 需要新增的字段检查范围明确
+  - 不与现有 checker 语义冲突
+  - 失败输出仍对人类可读
+- done_definition:
+  - ACTIVE field checker 的第一条 implementation slice 已经定义清楚，可进入真正编码
+- rollback_strategy:
+  - revert implementation-prep edits if they overfit the current workspace too narrowly
+- risk:
+  - medium
+
+#### Slice F2 - define exact checker contract and non-goals
+- phase_id: `PH-6`
+- goal:
+  - 在真正编码前，把 ACTIVE roadmap activity field checker 的精确检查范围、错误口径和非目标写清楚
+- scope:
+  - `scripts/check_active_consistency.py`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `ACTIVE.md`
+- target_files:
+  - `scripts/check_active_consistency.py`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `ACTIVE.md`
+- depends_on:
+  - `ES-F.F1`
+- validation:
+  - 规则清单能区分 hard-fail 与 defer
+  - 非目标明确，不会把 checker 一次做成大而全
+  - 失败输出对人类恢复仍友好
+- done_definition:
+  - 第一条 checker 的 exact contract 与 non-goals 定义完成，可直接转入代码实现
+- rollback_strategy:
+  - revert contract edits if they broaden checker scope beyond current migration maturity
+- risk:
+  - medium
+
+#### Slice F3 - implement ACTIVE field checker contract
+- phase_id: `PH-6`
+- goal:
+  - 按 F2 已冻结的 contract，把 ACTIVE focus roadmap activity field checker 的第一波硬校验真正落到代码里
+- scope:
+  - `scripts/check_active_consistency.py`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- target_files:
+  - `scripts/check_active_consistency.py`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- depends_on:
+  - `ES-F.F2`
+- validation:
+  - 缺失 `source_doc` / `roadmap_doc` / `tasks_doc` / `current_slice_id` / `next_slice_id` / `last_commit` 时 hard-fail
+  - `next_step` / `validation` / `blocked_by` 为空时 hard-fail
+  - doc pointer 指向缺失文件时 hard-fail
+  - repo drift 输出仍保持 `scope: message` 且可直接恢复
+  - `python3 scripts/check_active_consistency.py` 通过
+- done_definition:
+  - 第一条 checker 的 hard-fail contract 已按 F2 文档实现
+  - 失败输出与恢复路径仍对人类友好
+- rollback_strategy:
+  - revert checker implementation if it expands beyond the F2 contract or breaks current recovery semantics
+- risk:
+  - medium
+
+#### Slice F4 - add regression smoke coverage for the first checker
+- phase_id: `PH-6`
+- goal:
+  - 为第一条 checker 补一组轻量回归 smoke 覆盖，避免后续继续改动时把 F2/F3 已冻结 contract 弄丢
+- scope:
+  - `scripts/check_active_consistency.py`
+  - `scripts/`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- target_files:
+  - `scripts/check_active_consistency.py`
+  - `tests/test_check_active_consistency.py`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- depends_on:
+  - `ES-F.F3`
+- validation:
+  - 至少覆盖 focus roadmap activity 缺失必填字段时的 hard-fail
+  - 覆盖 doc pointer 指向不存在文件时的 hard-fail
+  - 覆盖正常 ledger 的 happy path
+- done_definition:
+  - 第一条 checker 具备最小 smoke 回归保护
+  - 后续改动不必只靠手工跑当前 workspace 来兜底
+- rollback_strategy:
+  - revert smoke coverage additions if they overfit current workspace layout or make checker changes harder than needed
+- risk:
+  - medium
+
+#### Slice F5 - define the second checker contract for migrated task slices
+- phase_id: `PH-6`
+- goal:
+  - 把第二条 checker（migrated task slice schema checker）的精确 scope、hard-fail 字段、non-goals 与恢复路径写清楚
+- scope:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `tasks/execution-system-testing-tasks.md`
+  - `tasks/active-ledger-v2-tasks.md`
+- target_files:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `tasks/execution-system-testing-tasks.md`
+  - `tasks/active-ledger-v2-tasks.md`
+- depends_on:
+  - `ES-F.F4`
+- validation:
+  - 明确哪些 task slices 算 migrated/in-scope
+  - 明确 hard-fail 只要求 `phase_id` / `rollback_strategy`
+  - 非目标明确，不误伤 legacy sections
+  - 恢复路径保持 deterministic
+- done_definition:
+  - 第二条 checker 的 exact contract 已冻结，可进入实现准备
+- rollback_strategy:
+  - revert contract edits if the scope expands from clearly migrated slices to fuzzy task-doc interpretation
+- risk:
+  - medium
+
+#### Slice F6 - shape implementation boundary for the second checker
+- phase_id: `PH-6`
+- goal:
+  - 把第二条 checker 的实现入口收敛成可编码边界：明确如何识别 in-scope migrated slices，并用真实样本验证不会误伤 legacy sections
+- scope:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `tasks/execution-system-testing-tasks.md`
+  - `tasks/active-ledger-v2-tasks.md`
+- target_files:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `tasks/execution-system-testing-tasks.md`
+  - `tasks/active-ledger-v2-tasks.md`
+- depends_on:
+  - `ES-F.F5`
+- validation:
+  - 用 `tasks/execution-system-testing-tasks.md` 标出哪些 slices 属于 in-scope migrated slices
+  - 明确实现不应把 `tasks/active-ledger-v2-tasks.md` 中 `Task A1/A2` 这类 legacy task headings 当成 migrated slices
+  - 给出可直接转成代码的 deterministic trigger
+- done_definition:
+  - 第二条 checker 已具备明确实现边界，可进入真正编码
+- rollback_strategy:
+  - revert implementation-boundary edits if they still depend on fuzzy prose judgment instead of stable structure
+- risk:
+  - medium
+
+#### Slice F7 - implement migrated task slice schema checker
+- phase_id: `PH-6`
+- goal:
+  - 按 F5/F6 已冻结边界，实现第二条 checker 的第一版 hard-fail 逻辑
+- scope:
+  - `scripts/`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `tasks/execution-system-testing-tasks.md`
+  - `tasks/active-ledger-v2-tasks.md`
+- target_files:
+  - `scripts/check_task_slice_schema.py`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `tasks/execution-system-testing-tasks.md`
+  - `tasks/active-ledger-v2-tasks.md`
+- depends_on:
+  - `ES-F.F6`
+- validation:
+  - in-scope migrated slices 缺 `phase_id` 时 hard-fail
+  - in-scope migrated slices 缺 `rollback_strategy` 时 hard-fail
+  - `Task 1/2/3...` 这类 legacy headings 不被误伤
+- done_definition:
+  - 第二条 checker 的第一版实现可运行并覆盖 execution-system-owned 样本
+- rollback_strategy:
+  - revert implementation if heading/scope detection still confuses legacy sections with migrated slices
+- risk:
+  - medium
+
+#### Slice F8 - add regression smoke coverage for the second checker
+- phase_id: `PH-6`
+- goal:
+  - 为第二条 checker 补最小 smoke 覆盖，避免 heading/scope/list-field 解析后续回归
+- scope:
+  - `scripts/`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- target_files:
+  - `scripts/check_task_slice_schema.py`
+  - `tests/test_check_task_slice_schema.py`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- depends_on:
+  - `ES-F.F7`
+- validation:
+  - 覆盖正常 migrated slice happy path
+  - 覆盖 legacy `Task` heading 不被误伤
+  - 覆盖 migrated slice 缺 `rollback_strategy` 时 hard-fail
+- done_definition:
+  - 第二条 checker 具备最小 smoke 回归保护
+- rollback_strategy:
+  - revert smoke additions if they overfit one execution-system sample wording instead of the checker contract boundary
+- risk:
+  - medium
+
+#### Slice F9 - unify checker validation entrypoint
+- phase_id: `PH-6`
+- goal:
+  - 把当前两条 checker + 两条 smoke 收到统一校验入口，降低手工串命令成本
+- scope:
+  - `scripts/`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- target_files:
+  - `scripts/run_execution_system_checks.py`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- depends_on:
+  - `ES-F.F8`
+- validation:
+  - 一条命令能串行执行 active checker / active smoke / task-slice checker / task-slice smoke
+  - 任一步失败时整体非零退出
+  - 输出仍对人类可读
+- done_definition:
+  - execution-system Phase 6 当前 checker 套件具备统一入口
+- rollback_strategy:
+  - revert unified entrypoint if it hides failing subcommands or makes local recovery less obvious
+- risk:
+  - low-to-medium
+
+#### Slice F10 - adopt the unified checker suite in core workflows
+- phase_id: `PH-6`
+- goal:
+  - 让统一 checker 入口进入核心 workflow，而不是继续只作为手工命令存在
+- scope:
+  - `scripts/`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- target_files:
+  - `scripts/complete_slice.sh`
+  - `scripts/accept_active_ledger_v2.py`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- depends_on:
+  - `ES-F.F9`
+- validation:
+  - `complete_slice.sh prepare` 先跑统一 checker 套件
+  - `accept_active_ledger_v2.py` 复用统一 checker 套件
+  - adoption 不隐藏原子失败子命令
+- done_definition:
+  - 统一 checker 入口已进入至少两条日常 workflow
+- rollback_strategy:
+  - revert workflow adoption if it obscures which underlying checker failed or blocks unrelated flows unexpectedly
+- risk:
+  - low-to-medium
+
+#### Slice F11 - document operational entrypoint rules
+- phase_id: `PH-6`
+- goal:
+  - 把“日常默认跑哪条入口、哪些失败是预期策略结果”收成稳定操作约定，减少脚本入口分叉
+- scope:
+  - `docs/execution-system-spec-v1.md`
+  - `skills/six-layer-execution-system/SKILL.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- target_files:
+  - `docs/execution-system-spec-v1.md`
+  - `skills/six-layer-execution-system/SKILL.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- depends_on:
+  - `ES-F.F10`
+- validation:
+  - 文档明确 routine validation 默认走统一 checker 入口
+  - 文档明确单独修 ACTIVE 或 task schema 时何时走单项 checker
+  - heartbeat active work check 改为优先跑统一 checker 套件
+- done_definition:
+  - 入口选择规则与预期失败口径已稳定落盘
+- rollback_strategy:
+  - revert operational docs changes if they conflict with real workflow semantics or create a second source of truth
+- risk:
+  - low
+
+#### Slice F12 - define Phase 6 completion and expansion gate
+- phase_id: `PH-6`
+- goal:
+  - 把 Phase 6 什么时候算“足够完成”、什么时候才应该继续加第三条规则，写成明确门槛
+- scope:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+- target_files:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+- depends_on:
+  - `ES-F.F11`
+- validation:
+  - 明确 Phase 6 足够完成的最小门槛
+  - 明确何时不该继续机械增加第三条 hard-fail checker
+  - 明确下一步扩展需要满足的信号
+- done_definition:
+  - Phase 6 的 completion gate 与 expansion gate 已冻结
+- rollback_strategy:
+  - revert gate definitions if they over-constrain later automation or conflict with actual checker usage
+- risk:
+  - low
+
+#### Slice F13 - close out Phase 6 and steer the next wave
+- phase_id: `PH-6`
+- goal:
+  - 把 Phase 6 到此为止的收官结论写清楚，并明确下一波默认应转向 advisory/workflow 改进而不是第三条 hard-fail checker
+- scope:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `ACTIVE.md`
+- target_files:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `ACTIVE.md`
+- depends_on:
+  - `ES-F.F12`
+- validation:
+  - 文档明确当前 Phase 6 应视为 sufficiently landed
+  - 文档明确下一波默认应优先 advisory/workflow 改进
+  - 不把未来第三条 checker 永久封死，只要求出现明确 deterministic gap 再重开
+- done_definition:
+  - Phase 6 的 closeout 结论与 next-wave steering 已冻结
+- rollback_strategy:
+  - revert closeout conclusion if later evidence shows the current checker suite is still too immature to count as landed
+- risk:
+  - low
+
+#### Slice F14 - queue the next advisory/workflow wave
+- phase_id: `PH-7`
+- goal:
+  - 把 Phase 6 收官后的下一波 advisory/workflow 改进正式排成可执行候选顺序，避免回到空泛 backlog
+- scope:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `ACTIVE.md`
+- target_files:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `ACTIVE.md`
+- depends_on:
+  - `ES-F.F13`
+- validation:
+  - 明确 advisory/workflow 下一波的推荐顺序
+  - 明确每一候选默认先 advisory / workflow，不直接 hard-fail
+  - 当前 focus 与 roadmap 推荐阶段同步到下一波入口
+- done_definition:
+  - post-Phase-6 的 next-wave queue 已冻结为可执行顺序
+- rollback_strategy:
+  - revert next-wave ordering if it drifts back into vague backlog language or prematurely commits to new hard-fail rules
+- risk:
+  - low
+
+#### Slice F15 - define oversized migration slice advisory contract
+- phase_id: `PH-7`
+- goal:
+  - 把下一波第一刀 `oversized migration slice advisory` 的 scope、signal、输出方式和非目标写清楚
+- scope:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `tasks/execution-system-testing-tasks.md`
+- target_files:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `tasks/execution-system-testing-tasks.md`
+- depends_on:
+  - `ES-F.F14`
+- validation:
+  - 明确 advisory 只告警、不 hard-fail
+  - 明确 advisory 只看 migrated slice semantics，不扫 legacy task sections
+  - 明确何种信号才算 oversized candidate
+- done_definition:
+  - oversized migration slice advisory 的 exact contract 已冻结，可进入实现准备
+- rollback_strategy:
+  - revert contract if it slips into fuzzy prose policing or silently reintroduces a third hard-fail policy
+- risk:
+  - low
+
+#### Slice F16 - shape deterministic trigger for oversized-slice advisory
+- phase_id: `PH-7`
+- goal:
+  - 把 oversized-slice advisory 收敛成第一版可编码 trigger，优先用结构信号而不是模糊 prose 判断
+- scope:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `tasks/execution-system-testing-tasks.md`
+- target_files:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `tasks/execution-system-testing-tasks.md`
+- depends_on:
+  - `ES-F.F15`
+- validation:
+  - trigger 明确依赖 migrated slice heading + `phase_id` + 多项 `scope`/`done_definition`
+  - trigger 不把已拆分的 `2A/2B` 这类 slice 默认打成 oversized
+  - trigger 仍保持 advisory-only
+- done_definition:
+  - oversized-slice advisory 的第一版 deterministic trigger 已冻结，可进入真正编码
+- rollback_strategy:
+  - revert trigger shaping if it drifts into vague prose heuristics or starts warning on most healthy migrated slices
+- risk:
+  - low
+
+#### Slice F17 - implement oversized migration slice advisory
+- phase_id: `PH-7`
+- goal:
+  - 按 F15/F16 已冻结边界，实现 oversized migration slice advisory 的第一版脚本
+- scope:
+  - `scripts/`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `tasks/execution-system-testing-tasks.md`
+- target_files:
+  - `scripts/check_oversized_migration_slices.py`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `tasks/execution-system-testing-tasks.md`
+- depends_on:
+  - `ES-F.F16`
+- validation:
+  - 脚本输出 advisory，不 hard-fail
+  - 已拆分的 `2A/2B` 风格 slice 不默认告警
+  - execution-system-owned 样本上能识别出首批真正偏宽的 migrated slices
+- done_definition:
+  - oversized migration slice advisory 第一版实现可运行
+- rollback_strategy:
+  - revert implementation if the advisory is too noisy, drifts into prose policing, or starts behaving like a hidden hard-fail
+- risk:
+  - low
+
+#### Slice F18 - add oversized advisory smoke coverage
+- phase_id: `PH-7`
+- goal:
+  - 为 oversized migration slice advisory 补最小 smoke 覆盖，避免后续调 trigger 时噪声回升
+- scope:
+  - `scripts/`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- target_files:
+  - `scripts/check_oversized_migration_slices.py`
+  - `tests/test_check_oversized_migration_slices.py`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- depends_on:
+  - `ES-F.F17`
+- validation:
+  - 覆盖 advisory happy path
+  - 覆盖已拆分 `2A/2B` 风格 slice 不告警
+  - 覆盖 broad migrated slice 触发 advisory
+- done_definition:
+  - oversized advisory 具备最小 smoke 回归保护
+- rollback_strategy:
+  - revert smoke additions if they overfit one execution-system sample wording instead of the advisory contract trigger
+- risk:
+  - low
+
+#### Slice F19 - adopt oversized advisory in workflow-level reporting
+- phase_id: `PH-7`
+- goal:
+  - 让 oversized advisory 进入 workflow-level reporting，但不改变 unified hard-fail suite 的退出语义
+- scope:
+  - `scripts/`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- target_files:
+  - `scripts/run_execution_system_checks.py`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- depends_on:
+  - `ES-F.F18`
+- validation:
+  - unified runner 会显示 oversized advisory 输出
+  - advisory 不影响 unified runner 的成功/失败退出码
+  - 输出能清楚区分 hard-fail suite 与 advisory reporting
+- done_definition:
+  - oversized advisory 已进入 workflow-level reporting
+- rollback_strategy:
+  - revert reporting adoption if it obscures which checks are hard-fail vs advisory-only
+- risk:
+  - low
+
+#### Slice F20 - improve advisory recovery reporting
+- phase_id: `PH-7`
+- goal:
+  - 把 oversized advisory 的输出从原始命中列表收口成更清楚的摘要 + recovery hint
+- scope:
+  - `scripts/`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- target_files:
+  - `scripts/check_oversized_migration_slices.py`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- depends_on:
+  - `ES-F.F19`
+- validation:
+  - 输出包含 warning_count
+  - 输出仍列出命中 slice 与结构原因
+  - 输出包含 recovery hint，但仍保持 advisory-only
+- done_definition:
+  - oversized advisory reporting 对人类恢复更直接
+- rollback_strategy:
+  - revert reporting polish if it hides the concrete reasons behind each advisory hit
+- risk:
+  - low
+
+#### Slice F21 - define workflow-level failure summary contract
+- phase_id: `PH-7`
+- goal:
+  - 把第二个候选 `workflow-level failure summary / recovery hints` 的 scope、输出契约和非目标写清楚
+- scope:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `scripts/run_execution_system_checks.py`
+- target_files:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `scripts/run_execution_system_checks.py`
+- depends_on:
+  - `ES-F.F20`
+- validation:
+  - 明确 summary 层只做 operator-facing 总结，不替代底层输出
+  - 明确 hard-fail / advisory / strategy-gate 三类结果如何映射 recovery hint
+  - 明确不把 advisory 合并成 hard-fail 状态
+- done_definition:
+  - workflow-level failure summary 的 exact contract 已冻结，可进入实现准备
+- rollback_strategy:
+  - revert contract if it drifts into hiding underlying command output or inventing fuzzy recovery advice
+- risk:
+  - low
+
+#### Slice F22 - shape summary footer output format
+- phase_id: `PH-7`
+- goal:
+  - 把 workflow-level failure summary 收敛成第一版可编码输出格式，先用追加 footer，不重排原始输出
+- scope:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `scripts/run_execution_system_checks.py`
+- target_files:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `scripts/run_execution_system_checks.py`
+- depends_on:
+  - `ES-F.F21`
+- validation:
+  - 明确第一版只追加 summary footer
+  - 明确 footer 至少包含 hard-fail status、first failing command、advisory hits、recovery hints
+  - 明确不改写原始 checker/advisory 正文输出
+- done_definition:
+  - workflow summary 的第一版输出格式已冻结，可进入实现
+- rollback_strategy:
+  - revert output-format shaping if it starts to compete with or obscure the raw command output stream
+- risk:
+  - low
+
+#### Slice F23 - implement workflow summary footer
+- phase_id: `PH-7`
+- goal:
+  - 在 unified runner 中实现第一版 summary footer，给出 hard-fail/advisory/recovery 的操作级总结
+- scope:
+  - `scripts/`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- target_files:
+  - `scripts/run_execution_system_checks.py`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- depends_on:
+  - `ES-F.F22`
+- validation:
+  - raw command output 仍保留
+  - footer 包含 hard-fail status、first failing command、advisory hits、recovery hints
+  - advisory 仍不改变 unified runner 退出码
+- done_definition:
+  - workflow summary footer 第一版已可运行
+- rollback_strategy:
+  - revert implementation if footer starts obscuring raw checker output or misclassifies advisory vs hard-fail results
+- risk:
+  - low
+
+#### Slice F24 - add summary footer smoke coverage
+- phase_id: `PH-7`
+- goal:
+  - 为 workflow summary footer 补最小 smoke 覆盖，防止 hard-fail/advisory/recovery 映射被后续改坏
+- scope:
+  - `scripts/`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- target_files:
+  - `scripts/run_execution_system_checks.py`
+  - `tests/test_run_execution_system_checks.py`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- depends_on:
+  - `ES-F.F23`
+- validation:
+  - 覆盖 hard-fail status=passed 且存在 advisory 的路径
+  - 覆盖 hard-fail status=failed 的路径
+  - 覆盖 summary footer 中的 recovery hint 映射
+- done_definition:
+  - workflow summary footer 具备最小 smoke 回归保护
+- rollback_strategy:
+  - revert smoke additions if they overfit current command wording instead of the footer contract
+- risk:
+  - low
+
+#### Slice F25 - encode closed_out in slice closeout artifact
+- phase_id: `PH-7`
+- goal:
+  - 把 slice completion state machine 先推进到工件语义：closeout artifact 显式声明 `slice_state=closed_out`
+- scope:
+  - `scripts/`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- target_files:
+  - `scripts/create_slice_closeout.py`
+  - `scripts/check_slice_closeout.py`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- depends_on:
+  - `ES-F.F24`
+- validation:
+  - closeout artifact 包含 `slice_state: closed_out`
+  - closeout verifier 要求 `slice_state=closed_out`
+  - 不改变现有 closeout / notification 主流程
+- done_definition:
+  - `closed_out` 已从文档状态机推进成真实工件字段
+- rollback_strategy:
+  - revert artifact-state encoding if it breaks closeout compatibility without improving state-machine clarity
+- risk:
+  - low
+
+#### Slice F26 - encode validated state in closeout artifact semantics
+- phase_id: `PH-7`
+- goal:
+  - 把 `validated` 从隐含验证列表推进成更明确的工件字段，并保持与 `closed_out` 关系清晰
+- scope:
+  - `scripts/`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- target_files:
+  - `scripts/create_slice_closeout.py`
+  - `scripts/check_slice_closeout.py`
+  - `tests/test_slice_closeout_state.py`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- depends_on:
+  - `ES-F.F25`
+- validation:
+  - closeout artifact 显式带 `validation_state: validated`
+  - closeout verifier 要求 `validation_state=validated`
+  - `validation_state` 与 `slice_state=closed_out` 同时存在且语义不冲突
+- done_definition:
+  - `validated` 已从隐含验证列表推进成真实工件字段
+- rollback_strategy:
+  - revert validation-state encoding if it creates duplicate/confusing completion semantics instead of clarifying the state machine
+- risk:
+  - low
+
+#### Slice F27 - define second-pass ACTIVE slimming boundary
+- phase_id: `PH-7`
+- goal:
+  - 针对最终规范里“ACTIVE 仍偏厚”的缺口，明确第二轮 ACTIVE slimming 应该剪掉什么、保留什么
+- scope:
+  - `ACTIVE.md`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- target_files:
+  - `ACTIVE.md`
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- depends_on:
+  - `ES-F.F26`
+- validation:
+  - 明确哪些 `last_artifact` / `last_decision` 内容仍属于运行时恢复必要信息
+  - 明确哪些内容应迁回 docs / decisions / memory
+  - 不破坏 progress reply、恢复协议、focus-first 判断所需字段
+- done_definition:
+  - 第二轮 ACTIVE slimming 的边界已冻结，可进入实际瘦身
+- rollback_strategy:
+  - revert slimming boundary if it removes runtime-truth fields that are still needed for recovery or progress replies
+- risk:
+  - medium
+
+#### Slice F28 - apply second-pass ACTIVE slimming
+- phase_id: `PH-7`
+- goal:
+  - 按 F27 已冻结边界，对 ACTIVE roadmap activity 中过厚的历史累积做第二轮瘦身
+- scope:
+  - `ACTIVE.md`
+  - `memory/2026-04-02.md`
+- target_files:
+  - `ACTIVE.md`
+  - `memory/2026-04-02.md`
+- depends_on:
+  - `ES-F.F27`
+- validation:
+  - `last_artifact` / `last_decision` 更短、更偏恢复指针而非流水账
+  - 当前 focus / progress reply / recovery 所需字段仍完整
+  - `python3 scripts/run_execution_system_checks.py` 通过
+- done_definition:
+  - ACTIVE 第二轮瘦身已落地且未损伤运行时恢复能力
+- rollback_strategy:
+  - revert slimming edits if recovery quality drops or operator must re-open docs for facts that should still live in ACTIVE
+- risk:
+  - medium
+
+#### Slice F29 - align acceptance with strategy-gate semantics
+- phase_id: `PH-7`
+- goal:
+  - 让 acceptance / focus-first 校验区分“模型损坏”与“当前 focus 故意不是 auto-runnable”的 policy gate
+- scope:
+  - `scripts/`
+  - `docs/active-ledger-v2.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- target_files:
+  - `scripts/validate_focus_first.py`
+  - `scripts/accept_active_ledger_v2.py`
+  - `docs/active-ledger-v2.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+- depends_on:
+  - `ES-F.F28`
+- validation:
+  - `validate_focus_first.py` 能输出 policy-gate 语义
+  - `accept_active_ledger_v2.py` 对 policy gate 返回 success-with-policy-gates，而不是 acceptance failure
+  - 文档明确三种结果：OK / POLICY_GATE / FAILED
+- done_definition:
+  - acceptance / strategy-gate 语义与最终规范更一致
+- rollback_strategy:
+  - revert gate semantics changes if they hide genuine focus-first breakage or blur true failures into policy gates
+- risk:
+  - low
+
+#### Slice F30 - record post-alignment audit conclusion
+- phase_id: `PH-7`
+- goal:
+  - 把当前这轮针对最终规范缺口的补齐结果收成明确 audit / completion 结论，避免主线继续无限扩张
+- scope:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `ACTIVE.md`
+- target_files:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `ACTIVE.md`
+- depends_on:
+  - `ES-F.F29`
+- validation:
+  - 明确当前已补齐的最终规范缺口
+  - 明确剩余差距是否已从“结构缺口”降到“增量优化项”
+  - 明确下一步不再盲目扩 execution-system 主线
+- done_definition:
+  - 当前对齐最终规范 v1 的 audit 结论已冻结
+- rollback_strategy:
+  - revert audit conclusion if it overstates completion or hides still-material structural gaps
+- risk:
+  - low
+
+#### Slice F31 - define reopen conditions for future execution-system work
+- phase_id: `PH-7`
+- goal:
+  - 把未来何时应重开 execution-system 主线写成明确条件，防止后续因为泛化 polish 再次无限扩张
+- scope:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `ACTIVE.md`
+- target_files:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `ACTIVE.md`
+- depends_on:
+  - `ES-F.F30`
+- validation:
+  - 明确哪些条件足以重开 execution-system 切片
+  - 明确哪些“只是想再 polish 一点”的理由不足以重开
+  - 让 roadmap / ACTIVE 的下一步语义更克制
+- done_definition:
+  - execution-system 主线的 reopen conditions 已冻结
+- rollback_strategy:
+  - revert reopen conditions if they block clearly justified structural work or are too vague to guide future reopening
+- risk:
+  - low
+
+#### Slice F32 - define maintenance-mode re-entry protocol
+- phase_id: `PH-7`
+- goal:
+  - 把维护态下如何重新进入 execution-system 主线写成明确 protocol，防止未来重开动作变成无边界 backlog 回潮
+- scope:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `ACTIVE.md`
+- target_files:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `ACTIVE.md`
+- depends_on:
+  - `ES-F.F31`
+- validation:
+  - 明确 re-entry 需要记录 concrete trigger
+  - 明确一次只为一个具体 gap 重开
+  - 明确不允许因为泛化优化冲动回到开放式系统工作
+- done_definition:
+  - execution-system 维护态的 re-entry protocol 已冻结
+- rollback_strategy:
+  - revert re-entry protocol if it over-constrains legitimate future system work or stays too abstract to guide reopening
+- risk:
+  - low
+
+#### Slice F33 - plan acceptance / summary / closeout integration wave
+- phase_id: `PH-7`
+- goal:
+  - 在 maintenance mode 下为明确重开的 operator-workflow 质量需求补一份薄整合计划，不立刻扩大实现面
+- scope:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `ACTIVE.md`
+- target_files:
+  - `docs/execution-system-spec-v1.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `ACTIVE.md`
+- depends_on:
+  - `ES-F.F32`
+- validation:
+  - 明确共享结果模型、structured summary、acceptance 复用、closeout-ready gate、chain smoke 这 5 个计划步骤
+  - 明确保持 raw output 可见，不把 advisory 变成 hard-fail
+  - 不把该计划误写成新的开放式系统 backlog
+- done_definition:
+  - acceptance / summary / closeout 一体化操作链的第一版实施计划已冻结
+- rollback_strategy:
+  - revert the plan if it expands into a platform rewrite instead of thin orchestration around current scripts
+- risk:
+  - low

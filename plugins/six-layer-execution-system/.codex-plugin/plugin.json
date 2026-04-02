@@ -1,0 +1,46 @@
+{
+  "name": "six-layer-execution-system",
+  "version": "0.1.0",
+  "description": "Self-contained Codex plugin for inspecting, validating, and evolving focus-first six-layer execution-system repositories.",
+  "author": {
+    "name": "Local Repo Maintainers",
+    "email": "[TODO: maintainer@example.com]",
+    "url": "[TODO: https://example.com/six-layer-execution-system]"
+  },
+  "homepage": "[TODO: https://example.com/six-layer-execution-system]",
+  "repository": "[TODO: https://example.com/six-layer-execution-system]",
+  "license": "UNLICENSED",
+  "keywords": [
+    "execution-system",
+    "openclaw",
+    "workspace",
+    "governance",
+    "automation",
+    "protocol"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Six-Layer Execution System",
+    "shortDescription": "Inspect, validate, and evolve focus-first execution-system repos",
+    "longDescription": "Copy this plugin directory into a Codex plugin folder to inspect the local execution-system snapshot, recover live focus state from ACTIVE.md, run the canonical checker suite, and evolve protocol, governance, or closeout flows inside a self-contained six-layer execution-system repository.",
+    "developerName": "Local Repo Maintainers",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "[TODO: https://example.com/six-layer-execution-system]",
+    "privacyPolicyURL": "[TODO: https://example.com/privacy]",
+    "termsOfServiceURL": "[TODO: https://example.com/terms]",
+    "defaultPrompt": [
+      "Inspect this repo, summarize the current focus activity, and explain the next slice.",
+      "Run the canonical execution-system checks and report any blocking failures.",
+      "Open ACTIVE.md, recover the live state, and outline the next concrete action."
+    ],
+    "brandColor": "#0F766E",
+    "composerIcon": "./assets/six-layer-execution-system-small.svg",
+    "logo": "./assets/six-layer-execution-system.svg",
+    "screenshots": []
+  }
+}

@@ -1,45 +1,31 @@
-# Six-Layer Execution System Plugin
+# Six-Layer Execution System Plugin Repo
 
-这个仓库现在是独立的 Codex 插件仓库；插件根目录本身就是 six-layer execution-system 的默认运行态与参考文档入口。
+这个仓库现在是一个插件打包仓库，真正的 self-contained 插件位于：
 
-## 设计边界
+- `plugins/six-layer-execution-system/`
 
-- `.codex-plugin/`、`skills/`、`agents/` 负责插件发现、展示和交互入口。
-- 根目录控制文件、`contracts/`、`docs/`、`roadmaps/`、`tasks/`、`memory/` 共同组成默认运行态真相。
-- 根目录 `references/` 与 `scripts/` 是当前仓库自带的文档与入口，不再依赖外层宿主仓库。
+该目录包含 execution-system 的运行态真相、脚本、技能、资源和插件 manifest。设计目标是把这个目录整体复制到另一台机器的 Codex 插件目录后即可使用，不再依赖当前仓库根目录。
 
-## 主要入口
+## Development Layout
 
-- manifest：`.codex-plugin/plugin.json`
-- skill：`skills/six-layer-execution-system/SKILL.md`
-- 根目录 skill：`SKILL.md`
-- agent 元数据：`agents/openai.yaml`
-- 根目录入口：
-  - `scripts/inspect_openclaw_execution_system.py`
-  - `scripts/run_local_execution_checks.py`
-- 插件包装脚本：
-  - `scripts/inspect_execution_system.py`
-  - `scripts/run_execution_checks.py`
+- 插件本体：`plugins/six-layer-execution-system/`
+- 可选 repo-local marketplace：`.agents/plugins/marketplace.json`
+- 根目录只保留 git 历史和分发壳层
 
-## 目录约定
+## Canonical Entrypoints
 
-- 仓库根目录直接承载 execution-system 运行态；不再额外嵌套 `workspace/`。
-- `references/` 保存安装说明、source map、上游运行时与本地执行系统文档。
-- `scripts/` 同时提供根目录便捷命令和插件安全包装命令。
-
-## 本地运行
-
-在仓库根目录执行：
-
-```bash
-python3 scripts/inspect_openclaw_execution_system.py --format markdown
-python3 scripts/run_local_execution_checks.py checks --timeout 60
-python3 scripts/run_local_execution_checks.py full-tests --timeout 60
-```
-
-如果你希望验证插件公开入口，也可以执行：
+从 `plugins/six-layer-execution-system/` 目录运行：
 
 ```bash
 python3 scripts/inspect_execution_system.py --format markdown
 python3 scripts/run_execution_checks.py checks --timeout 60
+python3 scripts/run_execution_checks.py full-tests --timeout 60
 ```
+
+说明：
+- `checks` 始终可用；如果当前是完整 source checkout，它还会追加运行仓库根 `tests/` 下的 repo smoke tests。
+- `full-tests` 现在依赖仓库根 `tests/`。把 `plugins/six-layer-execution-system/` 单独复制出去后，该入口会明确返回 `unavailable`，不再承诺完整测试套件可运行。
+
+## Install Shape
+
+建议把 `plugins/six-layer-execution-system/` 整个目录复制到目标机器的 Codex 插件目录中，并按目标环境需要选择是否登记 marketplace。

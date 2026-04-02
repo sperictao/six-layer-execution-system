@@ -1,0 +1,4 @@
+interface:
+  display_name: "Six-Layer Execution System"
+  short_description: "Inspect, validate, and evolve focus-first execution-system repos"
+  default_prompt: "Use $six-layer-execution-system to inspect the current repo, recover the focus activity, and run the canonical checks."
