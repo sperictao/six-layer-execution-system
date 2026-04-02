@@ -1,0 +1,144 @@
+# Workspace Execution System
+
+## Primary Local Sources
+
+Read these first when the task is about the local execution system:
+
+- `/Users/erictao/source/repos/six-layer-execution-system/AGENTS.md`
+- `/Users/erictao/source/repos/six-layer-execution-system/ACTIVE.md`
+- `/Users/erictao/source/repos/six-layer-execution-system/docs/execution-system-spec-v1.md`
+- `/Users/erictao/source/repos/six-layer-execution-system/docs/execution-system-maintenance-guardrails.md`
+- `/Users/erictao/source/repos/six-layer-execution-system/docs/execution-system-testing-inventory.md`
+
+## Core Model
+
+The local root-hosted execution system is built on:
+
+- layered truth
+- focus-first execution
+- explicit completion protocol
+
+The six owned layers are:
+
+1. contract: long-lived constraints and invariants
+2. roadmap: phases, dependencies, exit criteria
+3. tasks: slices, validation, rollback shape
+4. ACTIVE: current runtime truth
+5. decisions: durable rationale
+6. memory: history and recovery aids
+
+Demand intake exists upstream of those layers but is not runtime truth.
+
+## Runtime Truth Rules
+
+- `ACTIVE.md` is the only live answer to "what are we doing now?"
+- Do not reconstruct current state from memory logs, daily notes, or chat history.
+- Do not store current slice or live blockers in roadmap or memory files.
+- Do not turn `ACTIVE.md` into a milestone diary.
+
+When asked to recover or report status:
+
+1. read `ACTIVE.md`
+2. resolve the focus activity
+3. read its linked `source_doc`, `roadmap_doc`, and `tasks_doc`
+4. verify repo/workspace facts
+5. only then reply
+
+## Focus-First and Parallel-Wave Semantics
+
+Default rule:
+
+- only `current_focus_activity_id` may auto-advance
+- non-focus activities may exist but must not silently run
+
+Parallel execution is allowed only inside the current focus activity and only when:
+
+- tasks do not write the same file or mutate the same runtime state
+- each task has a clear input/output boundary
+- the parent path owns the integration step
+
+Prefer serial execution when:
+
+- work is a hard dependency chain
+- tasks touch overlapping file regions
+- later choices depend on earlier outputs
+
+`ACTIVE.md` may carry wave-state fields only when the focus activity is truly using
+parallel-wave execution:
+
+- `execution_mode`
+- `current_wave_id`
+- `ready_slices`
+- `inflight_slices`
+- `blocked_slices`
+- `integration_step`
+- `last_wave_result`
+
+Otherwise keep ACTIVE lean.
+
+## Completion Contract
+
+The local system treats completion as explicit artifact state, not inference.
+
+Required semantics:
+
+- `validation_state: validated`
+- `slice_state: closed_out`
+
+Do not regress to implicit completion inferred from:
+
+- green validation list alone
+- git cleanliness alone
+- a human summary alone
+
+## Closeout and Notification Flow
+
+The canonical flow is implemented in `/Users/erictao/source/repos/six-layer-execution-system/scripts/complete_slice.sh`.
+
+Flow summary:
+
+1. `prepare`
+2. `payload`
+3. external send
+4. `ack <dedupe_key>`
+5. or `fail`
+
+Important local rule:
+
+- do not call `ack_slice_notification.py` directly during roadmap closeout
+- only `complete_slice.sh ack` may finalize notification delivery
+
+Durable notification truth lives in workspace memory artifacts, not in `ACTIVE.md`.
+The canonical notification payload should explicitly carry `current_focus_activity_id` from the frozen closeout artifact instead of re-reading live focus state.
+
+## Maintenance-Mode Guardrails
+
+Once `execution-system-spec-v1` reached maintenance mode, local rules became:
+
+- reopen only with a concrete trigger
+- never weaken explicit `validated` / `closed_out`
+- keep ACTIVE runtime-only
+- make tests follow live runtime truth dynamically
+- keep advisories actionable and non-blocking
+- do not create new execution-system slices by default
+
+Use the maintenance guardrails doc whenever a change risks reopening the line.
+
+## Current Testing Philosophy
+
+The local system prefers:
+
+- precise checkers for hard-fail runtime truth
+- advisory scripts for non-blocking operator hints
+- path tests for protocol drift
+- one unified checker runner
+- one unified full-test runner
+
+Use smoke tests for local field invariants.
+Use synthetic path tests when a value must survive multiple surfaces such as:
+
+- artifact -> queue/state -> payload
+- runner -> acceptance
+- focus state -> closeout-ready gate
+
+See `references/checkers-and-protocols.md` for the concrete script map.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Six-Layer Execution System"
+  short_description: "Inspect and evolve focus-first execution-system workspaces"
+  default_prompt: "Use $six-layer-execution-system to inspect, validate, recover, or modify a repository that follows the six-layer execution-system layout."

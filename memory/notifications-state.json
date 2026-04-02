@@ -1,0 +1,77 @@
+{
+  "version": 2,
+  "pending": [],
+  "inflight": [],
+  "sent": [
+    {
+      "dedupe_key": "one-publish:PR-E.P7:e095f13",
+      "repo": "one-publish",
+      "next_slice_id": "PR-E.P8",
+      "commit": "e095f13",
+      "validations": [
+        "`pnpm typecheck` passed for `PR-E.P6`",
+        "`pnpm test` passed for `PR-E.P6`",
+        "`cargo check` last confirmed on backend split track"
+      ],
+      "message": "one-publish \u5207\u7247\u5b8c\u6210\n- \u5f53\u524d\u5207\u7247\uff1aPR-E.P7\n- \u9a8c\u8bc1\uff1a`pnpm typecheck` passed for `PR-E.P6` / `pnpm test` passed for `PR-E.P6` / `cargo check` last confirmed on backend split track\n- \u4e0b\u4e00\u5207\u7247\uff1aPR-E.P8\n- commit\uff1ae095f13",
+      "queued_at": "2026-03-13T12:34:31+08:00",
+      "flushed_at": "2026-03-13T12:35:22+08:00",
+      "sent_at": "2026-03-13T12:35:48+08:00",
+      "completed_slice_id": "PR-E.P7",
+      "activity_id": "one-publish-refactor",
+      "activity_type": "roadmap"
+    },
+    {
+      "dedupe_key": "test:notification-flow:2026-03-13",
+      "repo": "notification-test",
+      "next_slice_id": "TEST.P2",
+      "commit": "test-20260313",
+      "validations": [
+        "test prepare passed",
+        "test payload generated"
+      ],
+      "message": "[\u6d4b\u8bd5] \u901a\u77e5\u95ed\u73af\u9a8c\u8bc1\n- \u5f53\u524d\u5207\u7247\uff1aTEST.P1\n- \u9a8c\u8bc1\uff1atest prepare passed / test payload generated\n- \u4e0b\u4e00\u5207\u7247\uff1aTEST.P2\n- commit\uff1atest-20260313",
+      "queued_at": "2026-03-13T13:04:42+08:00",
+      "flushed_at": "2026-03-13T13:04:42+08:00",
+      "sent_at": "2026-03-13T13:05:05+08:00",
+      "completed_slice_id": "TEST.P1",
+      "activity_id": "notification-test",
+      "activity_type": "roadmap"
+    },
+    {
+      "dedupe_key": "one-publish:PR-E.P9:32dae48",
+      "repo": "one-publish",
+      "next_slice_id": "PR-E.P10",
+      "commit": "32dae48",
+      "validations": [
+        "`pnpm typecheck` passed for `PR-E.P8`",
+        "`pnpm test` passed for `PR-E.P8`",
+        "`cargo check` last confirmed on backend split track"
+      ],
+      "message": "one-publish \u5207\u7247\u5b8c\u6210\n- \u5f53\u524d\u5207\u7247\uff1aPR-E.P9\n- \u9a8c\u8bc1\uff1a`pnpm typecheck` passed for `PR-E.P8` / `pnpm test` passed for `PR-E.P8` / `cargo check` last confirmed on backend split track\n- \u4e0b\u4e00\u5207\u7247\uff1aPR-E.P10\n- commit\uff1a32dae48",
+      "queued_at": "2026-03-13T13:48:34+08:00",
+      "flushed_at": "2026-03-13T13:48:34+08:00",
+      "sent_at": "2026-03-13T13:48:53+08:00",
+      "completed_slice_id": "PR-E.P9",
+      "activity_id": "one-publish-refactor",
+      "activity_type": "roadmap"
+    },
+    {
+      "dedupe_key": "notification-test-v2:TEST.P3:test-explicit-20260313",
+      "repo": "notification-test-v2",
+      "completed_slice_id": "TEST.P3",
+      "next_slice_id": "TEST.P4",
+      "commit": "test-explicit-20260313",
+      "validations": [
+        "explicit closeout created",
+        "queue/flush/payload/send/ack end-to-end"
+      ],
+      "message": "notification-test-v2 \u5207\u7247\u5b8c\u6210\n- \u5f53\u524d\u5207\u7247\uff1aTEST.P3\n- \u9a8c\u8bc1\uff1aexplicit closeout created / queue/flush/payload/send/ack end-to-end\n- \u4e0b\u4e00\u5207\u7247\uff1aTEST.P4\n- commit\uff1atest-explicit-20260313",
+      "queued_at": "2026-03-13T15:48:43+08:00",
+      "flushed_at": "2026-03-13T15:48:43+08:00",
+      "sent_at": "2026-03-13T15:49:10+08:00",
+      "activity_id": "notification-test",
+      "activity_type": "roadmap"
+    }
+  ]
+}
