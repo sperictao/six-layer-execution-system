@@ -16,7 +16,6 @@ def main() -> int:
         print("FOCUS_VALIDATION_FAILED:no_focus")
         return 1
 
-    problems: list[str] = []
     policy_gates: list[str] = []
 
     focus_autopilot = focus.scalar("autopilot") == "true"
@@ -29,12 +28,6 @@ def main() -> int:
         policy_gates.append("focus activity is not in runnable activity set")
 
     non_focus_runnable = [aid for aid in runnable if aid != focus.activity_id]
-
-    if problems:
-        print("FOCUS_VALIDATION_FAILED")
-        for problem in problems:
-            print(f"- {problem}")
-        return 1
 
     if policy_gates:
         print("FOCUS_VALIDATION_POLICY_GATE")

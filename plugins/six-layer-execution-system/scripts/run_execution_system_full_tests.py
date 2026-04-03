@@ -29,6 +29,12 @@ REPO_TESTS = [
     ("inspect-smoke", "test_inspect_execution_system.py"),
     ("closeout-state-smoke", "test_slice_closeout_state.py"),
     ("closeout-ready-smoke", "test_check_closeout_ready.py"),
+    ("notification-tools-smoke", "test_notification_script_tools.py"),
+    ("wrapper-and-runner-tools-smoke", "test_wrapper_and_runner_tools.py"),
+    ("introspection-and-control-tools-smoke", "test_introspection_and_control_tools.py"),
+    ("checker-helper-coverage-smoke", "test_checker_helper_coverage.py"),
+    ("consistency-and-runner-helper-coverage-smoke", "test_consistency_and_runner_helper_coverage.py"),
+    ("edge-branch-coverage-smoke", "test_edge_branch_coverage.py"),
 ]
 
 PLUGIN_COMMANDS = [

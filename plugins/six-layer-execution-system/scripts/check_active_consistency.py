@@ -138,9 +138,6 @@ def validate_common_activity_fields(problems: list[str], activity: Activity) -> 
         if field not in activity.fields:
             add_problem(problems, f"activity:{activity_id}", f"missing `{field}`")
 
-    if activity.scalar("activity_id") and activity.scalar("activity_id") != activity_id:
-        add_problem(problems, f"activity:{activity_id}", "activity_id mismatch")
-
     if activity.scalar("status") not in {"ready", "in_progress", "blocked", "done", "parked"}:
         add_problem(problems, f"activity:{activity_id}", "status must be one of ready/in_progress/blocked/done/parked")
 

@@ -54,6 +54,12 @@ Existing tests:
 - `tests/test_check_closeout_ready.py`
 - `tests/test_execution_system_governance_consistency.py`
 - `tests/test_check_execution_system_status_freshness.py`
+- `tests/test_notification_script_tools.py`
+- `tests/test_wrapper_and_runner_tools.py`
+- `tests/test_introspection_and_control_tools.py`
+- `tests/test_checker_helper_coverage.py`
+- `tests/test_consistency_and_runner_helper_coverage.py`
+- `tests/test_edge_branch_coverage.py`
 
 Coverage summary:
 - ACTIVE checker semantics
@@ -68,6 +74,12 @@ Coverage summary:
 - closeout artifact state semantics
 - canonical closeout payload field semantics
 - closeout-ready gate semantics
+- notification state and closeout helper tool semantics
+- plugin wrapper, repo path, and full-suite runner semantics
+- inspection, focus control, maintenance control, and parser helper semantics
+- pure checker helper branches across schema/dependency/parallel-wave/freshness/governance surfaces
+- active-consistency helper branches and unified runner helper semantics
+- notification / closeout / parser edge branches that were previously only hit indirectly
 
 ### 1.3 Execution-system path tests
 Current state:
@@ -86,6 +98,12 @@ Existing tests:
 - `tests/test_execution_system_path_closeout_ready_focus_drift.py`
 - `tests/test_execution_system_path_runner_hint_drift.py`
 - `tests/test_execution_system_path_parallel_wave.py`
+- `tests/test_notification_script_tools.py`
+- `tests/test_wrapper_and_runner_tools.py`
+- `tests/test_introspection_and_control_tools.py`
+- `tests/test_checker_helper_coverage.py`
+- `tests/test_consistency_and_runner_helper_coverage.py`
+- `tests/test_edge_branch_coverage.py`
 
 Covered path:
 - hard-fail suite passes
@@ -199,16 +217,23 @@ Notes:
 - runner/summary-hint drift coverage
 - synthetic single-wave parallel-wave path coverage
 - acceptance and runner integration at the happy-path level
+- notification helper tooling coverage
+- wrapper, runner, inspection, and control-tooling coverage
+- checker helper branch coverage
+- active-consistency and runner helper branch coverage
+- notification / closeout / parser edge-branch coverage
 
 ### Medium coverage
 - end-to-end execution-system path coverage as a whole
 - governance drift recovery messaging in the unified runner
 - active wave-state hard-fail runner integration semantics and recovery messaging
 - maintenance-mode transitions where the live focus is a first-class `waiting` activity instead of a runnable roadmap or non-execution-system activity
+- final line-level branch closure until a fresh 100% report confirms there are no remaining helper gaps
 
 ### Weak coverage
 - broader governance-drift matrix beyond the current resume-trigger recovery alignment case
 - future protocol additions that could introduce new negative paths
+- any residual script-level branch gaps surfaced by the next line-coverage audit
 
 ---
 
@@ -217,6 +242,7 @@ Notes:
 ### Highest-value missing tests
 1. broader governance-drift matrix tests beyond the current resume-trigger recovery alignment case
 2. any remaining negative-path execution-system path cases discovered during future protocol changes
+3. any residual script-level branch gaps discovered by the next line-coverage report
 
 ### Why these matter
 - most of the original execution-system path matrix gaps are now covered
@@ -241,4 +267,10 @@ Current conclusion:
 - closeout-ready drift coverage is landed in `tests/test_execution_system_path_closeout_ready_focus_drift.py`
 - closeout payload identity coverage is landed in `tests/test_execution_system_path_closeout_payload_identity.py`
 - runner/summary-hint drift coverage is landed in `tests/test_execution_system_path_runner_hint_drift.py`
+- notification state and closeout helper coverage is landed in `tests/test_notification_script_tools.py`
+- wrapper / runner / path coverage is landed in `tests/test_wrapper_and_runner_tools.py`
+- inspection / parser / control-tool coverage is landed in `tests/test_introspection_and_control_tools.py`
+- checker helper branch coverage is landed in `tests/test_checker_helper_coverage.py`
+- active-consistency and runner helper branch coverage is landed in `tests/test_consistency_and_runner_helper_coverage.py`
+- notification / closeout / parser edge-branch coverage is landed in `tests/test_edge_branch_coverage.py`
 - the next best slice is broader governance-drift hardening around live-ledger semantics, especially waiting-focus legality and stale health reporting
