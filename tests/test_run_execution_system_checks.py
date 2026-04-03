@@ -28,6 +28,7 @@ def repo_checkout_without_tests_env() -> tuple[dict[str, str], Path]:
 
 
 def main() -> int:
+    dev_runner = Path(__file__).with_name("run_execution_system_checks.py")
     advisory_command = command_str("check_oversized_migration_slices.py")
     active_command = command_str("check_active_consistency.py")
     dependency_command = command_str("check_task_dependency_graph.py")
@@ -102,6 +103,19 @@ def main() -> int:
             unavailable_output,
             f"- repo_smoke_tests_reason: repo checkout detected at {unavailable_root_resolved}, but {unavailable_root_resolved / 'tests'} is missing",
         )
+
+        proc = subprocess.run(
+            ["python3", str(dev_runner)],
+            text=True,
+            capture_output=True,
+            check=False,
+            env=unavailable_env,
+        )
+        dev_runner_output = proc.stdout + proc.stderr
+        if proc.returncode != 0:
+            raise AssertionError(f"tests/run_execution_system_checks.py should behave like the plugin wrapper\n{dev_runner_output}")
+        expect_contains("dev-runner-unavailable-path", dev_runner_output, "EXECUTION_SYSTEM_REPO_SMOKE_TESTS_UNAVAILABLE")
+        expect_contains("dev-runner-unavailable-path", dev_runner_output, "- repo_smoke_tests: unavailable")
 
         proc = subprocess.run(
             ["python3", str(WORKSPACE / "scripts" / "run_execution_system_full_tests.py")],

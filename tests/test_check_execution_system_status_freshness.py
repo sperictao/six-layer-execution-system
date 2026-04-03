@@ -29,6 +29,11 @@ def main() -> int:
     if proc.returncode != 0:
         raise AssertionError(proc.stdout + proc.stderr)
     expect_contains("workspace-ok", proc, "EXECUTION_SYSTEM_STATUS_FRESHNESS_OK")
+    expect_contains(
+        "workspace-ok",
+        proc,
+        "- checked_files: ACTIVE.md,docs/execution-system-testing-inventory.md,tests/execution-system-testing-inventory.md",
+    )
 
     with tempfile.TemporaryDirectory(prefix="status-freshness-") as tmpdir:
         tmp = Path(tmpdir)

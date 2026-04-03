@@ -20,7 +20,7 @@ Key execution files:
 - `ACTIVE.md`
 - `docs/execution-system-spec-v1.md`
 - `docs/execution-system-maintenance-guardrails.md`
-- `docs/execution-system-testing-inventory.md`
+- `docs/execution-system-testing-inventory.md` (compatibility pointer)
 
 Key execution directories:
 
@@ -41,9 +41,9 @@ Docs:
 
 - `docs/execution-system-spec-v1.md`
 - `docs/execution-system-maintenance-guardrails.md`
-- `docs/execution-system-testing-inventory.md`
 - `docs/execution-system-decomposition-upgrade-plan.md`
 - `docs/execution-system-spec-v1-acceptance-checklist.md`
+- `<repo-root>/tests/execution-system-testing-inventory.md` (source-checkout authority)
 
 Roadmaps:
 

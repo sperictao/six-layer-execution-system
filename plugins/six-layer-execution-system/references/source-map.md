@@ -23,7 +23,8 @@ Execution-system docs:
 
 - `<plugin-root>/docs/execution-system-spec-v1.md`
 - `<plugin-root>/docs/execution-system-maintenance-guardrails.md`
-- `<plugin-root>/docs/execution-system-testing-inventory.md`
+- `<repo-root>/tests/execution-system-testing-inventory.md`
+- `<plugin-root>/docs/execution-system-testing-inventory.md` (compatibility pointer)
 - `<plugin-root>/docs/execution-system-spec-v1-acceptance-checklist.md`
 - `<plugin-root>/docs/execution-system-decomposition-upgrade-plan.md`
 - `<plugin-root>/docs/active-ledger-v2.md`
@@ -69,6 +70,7 @@ Checkers:
 Runners:
 
 - `<plugin-root>/scripts/run_execution_system_checks.py`
+- `<repo-root>/tests/run_execution_system_checks.py`
 - `<plugin-root>/scripts/run_execution_system_full_tests.py`
 - `<plugin-root>/scripts/accept_active_ledger_v2.py`
 

@@ -8,7 +8,8 @@ Read these first when the task is about the local execution system:
 - `<plugin-root>/ACTIVE.md`
 - `<plugin-root>/docs/execution-system-spec-v1.md`
 - `<plugin-root>/docs/execution-system-maintenance-guardrails.md`
-- `<plugin-root>/docs/execution-system-testing-inventory.md`
+- `<repo-root>/tests/execution-system-testing-inventory.md`
+- `<plugin-root>/docs/execution-system-testing-inventory.md` (compatibility pointer)
 
 ## Core Model
 

@@ -5,6 +5,7 @@
 Use the repo's own scripts instead of recreating logic:
 
 - checks runner: `<plugin-root>/scripts/run_execution_system_checks.py`
+- repo-local development runner: `<repo-root>/tests/run_execution_system_checks.py`
 - full-suite runner: `<plugin-root>/scripts/run_execution_system_full_tests.py`
 - ACTIVE acceptance: `<plugin-root>/scripts/accept_active_ledger_v2.py`
 - closeout flow: `<plugin-root>/scripts/complete_slice.py`
