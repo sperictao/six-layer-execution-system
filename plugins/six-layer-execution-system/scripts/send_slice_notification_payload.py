@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 from execution_system_paths import WORKSPACE
 CLOSEOUT = WORKSPACE / "memory/last-slice-closeout.json"

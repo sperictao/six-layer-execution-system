@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import subprocess
 import sys
-from pathlib import Path
 
 from execution_system_paths import WORKSPACE
 CHECK = WORKSPACE / "scripts" / "check_execution_system_maintenance_mode.py"

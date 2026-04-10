@@ -5,7 +5,6 @@ import py_compile
 import subprocess
 import sys
 import tempfile
-from pathlib import Path
 
 from execution_system_paths import WORKSPACE
 sys.path.insert(0, str(WORKSPACE))

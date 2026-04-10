@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import subprocess
 import sys
-from pathlib import Path
 
 from execution_system_paths import WORKSPACE
 sys.path.insert(0, str(WORKSPACE / "scripts"))

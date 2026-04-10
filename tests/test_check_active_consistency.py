@@ -5,7 +5,6 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from execution_system_paths import WORKSPACE
 from test_workspace_clone import cloned_workspace, init_git_repo, workspace_env
 
 

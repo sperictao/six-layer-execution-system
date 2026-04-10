@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import subprocess
-from pathlib import Path
 
 from execution_system_paths import WORKSPACE
 CHECK = WORKSPACE / "scripts" / "check_execution_system_governance_consistency.py"

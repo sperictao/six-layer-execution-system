@@ -4,11 +4,8 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
-import os
-import shutil
 import subprocess
 import sys
-from pathlib import Path
 from typing import Any
 
 from repo_paths import CLI_PATH, CONFIG_PATH, PACKAGE_ROOT, REPO_ROOT, STATE_ROOT, WORKSPACE
