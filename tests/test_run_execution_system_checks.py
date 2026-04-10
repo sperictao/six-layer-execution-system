@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import json
 import subprocess
 import tempfile
 from pathlib import Path
@@ -51,6 +52,35 @@ def main() -> int:
         expect_contains("controlled-pass", live_output, "- hard_fail_status: passed")
         expect_contains("controlled-pass", live_output, "- repo_smoke_tests: skipped")
         expect_contains("controlled-pass", live_output, "- repo_smoke_tests_reason: repo checkout not detected from plugin layout")
+        telemetry_path = workspace / ".trae" / "telemetry.jsonl"
+        if not telemetry_path.exists():
+            raise AssertionError("run_execution_system_checks should emit telemetry into the workspace")
+        try:
+            telemetry_lines = telemetry_path.read_text(encoding="utf-8").splitlines()
+        except OSError as error:
+            raise AssertionError(f"telemetry file should be readable: {telemetry_path}") from error
+        except UnicodeDecodeError as error:
+            raise AssertionError(f"telemetry file should be valid UTF-8: {telemetry_path}") from error
+        telemetry_events = []
+        for line in telemetry_lines:
+            if not line.strip():
+                continue
+            try:
+                telemetry_events.append(json.loads(line))
+            except json.JSONDecodeError as error:
+                raise AssertionError(f"telemetry should contain valid JSON lines: {line}") from error
+        if not telemetry_events:
+            raise AssertionError("run_execution_system_checks should write at least one telemetry event")
+        latest_event = telemetry_events[-1]
+        if latest_event.get("event_type") != "execution_system_check":
+            raise AssertionError(f"unexpected telemetry event: {latest_event}")
+        if "timestamp" not in latest_event:
+            raise AssertionError(f"telemetry event should include a timestamp: {latest_event}")
+        payload = latest_event.get("payload")
+        if not isinstance(payload, dict):
+            raise AssertionError(f"telemetry event should include a payload object: {latest_event}")
+        if "elapsed_seconds" not in payload:
+            raise AssertionError(f"telemetry payload should include elapsed_seconds: {latest_event}")
 
     unavailable_env, unavailable_root = repo_checkout_without_tests_env()
     unavailable_root_resolved = unavailable_root.resolve()

@@ -23,20 +23,13 @@ def clear_notification_cache():
 def clear_closeout_cache():
     LAST_CLOSEOUT.write_text("{}\n", encoding="utf-8")
 
-def check_closeout_ready(summary=None) -> bool:
-    if summary is None:
-        code, summary = collect_summary(print_output=False)
-        if code != 0:
-            print("CLOSEOUT_READY_FAILED")
-            print("- reason: hard-fail suite did not pass")
-            print(f"- first_failing_command: {summary.first_failing_command or 'none'}")
-            return False
-    else:
-        if summary.hard_fail_status == "failed":
-            print("CLOSEOUT_READY_FAILED")
-            print("- reason: hard-fail suite did not pass")
-            print(f"- first_failing_command: {summary.first_failing_command or 'none'}")
-            return False
+def check_closeout_ready() -> bool:
+    code, summary = collect_summary(print_output=False)
+    if code != 0:
+        print("CLOSEOUT_READY_FAILED")
+        print("- reason: hard-fail suite did not pass")
+        print(f"- first_failing_command: {summary.first_failing_command or 'none'}")
+        return False
 
     ledger = parse_ledger(ACTIVE)
     focus = ledger.get_current_focus_activity()
@@ -85,7 +78,7 @@ def prepare_slice():
     if code != 0:
         sys.exit(code)
     
-    if not check_closeout_ready(summary):
+    if not check_closeout_ready():
         sys.exit(1)
 
     ledger = parse_ledger(ACTIVE)
