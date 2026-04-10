@@ -5,24 +5,36 @@ from functools import wraps
 from pathlib import Path
 from typing import Callable, Any, Optional
 
+from execution_system_paths import WORKSPACE
+
+
 def get_telemetry_file() -> Path:
     env_path = os.environ.get("TELEMETRY_FILE_PATH")
     if env_path:
-        return Path(env_path)
-    return Path("/workspace/.trae/telemetry.jsonl")
+        return Path(env_path).expanduser()
+    return WORKSPACE / ".trae" / "telemetry.jsonl"
 
-def record_event(event_type: str, payload: dict):
+
+def record_event(event_type: str, payload: dict) -> None:
     telemetry_file = get_telemetry_file()
     telemetry_file.parent.mkdir(parents=True, exist_ok=True)
-    
+
     event = {
         "timestamp": time.time(),
         "event_type": event_type,
-        "payload": payload
+        "payload": payload,
     }
-    
+
     with open(telemetry_file, "a", encoding="utf-8") as f:
         f.write(json.dumps(event) + "\n")
+
+
+def record_event_safely(event_type: str, payload: dict) -> None:
+    try:
+        record_event(event_type, payload)
+    except OSError:
+        return
+
 
 def with_telemetry(event_type: str, payload_builder: Optional[Callable[[Any], dict]] = None) -> Callable:
     """
@@ -38,22 +50,25 @@ def with_telemetry(event_type: str, payload_builder: Optional[Callable[[Any], di
             try:
                 result = func(*args, **kwargs)
                 elapsed = time.time() - start_time
-                
+
                 payload = {}
                 if payload_builder:
                     payload = payload_builder(result)
-                    
+
                 payload["elapsed_seconds"] = elapsed
-                record_event(event_type, payload)
-                
+                record_event_safely(event_type, payload)
+
                 return result
             except Exception as e:
                 elapsed = time.time() - start_time
-                record_event(event_type, {
+                record_event_safely(
+                    event_type,
+                    {
                     "elapsed_seconds": elapsed,
                     "status": "error",
-                    "error": type(e).__name__
-                })
+                    "error": type(e).__name__,
+                    },
+                )
                 raise e
         return wrapper
     return decorator

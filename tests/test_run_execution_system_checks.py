@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import json
 import subprocess
 import tempfile
 from pathlib import Path
@@ -51,6 +52,15 @@ def main() -> int:
         expect_contains("controlled-pass", live_output, "- hard_fail_status: passed")
         expect_contains("controlled-pass", live_output, "- repo_smoke_tests: skipped")
         expect_contains("controlled-pass", live_output, "- repo_smoke_tests_reason: repo checkout not detected from plugin layout")
+        telemetry_path = workspace / ".trae" / "telemetry.jsonl"
+        if not telemetry_path.exists():
+            raise AssertionError("run_execution_system_checks should emit telemetry into the workspace")
+        telemetry_events = [json.loads(line) for line in telemetry_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+        if not telemetry_events:
+            raise AssertionError("run_execution_system_checks should write at least one telemetry event")
+        latest_event = telemetry_events[-1]
+        if latest_event.get("event_type") != "execution_system_check":
+            raise AssertionError(f"unexpected telemetry event: {latest_event}")
 
     unavailable_env, unavailable_root = repo_checkout_without_tests_env()
     unavailable_root_resolved = unavailable_root.resolve()
