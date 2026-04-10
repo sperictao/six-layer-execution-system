@@ -42,7 +42,7 @@ def record_event_safely(event_type: str, payload: dict) -> None:
 def with_telemetry(event_type: str, payload_builder: Optional[Callable[[Any], dict]] = None) -> Callable:
     """
     Decorator to record telemetry events for function executions.
-    
+
     :param event_type: The type of the telemetry event.
     :param payload_builder: Optional function to build a payload from the decorated function's result.
     """
@@ -67,9 +67,9 @@ def with_telemetry(event_type: str, payload_builder: Optional[Callable[[Any], di
                 record_event_safely(
                     event_type,
                     {
-                    "elapsed_seconds": elapsed,
-                    "status": "error",
-                    "error": type(e).__name__,
+                        "elapsed_seconds": elapsed,
+                        "status": "error",
+                        "error": type(e).__name__,
                     },
                 )
                 raise e

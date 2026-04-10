@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -224,6 +225,10 @@ def collect_summary(print_output: bool = True) -> tuple[int, ExecutionSystemSumm
             advisory_hits.append(pretty)
 
     tests_root, tests_reason = discover_repo_tests_root()
+    if os.environ.get("SIX_LAYER_EXECUTION_MODE") == "agile":
+        tests_reason = "agile mode enabled"
+        tests_root = None
+
     if tests_root is None:
         repo_smoke_status = repo_smoke_status_for_reason(tests_reason)
         summary = build_summary(

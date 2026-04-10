@@ -34,6 +34,10 @@ def cmd_slice_start(args):
         sys.exit(1)
 
 def cmd_slice_complete(args):
+    if getattr(args, "agile", False):
+        import os
+        os.environ["SIX_LAYER_EXECUTION_MODE"] = "agile"
+
     print("Running execution system checks and closeout generation...")
     import complete_slice
     try:
@@ -73,6 +77,7 @@ def main():
     start_parser.add_argument("id", help="Slice ID to start")
     
     complete_parser = slice_subparsers.add_parser("complete", help="Complete the current slice")
+    complete_parser.add_argument("--agile", action="store_true", help="Run in Agile Mode (skip repo smoke tests for faster execution)")
     
     # status command
     status_parser = subparsers.add_parser("status", help="Show current status")
