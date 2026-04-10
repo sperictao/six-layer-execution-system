@@ -9,6 +9,7 @@ from execution_system_paths import WORKSPACE
 from test_workspace_clone import cloned_workspace
 
 INSPECT = WORKSPACE / "scripts" / "inspect_execution_system.py"
+INSPECT_ENV = WORKSPACE / "scripts" / "inspect_execution_system_env.py"
 
 
 def main() -> int:
@@ -42,6 +43,23 @@ def main() -> int:
             )
         if snapshot.get("plugin", {}).get("exists") is not True:
             raise AssertionError(f"fallback workspace should exist\n{output}")
+
+        alias_proc = subprocess.run(
+            ["python3", str(INSPECT_ENV), "--format", "json"],
+            text=True,
+            capture_output=True,
+            check=False,
+            env=env,
+        )
+        alias_output = alias_proc.stdout + alias_proc.stderr
+        if alias_proc.returncode != 0:
+            raise AssertionError(f"inspect_execution_system_env should succeed\n{alias_output}")
+        if proc.stdout != alias_proc.stdout:
+            raise AssertionError(
+                "inspect_execution_system_env should stay aligned with the main inspect entrypoint\n"
+                f"main={proc.stdout}\n"
+                f"alias={alias_proc.stdout}"
+            )
 
     print("INSPECT_EXECUTION_SYSTEM_SMOKE_OK")
     return 0

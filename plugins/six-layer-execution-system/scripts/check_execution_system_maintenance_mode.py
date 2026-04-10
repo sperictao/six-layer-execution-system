@@ -5,6 +5,8 @@ import subprocess
 import sys
 
 from execution_system_paths import WORKSPACE
+from execution_system_suite import workspace_python_command
+
 sys.path.insert(0, str(WORKSPACE / "scripts"))
 
 from active_ledger import parse_ledger  # noqa: E402
@@ -59,7 +61,7 @@ def main() -> int:
         return 1
 
     proc = subprocess.run(
-        ["python3", str(WORKSPACE / "scripts" / "accept_active_ledger_v2.py")],
+        workspace_python_command("accept_active_ledger_v2.py"),
         text=True,
         capture_output=True,
         check=False,

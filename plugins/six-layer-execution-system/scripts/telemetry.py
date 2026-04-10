@@ -6,14 +6,14 @@ from functools import wraps
 from pathlib import Path
 from typing import Callable, Any, Optional
 
-from execution_system_paths import WORKSPACE
+from execution_system_paths import STATE_ROOT
 
 
 def get_telemetry_file() -> Path:
     env_path = os.environ.get("TELEMETRY_FILE_PATH")
     if env_path:
         return Path(env_path).expanduser()
-    return WORKSPACE / "local-state" / "telemetry.jsonl"
+    return STATE_ROOT / "telemetry.jsonl"
 
 
 def record_event(event_type: str, payload: dict) -> None:
@@ -72,6 +72,6 @@ def with_telemetry(event_type: str, payload_builder: Optional[Callable[[Any], di
                         "error": type(e).__name__,
                     },
                 )
-                raise e
+                raise
         return wrapper
     return decorator

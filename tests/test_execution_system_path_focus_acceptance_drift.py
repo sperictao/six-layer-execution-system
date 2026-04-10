@@ -32,8 +32,8 @@ def main() -> int:
                 "ok",
                 "EXECUTION_SYSTEM_SUMMARY_STATUS:passed\n"
                 "first_failing_command=none\n"
-                "advisory_hits=1\n"
-                f"advisory_command={command_str('check_oversized_migration_slices.py')}",
+                "advisory_commands_run=1\n"
+                "advisory_hits=0",
             )
         if name == "focus-first":
             return (

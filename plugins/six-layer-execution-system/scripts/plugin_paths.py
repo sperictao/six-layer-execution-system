@@ -1,25 +1,19 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import os
 import subprocess
-from pathlib import Path
+from execution_system_paths import PLUGIN_ROOT, REPO_ROOT, STATE_ROOT, WORKSPACE
 
-PLUGIN_ROOT = Path(__file__).resolve().parents[1]
 ROOT_SCRIPTS = PLUGIN_ROOT / "scripts"
-REPO_ROOT = Path(
-    os.environ.get("SIX_LAYER_REPO_ROOT", PLUGIN_ROOT)
-).expanduser().resolve()
-WORKSPACE = Path(
-    os.environ.get("SIX_LAYER_WORKSPACE", REPO_ROOT)
-).expanduser().resolve()
 
 
 def build_env() -> dict[str, str]:
+    import os
+
     env = os.environ.copy()
     env.setdefault("SIX_LAYER_REPO_ROOT", str(REPO_ROOT))
     env.setdefault("SIX_LAYER_WORKSPACE", str(WORKSPACE))
-    env.setdefault("SIX_LAYER_STATE_ROOT", str(REPO_ROOT / "local-state"))
+    env.setdefault("SIX_LAYER_STATE_ROOT", str(STATE_ROOT))
     return env
 
 

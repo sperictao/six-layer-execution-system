@@ -4,13 +4,12 @@ from __future__ import annotations
 import argparse
 import subprocess
 
-from plugin_paths import WORKSPACE
+from execution_system_paths import WORKSPACE
+from execution_system_suite import LOCAL_CHECK_MODES, workspace_python_command
 
 COMMANDS = {
-    "active": ["python3", str(WORKSPACE / "scripts" / "check_active_consistency.py")],
-    "checks": ["python3", str(WORKSPACE / "scripts" / "run_execution_system_checks.py")],
-    "full-tests": ["python3", str(WORKSPACE / "scripts" / "run_execution_system_full_tests.py")],
-    "closeout-ready": ["python3", str(WORKSPACE / "scripts" / "check_closeout_ready.py")],
+    mode: workspace_python_command(script_name)
+    for mode, script_name in LOCAL_CHECK_MODES.items()
 }
 
 

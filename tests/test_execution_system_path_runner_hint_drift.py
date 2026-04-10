@@ -12,6 +12,8 @@ from scripts.run_execution_system_checks import CHECKS, recovery_hint_for_comman
 
 EXPECTED_HINTS = {
     "check_active_consistency.py": "repair ACTIVE.md or repo drift first",
+    "check_demand_card_schema.py": "repair malformed demand intake fields before continuing",
+    "check_generated_decomposition_consistency.py": "repair generated demand, roadmap, tasks, and ACTIVE drift before continuing",
     "check_task_slice_schema.py": "repair migrated task slice structure first",
     "check_task_dependency_graph.py": "repair slice dependency references or cycles before continuing",
     "check_parallel_safety.py": "repair unsafe parallel_safe declarations or missing shared_write_targets before continuing",

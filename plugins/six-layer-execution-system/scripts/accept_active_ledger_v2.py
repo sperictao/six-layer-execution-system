@@ -7,21 +7,19 @@ import sys
 import tempfile
 
 from execution_system_paths import WORKSPACE
+from execution_system_suite import (
+    ACCEPTANCE_PY_COMPILE_SPECS,
+    ACCEPTANCE_SCRIPT_CHECK_SPECS,
+    named_workspace_python_commands,
+)
+
 sys.path.insert(0, str(WORKSPACE))
 
 from scripts.run_execution_system_checks import collect_summary
 
-CHECKS = [
-    (
-        "execution-system-suite",
-        ["python3", str(WORKSPACE / "scripts/run_execution_system_checks.py")],
-    ),
-    (
-        "focus-first",
-        ["python3", str(WORKSPACE / "scripts/validate_focus_first.py")],
-    ),
-    ("parser-pycompile", ["py_compile", str(WORKSPACE / "scripts/active_ledger.py")]),
-    ("focus-switch-tool-pycompile", ["py_compile", str(WORKSPACE / "scripts/set_focus_activity.py")]),
+CHECKS = named_workspace_python_commands(ACCEPTANCE_SCRIPT_CHECK_SPECS) + [
+    (name, ["py_compile", str(WORKSPACE / "scripts" / script_name)])
+    for name, script_name in ACCEPTANCE_PY_COMPILE_SPECS
 ]
 
 
@@ -31,10 +29,11 @@ def run_check(name: str, cmd: list[str]) -> tuple[str, str]:
         output_lines = [
             f"EXECUTION_SYSTEM_SUMMARY_STATUS:{summary.hard_fail_status}",
             f"first_failing_command={summary.first_failing_command or 'none'}",
+            f"advisory_commands_run={summary.advisory_commands_run}",
             f"advisory_hits={len(summary.advisory_commands)}",
         ]
         for advisory in summary.advisory_commands:
-            output_lines.append(f"advisory_command={advisory}")
+            output_lines.append(f"advisory_hit_command={advisory}")
         output = "\n".join(output_lines)
         return ("ok" if code == 0 else "fail"), output
 

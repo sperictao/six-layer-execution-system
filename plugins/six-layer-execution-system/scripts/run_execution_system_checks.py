@@ -6,32 +6,28 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
+from active_ledger import parse_ledger
 from execution_system_paths import WORKSPACE
+from execution_system_paths import resolve_workspace_path
+from execution_system_suite import (
+    ADVISORY_SCRIPT_NAMES,
+    CHECK_SCRIPT_NAMES,
+    REPO_SMOKE_TESTS,
+    repo_test_command,
+    workspace_python_command,
+    workspace_python_commands,
+)
 import telemetry
 
-CHECKS = [
-    ["python3", str(WORKSPACE / "scripts" / "check_active_consistency.py")],
-    ["python3", str(WORKSPACE / "scripts" / "check_task_slice_schema.py")],
-    ["python3", str(WORKSPACE / "scripts" / "check_task_dependency_graph.py")],
-    ["python3", str(WORKSPACE / "scripts" / "check_parallel_safety.py")],
-    ["python3", str(WORKSPACE / "scripts" / "check_active_wave_state.py")],
-    ["python3", str(WORKSPACE / "scripts" / "check_execution_system_governance_consistency.py")],
-    ["python3", str(WORKSPACE / "scripts" / "check_execution_system_status_freshness.py")],
-]
-
-ADVISORIES = [
-    ["python3", str(WORKSPACE / "scripts" / "check_oversized_migration_slices.py")],
-]
-
-REPO_SMOKE_TESTS = [
-    "test_check_active_consistency.py",
-    "test_check_task_slice_schema.py",
-    "test_check_task_dependency_graph.py",
-    "test_check_parallel_safety.py",
-    "test_check_active_wave_state.py",
-    "test_execution_system_governance_consistency.py",
-    "test_check_execution_system_status_freshness.py",
-]
+BASE_CHECKS = workspace_python_commands(CHECK_SCRIPT_NAMES)
+# Backward-compatible export for tests and callers that inspect the static registry.
+CHECKS = BASE_CHECKS
+ADVISORIES = workspace_python_commands(ADVISORY_SCRIPT_NAMES)
+GENERATED_TASK_DOC_CHECK_SCRIPT_NAMES = (
+    "check_task_slice_schema.py",
+    "check_task_dependency_graph.py",
+    "check_parallel_safety.py",
+)
 
 
 @dataclass
@@ -39,6 +35,7 @@ class ExecutionSystemSummary:
     hard_fail_status: str
     first_failing_command: str | None
     advisory_commands: list[str]
+    advisory_commands_run: int = 0
     repo_smoke_tests_status: str = "not-run"
     repo_smoke_tests_total: int = 0
     repo_smoke_tests_root: str | None = None
@@ -104,7 +101,7 @@ def discover_repo_tests_root() -> tuple[Path | None, str | None]:
 
 
 def repo_test_commands(tests_root: Path) -> list[list[str]]:
-    return [["python3", str(tests_root / test_name)] for test_name in REPO_SMOKE_TESTS]
+    return [repo_test_command(tests_root, test_name) for test_name in REPO_SMOKE_TESTS]
 
 
 def repo_smoke_status_for_reason(reason: str | None) -> str:
@@ -113,10 +110,71 @@ def repo_smoke_status_for_reason(reason: str | None) -> str:
     return "skipped"
 
 
-def recovery_hint_for_command(command: list[str]) -> str:
-    script = Path(command[-1]).name
+def generated_task_docs() -> list[Path]:
+    try:
+        ledger = parse_ledger(WORKSPACE / "ACTIVE.md")
+    except Exception:
+        return []
+
+    docs: list[Path] = []
+    seen: set[Path] = set()
+    for activity in ledger.list_activities():
+        if activity.scalar("type") != "roadmap":
+            continue
+        source_doc = (activity.scalar("source_doc") or "").strip()
+        tasks_doc = (activity.scalar("tasks_doc") or "").strip()
+        if not source_doc.startswith("demands/") or not tasks_doc:
+            continue
+        if not (activity.activity_id or "").startswith("auto-"):
+            continue
+
+        resolved = resolve_workspace_path(tasks_doc)
+        if resolved is None or resolved in seen:
+            continue
+        seen.add(resolved)
+        docs.append(resolved)
+    return docs
+
+
+def generated_task_doc_commands() -> list[list[str]]:
+    commands: list[list[str]] = []
+    for task_doc in generated_task_docs():
+        for script_name in GENERATED_TASK_DOC_CHECK_SCRIPT_NAMES:
+            commands.append(workspace_python_command(script_name) + [str(task_doc)])
+    return commands
+
+
+def all_check_commands() -> list[list[str]]:
+    commands: list[list[str]] = []
+    for command in BASE_CHECKS:
+        commands.append(command)
+        if Path(command[-1]).name == "check_generated_decomposition_consistency.py":
+            commands.extend(generated_task_doc_commands())
+    return commands
+
+
+def script_name_from_command(command: str | list[str]) -> str:
+    tokens = command.split() if isinstance(command, str) else command
+    for token in tokens:
+        name = Path(token).name
+        if name.endswith(".py"):
+            return name
+    return Path(tokens[-1]).name if tokens else ""
+
+
+def advisory_warning_detected(output: str) -> bool:
+    first_line = output.strip().splitlines()[0] if output.strip() else ""
+    return first_line.endswith("_ADVISORY")
+
+
+def recovery_hint_for_command(command: str | list[str]) -> str:
+    script = script_name_from_command(command)
     if script == "check_active_consistency.py":
         return "repair ACTIVE.md or repo drift first"
+    if script == "check_demand_card_schema.py":
+        return "repair malformed demand intake fields before continuing"
+    if script == "check_generated_decomposition_consistency.py":
+        return "repair generated demand, roadmap, tasks, and ACTIVE drift before continuing"
     if script == "check_task_slice_schema.py":
         return "repair migrated task slice structure first"
     if script == "check_task_dependency_graph.py":
@@ -140,6 +198,7 @@ def build_summary(
     first_failure: str | None,
     advisory_hits: list[str],
     *,
+    advisory_commands_run: int = 0,
     repo_smoke_tests_status: str = "not-run",
     repo_smoke_tests_total: int = 0,
     repo_smoke_tests_root: str | None = None,
@@ -149,6 +208,7 @@ def build_summary(
         hard_fail_status="passed" if first_failure is None else "failed",
         first_failing_command=first_failure,
         advisory_commands=advisory_hits,
+        advisory_commands_run=advisory_commands_run,
         repo_smoke_tests_status=repo_smoke_tests_status,
         repo_smoke_tests_total=repo_smoke_tests_total,
         repo_smoke_tests_root=repo_smoke_tests_root,
@@ -162,11 +222,12 @@ def summary_footer(summary: ExecutionSystemSummary) -> list[str]:
     lines.append(
         f"- first_failing_command: {summary.first_failing_command or 'none'}"
     )
+    lines.append(f"- advisory_commands_run: {summary.advisory_commands_run}")
 
     if summary.advisory_commands:
         lines.append(f"- advisory_hits: {len(summary.advisory_commands)}")
         for advisory in summary.advisory_commands:
-            lines.append(f"- advisory_command: {advisory}")
+            lines.append(f"- advisory_hit_command: {advisory}")
             lines.append(f"- recovery_hint: {recovery_hint_for_command(advisory.split())}")
     else:
         lines.append("- advisory_hits: 0")
@@ -192,6 +253,8 @@ def build_telemetry_payload(result: tuple[int, ExecutionSystemSummary]) -> dict:
         "status": "passed" if code == 0 else "failed",
         "first_failing_command": summary.first_failing_command,
         "hard_fail_status": summary.hard_fail_status,
+        "advisory_hits": len(summary.advisory_commands),
+        "advisory_commands_run": summary.advisory_commands_run,
         "repo_smoke_tests_status": summary.repo_smoke_tests_status,
     }
 
@@ -200,15 +263,20 @@ def build_telemetry_payload(result: tuple[int, ExecutionSystemSummary]) -> dict:
 def collect_summary(print_output: bool = True) -> tuple[int, ExecutionSystemSummary]:
     first_failure: str | None = None
     advisory_hits: list[str] = []
+    advisory_commands_run = 0
 
-    for command in CHECKS:
+    for command in all_check_commands():
         pretty = " ".join(command)
         if print_output:
             print(f"==> {pretty}")
         completed = subprocess.run(command, cwd=WORKSPACE, check=False)
         if completed.returncode != 0:
             first_failure = pretty
-            summary = build_summary(first_failure, advisory_hits)
+            summary = build_summary(
+                first_failure,
+                advisory_hits,
+                advisory_commands_run=advisory_commands_run,
+            )
             if print_output:
                 print(f"EXECUTION_SYSTEM_CHECKS_FAILED: {pretty}")
                 for line in summary_footer(summary):
@@ -219,8 +287,12 @@ def collect_summary(print_output: bool = True) -> tuple[int, ExecutionSystemSumm
         pretty = " ".join(command)
         if print_output:
             print(f"==> advisory: {pretty}")
-        completed = subprocess.run(command, cwd=WORKSPACE, check=False)
-        if completed.returncode == 0:
+        completed = subprocess.run(command, cwd=WORKSPACE, text=True, capture_output=True, check=False)
+        output = (completed.stdout + completed.stderr).strip()
+        if print_output and output:
+            print(output)
+        advisory_commands_run += 1
+        if completed.returncode == 0 and advisory_warning_detected(output):
             advisory_hits.append(pretty)
 
     tests_root, tests_reason = discover_repo_tests_root()
@@ -233,6 +305,7 @@ def collect_summary(print_output: bool = True) -> tuple[int, ExecutionSystemSumm
         summary = build_summary(
             first_failure,
             advisory_hits,
+            advisory_commands_run=advisory_commands_run,
             repo_smoke_tests_status=repo_smoke_status,
             repo_smoke_tests_reason=tests_reason,
         )
@@ -261,6 +334,7 @@ def collect_summary(print_output: bool = True) -> tuple[int, ExecutionSystemSumm
             summary = build_summary(
                 first_failure,
                 advisory_hits,
+                advisory_commands_run=advisory_commands_run,
                 repo_smoke_tests_status="failed",
                 repo_smoke_tests_total=len(REPO_SMOKE_TESTS),
                 repo_smoke_tests_root=str(tests_root),
@@ -274,6 +348,7 @@ def collect_summary(print_output: bool = True) -> tuple[int, ExecutionSystemSumm
     summary = build_summary(
         first_failure,
         advisory_hits,
+        advisory_commands_run=advisory_commands_run,
         repo_smoke_tests_status="passed",
         repo_smoke_tests_total=len(REPO_SMOKE_TESTS),
         repo_smoke_tests_root=str(tests_root),

@@ -31,6 +31,8 @@ def main() -> int:
     dev_runner = Path(__file__).with_name("run_execution_system_checks.py")
     advisory_command = command_str("check_oversized_migration_slices.py")
     active_command = command_str("check_active_consistency.py")
+    demand_command = command_str("check_demand_card_schema.py")
+    generated_consistency_command = command_str("check_generated_decomposition_consistency.py")
     dependency_command = command_str("check_task_dependency_graph.py")
     parallel_command = command_str("check_parallel_safety.py")
     active_wave_command = command_str("check_active_wave_state.py")
@@ -51,6 +53,8 @@ def main() -> int:
         expect_contains("controlled-pass", live_output, "EXECUTION_SYSTEM_CHECKS_OK")
         expect_contains("controlled-pass", live_output, "EXECUTION_SYSTEM_SUMMARY")
         expect_contains("controlled-pass", live_output, "- hard_fail_status: passed")
+        expect_contains("controlled-pass", live_output, "- advisory_commands_run: 1")
+        expect_contains("controlled-pass", live_output, "- advisory_hits: 0")
         expect_contains("controlled-pass", live_output, "- repo_smoke_tests: skipped")
         expect_contains("controlled-pass", live_output, "- repo_smoke_tests_reason: repo checkout not detected from plugin layout")
         telemetry_path = workspace / "local-state" / "telemetry.jsonl"
@@ -82,6 +86,27 @@ def main() -> int:
             raise AssertionError(f"telemetry event should include a payload object: {latest_event}")
         if "elapsed_seconds" not in payload:
             raise AssertionError(f"telemetry payload should include elapsed_seconds: {latest_event}")
+
+    with cloned_workspace() as workspace:
+        env = workspace_env(workspace)
+        init_git_repo(workspace)
+        state_root = workspace / "custom-state-root"
+        env["SIX_LAYER_STATE_ROOT"] = str(state_root)
+        proc = subprocess.run(
+            ["python3", str(workspace / "scripts" / "run_execution_system_checks.py")],
+            text=True,
+            capture_output=True,
+            check=False,
+            env=env,
+        )
+        output = proc.stdout + proc.stderr
+        if proc.returncode != 0:
+            raise AssertionError(f"runner should still pass with a custom state root\n{output}")
+        telemetry_path = state_root / "telemetry.jsonl"
+        if not telemetry_path.exists():
+            raise AssertionError(
+                "run_execution_system_checks should honor SIX_LAYER_STATE_ROOT for telemetry output"
+            )
 
     unavailable_env, unavailable_root = repo_checkout_without_tests_env()
     unavailable_root_resolved = unavailable_root.resolve()
@@ -141,8 +166,9 @@ def main() -> int:
             build_summary(
                 None,
                 [advisory_command],
+                advisory_commands_run=1,
                 repo_smoke_tests_status="passed",
-                repo_smoke_tests_total=7,
+                repo_smoke_tests_total=9,
                 repo_smoke_tests_root="/tmp/source-checkout/tests",
             )
         )
@@ -150,9 +176,11 @@ def main() -> int:
     expect_contains("pass-path", passed, "EXECUTION_SYSTEM_SUMMARY")
     expect_contains("pass-path", passed, "- hard_fail_status: passed")
     expect_contains("pass-path", passed, "- first_failing_command: none")
+    expect_contains("pass-path", passed, "- advisory_commands_run: 1")
     expect_contains("pass-path", passed, "- advisory_hits: 1")
+    expect_contains("pass-path", passed, f"- advisory_hit_command: {advisory_command}")
     expect_contains("pass-path", passed, "- repo_smoke_tests: passed")
-    expect_contains("pass-path", passed, "- repo_smoke_tests_total: 7")
+    expect_contains("pass-path", passed, "- repo_smoke_tests_total: 9")
     expect_contains("pass-path", passed, "- repo_smoke_tests_root: /tmp/source-checkout/tests")
     expect_contains("pass-path", passed, "- recovery_hint: inspect warned slices and decide whether to split them or tighten wording")
 
@@ -166,8 +194,39 @@ def main() -> int:
     )
     expect_contains("fail-path", failed, "- hard_fail_status: failed")
     expect_contains("fail-path", failed, f"- first_failing_command: {active_command}")
+    expect_contains("fail-path", failed, "- advisory_commands_run: 0")
     expect_contains("fail-path", failed, "- advisory_hits: 0")
     expect_contains("fail-path", failed, "- recovery_hint: repair ACTIVE.md or repo drift first")
+
+    demand_failed = "\n".join(
+        summary_footer(
+            build_summary(
+                demand_command,
+                [],
+            )
+        )
+    )
+    expect_contains("demand-fail-path", demand_failed, f"- first_failing_command: {demand_command}")
+    expect_contains("demand-fail-path", demand_failed, "- recovery_hint: repair malformed demand intake fields before continuing")
+
+    generated_consistency_failed = "\n".join(
+        summary_footer(
+            build_summary(
+                generated_consistency_command,
+                [],
+            )
+        )
+    )
+    expect_contains(
+        "generated-consistency-fail-path",
+        generated_consistency_failed,
+        f"- first_failing_command: {generated_consistency_command}",
+    )
+    expect_contains(
+        "generated-consistency-fail-path",
+        generated_consistency_failed,
+        "- recovery_hint: repair generated demand, roadmap, tasks, and ACTIVE drift before continuing",
+    )
 
     dependency_failed = "\n".join(
         summary_footer(

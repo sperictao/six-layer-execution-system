@@ -36,7 +36,8 @@ def main() -> int:
     expect(runner_output, "EXECUTION_SYSTEM_CHECKS_OK")
     expect(runner_output, "EXECUTION_SYSTEM_SUMMARY")
     expect(runner_output, "- hard_fail_status: passed")
-    expect(runner_output, "- advisory_hits: 1")
+    expect(runner_output, "- advisory_commands_run: 1")
+    expect(runner_output, "- advisory_hits: 0")
 
     code, closeout_output = run(CLOSEOUT_READY)
     if focus.scalar("type") == "roadmap":

@@ -15,7 +15,7 @@ def main() -> int:
 
     def fake_run_check(name: str, cmd: list[str]) -> tuple[str, str]:
         if name == "execution-system-suite":
-            return "ok", f"EXECUTION_SYSTEM_SUMMARY_STATUS:passed\nfirst_failing_command=none\nadvisory_hits=1\nadvisory_command={command_str('check_oversized_migration_slices.py')}"
+            return "ok", "EXECUTION_SYSTEM_SUMMARY_STATUS:passed\nfirst_failing_command=none\nadvisory_commands_run=1\nadvisory_hits=0"
         if name == "focus-first":
             return "policy_gate", "FOCUS_VALIDATION_POLICY_GATE\n- focus_activity_id: execution-system-spec-v1\n- focus activity is not autopilot=true\n- note: focus-first remains intact; current focus is intentionally not auto-runnable"
         return "ok", "stubbed-ok"
