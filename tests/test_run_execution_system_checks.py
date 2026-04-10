@@ -55,7 +55,14 @@ def main() -> int:
         telemetry_path = workspace / ".trae" / "telemetry.jsonl"
         if not telemetry_path.exists():
             raise AssertionError("run_execution_system_checks should emit telemetry into the workspace")
-        telemetry_events = [json.loads(line) for line in telemetry_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+        telemetry_events = []
+        for line in telemetry_path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            try:
+                telemetry_events.append(json.loads(line))
+            except json.JSONDecodeError as error:
+                raise AssertionError(f"telemetry should contain valid JSON lines: {line}") from error
         if not telemetry_events:
             raise AssertionError("run_execution_system_checks should write at least one telemetry event")
         latest_event = telemetry_events[-1]

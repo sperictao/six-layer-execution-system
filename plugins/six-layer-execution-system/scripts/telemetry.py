@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 import time
 from functools import wraps
 from pathlib import Path
@@ -32,7 +33,9 @@ def record_event(event_type: str, payload: dict) -> None:
 def record_event_safely(event_type: str, payload: dict) -> None:
     try:
         record_event(event_type, payload)
-    except OSError:
+    except OSError as error:
+        if os.environ.get("TELEMETRY_DEBUG"):
+            print(f"telemetry write failed: {error}", file=sys.stderr)
         return
 
 
