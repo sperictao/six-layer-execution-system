@@ -3,10 +3,12 @@ from __future__ import annotations
 
 import os
 import subprocess
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
 from execution_system_paths import WORKSPACE
+import telemetry
 
 CHECKS = [
     ["python3", str(WORKSPACE / "scripts" / "check_active_consistency.py")],
@@ -185,6 +187,17 @@ def summary_footer(summary: ExecutionSystemSummary) -> list[str]:
     return lines
 
 
+def build_telemetry_payload(result: tuple[int, ExecutionSystemSummary]) -> dict:
+    code, summary = result
+    return {
+        "status": "passed" if code == 0 else "failed",
+        "first_failing_command": summary.first_failing_command,
+        "hard_fail_status": summary.hard_fail_status,
+        "repo_smoke_tests_status": summary.repo_smoke_tests_status,
+    }
+
+
+@telemetry.with_telemetry("execution_system_check", payload_builder=build_telemetry_payload)
 def collect_summary(print_output: bool = True) -> tuple[int, ExecutionSystemSummary]:
     first_failure: str | None = None
     advisory_hits: list[str] = []
@@ -212,6 +225,10 @@ def collect_summary(print_output: bool = True) -> tuple[int, ExecutionSystemSumm
             advisory_hits.append(pretty)
 
     tests_root, tests_reason = discover_repo_tests_root()
+    if os.environ.get("SIX_LAYER_EXECUTION_MODE") == "agile":
+        tests_reason = "agile mode enabled"
+        tests_root = None
+
     if tests_root is None:
         repo_smoke_status = repo_smoke_status_for_reason(tests_reason)
         summary = build_summary(

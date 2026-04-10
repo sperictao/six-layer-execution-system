@@ -30,16 +30,7 @@ def write_json(path: Path, data: dict) -> None:
     path.write_text(json.dumps(data, ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
 
 
-def main() -> int:
-    if os.environ.get("COMPLETE_SLICE_ACK") != "1":
-        print("DIRECT_ACK_FORBIDDEN: use complete_slice.sh ack <dedupe_key>", file=sys.stderr)
-        return 3
-
-    if len(sys.argv) != 2:
-        print("usage: ack_slice_notification.py <dedupe_key>", file=sys.stderr)
-        return 2
-
-    dedupe_key = sys.argv[1]
+def ack_notification(dedupe_key: str) -> bool:
     state = read_json(STATE)
     inflight = state.get("inflight", [])
     sent = state.get("sent", [])
@@ -53,14 +44,29 @@ def main() -> int:
             remaining.append(item)
 
     if matched is None:
-        print("NOT_FOUND")
-        return 1
+        return False
 
     matched["sent_at"] = now_iso()
     sent.append(matched)
     state["inflight"] = remaining
     state["sent"] = sent
     write_json(STATE, state)
+    return True
+
+def main() -> int:
+    if os.environ.get("COMPLETE_SLICE_ACK") != "1":
+        print("DIRECT_ACK_FORBIDDEN: use complete_slice.sh ack <dedupe_key>", file=sys.stderr)
+        return 3
+
+    if len(sys.argv) != 2:
+        print("usage: ack_slice_notification.py <dedupe_key>", file=sys.stderr)
+        return 2
+
+    dedupe_key = sys.argv[1]
+    if not ack_notification(dedupe_key):
+        print("NOT_FOUND")
+        return 1
+
     print(dedupe_key)
     return 0
 
