@@ -6,7 +6,7 @@
 - current_focus_activity_id: `waiting-ledger-review`
 - default_reply_activity_id: `waiting-ledger-review`
 - selection_policy: `focus-first`
-- updated_at: `2026-04-02 00:00 Asia/Shanghai`
+- updated_at: `2026-04-10 15:20 CST`
 
 ## Status legend
 - `ready` — agreed and ready to start
@@ -50,6 +50,7 @@
 - `waiting-ledger-review`
 - `simple-ledger-docs`
 
+- `auto-auto-decompose-natural-language-demand`
 ## Activities
 
 ### Activity: execution-system-spec-v1
@@ -362,6 +363,45 @@
 - notes:
   - this activity exists as a schema validation sample for simple non-roadmap work
 
+### Activity: auto-auto-decompose-natural-language-demand
+- activity_id: `auto-auto-decompose-natural-language-demand`
+- title: `auto decompose Auto decompose natural-language demand`
+- type: `roadmap`
+- owner: `Codex`
+- status: `blocked`
+- priority: `P1`
+- autopilot: `false`
+- focus_rank: `4`
+- repo: `six-layer-execution-system`
+- path: `.`
+- source_doc: `demands/2026-04-10-auto-decompose-natural-language-demand.md`
+- roadmap_doc: `roadmaps/auto-decompose-natural-language-demand-roadmap.md`
+- tasks_doc: `tasks/auto-decompose-natural-language-demand-tasks.md`
+- current_slice_id: `AD-A.A1`
+- next_slice_id: `AD-A.B1`
+- objective: `将自然语言需求“Auto decompose natural-language demand”自动拆成可执行 backlog，并保持 execution-system 约束不漂移`
+- last_commit: `cf6e83d`
+- done_when:
+  - generated demand / roadmap / tasks artifacts stay aligned
+  - generated tasks pass dependency and parallel-safety checks
+  - generated activity passes cross-artifact consistency checks
+  - the generated activity is safe to activate or continue manually
+- next_step:
+  - review the generated demand intake 'demands/2026-04-10-auto-decompose-natural-language-demand.md'
+  - confirm the guarded activity 'auto-auto-decompose-natural-language-demand' before switching focus or enabling autonomous execution
+- validation:
+  - python3 scripts/check_demand_card_schema.py
+  - python3 scripts/check_generated_decomposition_consistency.py
+  - python3 scripts/run_execution_checks.py checks --timeout 60
+- blocked_by:
+  - explicit confirmation required before activation
+- retrieval_keys:
+  - auto-auto-decompose-natural-language-demand
+  - demands/2026-04-10-auto-decompose-natural-language-demand.md
+  - roadmaps/auto-decompose-natural-language-demand-roadmap.md
+  - tasks/auto-decompose-natural-language-demand-tasks.md
+  - implementation
+  - implementation-review-gate
 ## Completed / archived
 - `execution-system-testing` — testing roadmap/tasks/inventory + `run_execution_system_full_tests.py` are aligned; execution-system path naming is unified across scripts and docs; durable notes should point to the full-suite entrypoint, not quote frozen pass/fail counts
 - `decomposition-engine-v1-checker-cut` — first checker cut landed in the execution-system runner: `check_task_dependency_graph.py` + `check_parallel_safety.py` + their smoke tests are wired into `run_execution_system_checks.py`; dependency / parallel-safety schema now has real enforcement on `tasks/execution-system-decomposition-upgrade-tasks.md`

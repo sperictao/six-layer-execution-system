@@ -66,6 +66,7 @@ Demand Intake should answer:
 - what dependency shape is already visible
 - what can likely run in parallel vs what must remain serial
 - what outputs and validation are expected
+- whether activation must stay gated behind explicit confirmation or manual review
 
 ---
 
@@ -180,6 +181,10 @@ Demand Intake cards must not contain:
 - inflight slice state
 - closeout handoff state
 - alternate runtime truth that competes with `ACTIVE.md`
+
+`external_confirmation_required` intent:
+- it records whether generated activation must wait for an explicit human confirmation
+- when a generated activity is high-risk or confirmation-required, activation must not silently switch focus or enable autonomous execution
 
 ## 5.1 Contract files
 Recommended path:

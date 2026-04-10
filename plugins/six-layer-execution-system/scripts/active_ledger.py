@@ -132,6 +132,18 @@ class Activity:
         else:
             raise RuntimeError("Activity is not attached to a Ledger; cannot save.")
 
+    def to_lines(self) -> List[str]:
+        lines = [f"### Activity: {self.heading}"]
+        for key, value in self.fields.items():
+            safe_value = str(value).replace("`", "'").strip()
+            lines.append(f"- {key}: `{safe_value}`")
+        for key, values in self.list_fields.items():
+            lines.append(f"- {key}:")
+            for value in values:
+                safe_value = str(value).replace("`", "'").strip()
+                lines.append(f"  - {safe_value}")
+        return lines
+
 
 @dataclass
 class Ledger:
@@ -232,6 +244,40 @@ class Ledger:
             if not updated and in_meta:
                 # We hit EOF while in meta
                 self._all_lines.append(f"- {key}: `{value}`")
+
+    def add_activity(self, activity: Activity) -> None:
+        activity_id = activity.activity_id
+        if not activity_id:
+            raise RuntimeError("Activity must include `activity_id` before it can be added.")
+        if activity_id in self.activities:
+            raise RuntimeError(f"Activity `{activity_id}` already exists.")
+
+        if self._all_lines is None:
+            raise RuntimeError("Ledger was not fully parsed with file content; cannot add activity.")
+
+        index_start = None
+        index_end = len(self._all_lines)
+        for idx, line in enumerate(self._all_lines):
+            if line.strip() == "## Activity index":
+                index_start = idx + 1
+                continue
+            if index_start is not None and idx > index_start - 1 and line.startswith("## "):
+                index_end = idx
+                break
+        if index_start is None:
+            raise RuntimeError("Ledger is missing the `Activity index` section.")
+
+        self._all_lines.insert(index_end, f"- `{activity_id}`")
+        if self._activities_section_range:
+            start, end = self._activities_section_range
+            if index_end < start:
+                self._activities_section_range = (start + 1, end + 1)
+
+        if not activity._raw_lines:
+            activity._raw_lines = activity.to_lines()
+        activity._ledger = self
+        self.activities[activity_id] = activity
+        self.activity_index.append(activity_id)
                 
     def save(self) -> None:
         if not self._path or self._all_lines is None or self._activities_section_range is None:

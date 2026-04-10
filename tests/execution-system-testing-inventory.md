@@ -48,6 +48,8 @@ Current state:
 
 Existing tests:
 - `tests/test_check_active_consistency.py`
+- `tests/test_check_demand_card_schema.py`
+- `tests/test_check_generated_decomposition_consistency.py`
 - `tests/test_check_task_slice_schema.py`
 - `tests/test_check_task_dependency_graph.py`
 - `tests/test_check_parallel_safety.py`
@@ -67,6 +69,8 @@ Existing tests:
 
 Coverage summary:
 - ACTIVE checker semantics
+- demand-card schema semantics
+- generated decomposition consistency semantics
 - migrated task slice schema semantics
 - task dependency graph semantics
 - parallel safety semantics
@@ -91,6 +95,7 @@ Current state:
 
 Existing tests:
 - `tests/test_execution_system_path_chain.py`
+- `tests/test_execution_system_path_demand_decompose.py`
 - `tests/test_execution_system_path_hard_fail.py`
 - `tests/test_execution_system_path_policy_gate.py`
 - `tests/test_execution_system_path_closeout_blocked.py`
@@ -166,6 +171,8 @@ Notes:
 
 ### 2.2 Checker / advisory scripts
 - `scripts/check_active_consistency.py`
+- `scripts/check_demand_card_schema.py`
+- `scripts/check_generated_decomposition_consistency.py`
 - `scripts/check_task_slice_schema.py`
 - `scripts/check_task_dependency_graph.py`
 - `scripts/check_parallel_safety.py`
@@ -178,6 +185,8 @@ Notes:
 
 ### 2.3 Current smoke scripts
 - `tests/test_check_active_consistency.py`
+- `tests/test_check_demand_card_schema.py`
+- `tests/test_check_generated_decomposition_consistency.py`
 - `tests/test_check_task_slice_schema.py`
 - `tests/test_check_task_dependency_graph.py`
 - `tests/test_check_parallel_safety.py`
@@ -189,6 +198,7 @@ Notes:
 - `tests/test_slice_closeout_state.py`
 - `tests/test_check_closeout_ready.py`
 - `tests/test_execution_system_path_chain.py`
+- `tests/test_execution_system_path_demand_decompose.py`
 - `tests/test_execution_system_path_hard_fail.py`
 - `tests/test_execution_system_path_policy_gate.py`
 - `tests/test_execution_system_path_closeout_blocked.py`
@@ -207,6 +217,8 @@ Notes:
 
 ### Strong coverage
 - hard-fail checker semantics
+- demand-card schema semantics
+- generated decomposition consistency semantics
 - dependency-graph and parallel-safety checker semantics
 - advisory semantics
 - summary footer semantics

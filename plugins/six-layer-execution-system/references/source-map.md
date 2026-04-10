@@ -18,6 +18,7 @@ Top-level control files:
 - `<plugin-root>/skills/six-layer-execution-system/SKILL.md`
 - `<plugin-root>/ACTIVE.md`
 - `<plugin-root>/memory/working-buffer.md`
+- `<plugin-root>/demands/`
 
 Execution-system docs:
 
@@ -57,6 +58,7 @@ Ledger/parser:
 Checkers:
 
 - `<plugin-root>/scripts/check_active_consistency.py`
+- `<plugin-root>/scripts/check_demand_card_schema.py`
 - `<plugin-root>/scripts/check_task_slice_schema.py`
 - `<plugin-root>/scripts/check_task_dependency_graph.py`
 - `<plugin-root>/scripts/check_parallel_safety.py`
@@ -80,6 +82,12 @@ Closeout/handoff:
 - `<plugin-root>/scripts/create_slice_closeout.py`
 - `<plugin-root>/scripts/build_slice_handoff.py`
 - `<plugin-root>/scripts/check_slice_closeout.py`
+
+Demand decomposition:
+
+- `<plugin-root>/scripts/demand_card.py`
+- `<plugin-root>/scripts/decomposition_engine.py`
+- `<plugin-root>/scripts/exec_sys.py`
 
 Representative repo-local tests:
 

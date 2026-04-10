@@ -13,6 +13,25 @@
 - slice 完成语义必须显式落在 closeout artifact 中；`validation_state=validated` 与 `slice_state=closed_out` 不能退化为隐式约定。
 - contract 只保存长期约束；当前 repo 脏状态、临时操作记录、日记式里程碑不得写入 contract。
 
+## Decomposition Guardrails
+- allowed_slice_shapes:
+  - single-goal normalization slices
+  - guardrail or review-gate slices
+  - primary delivery slices
+  - validation and handoff slices
+- forbidden_slice_shapes:
+  - slices that mix broad runtime semantics changes with unrelated UI or documentation rewrites
+  - slices that mutate `ACTIVE.md` and delivery artifacts without an explicit integration note
+- preferred_dependency_shape: serial-first with an explicit review gate for high-risk work
+- parallelism_policy: only slices with no shared write targets may run in the same wave
+- integration_constraints:
+  - generated demand, roadmap, tasks, and ACTIVE activity metadata must pass a cross-artifact consistency check before activation
+
+## Review triggers
+- high-risk demands
+- `external_confirmation_required=true` demands
+- inferred boundaries that still need a human correction before activation
+
 ## Validation floor
 - 默认入口在无额外 env override 的情况下可运行：
   - `python3 scripts/inspect_execution_system.py --format markdown`

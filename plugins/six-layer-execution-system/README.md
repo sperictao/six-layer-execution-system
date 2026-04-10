@@ -16,6 +16,7 @@
 
 - 插件根目录控制文件、`contracts/`、`docs/`、`roadmaps/`、`tasks/`、`decisions/`、`memory/` 共同构成 execution-system 本体。
 - `ACTIVE.md` 是唯一 live runtime truth。
+- `demands/` 保存复杂自然语言需求的上游 intake 工件，不替代运行态真相。
 - `references/` 只保存辅助参考，不替代运行态真相。
 - `scripts/` 提供 inspect、checker、closeout、handoff 与 acceptance 入口。
 - repo-local 开发测试位于源仓库根 `tests/`，不随插件目录单独分发。
@@ -28,6 +29,9 @@
   - `python3 scripts/run_execution_checks.py checks --timeout 60`
 - full tests:
   - `python3 scripts/run_execution_checks.py full-tests --timeout 60`
+- demand decompose:
+  - `python3 scripts/exec_sys.py demand decompose --title "..." --request "..."`
+  - `python3 scripts/exec_sys.py demand decompose --request-file /abs/path/request.txt --activate`
 
 说明：
 - `checks` 始终可用；它会先跑插件内 checker，再在可检测到源仓库根 `tests/` 时追加 repo smoke tests。
@@ -40,6 +44,13 @@ python3 scripts/inspect_execution_system.py --format markdown
 python3 scripts/run_local_execution_checks.py checks --timeout 60
 python3 scripts/run_local_execution_checks.py full-tests --timeout 60
 ```
+
+生成自然语言需求分解时，会自动写入：
+
+- `demands/*.md`
+- `roadmaps/*-roadmap.md`
+- `tasks/*-tasks.md`
+- `ACTIVE.md` 中的新 activity 卡片
 
 ## Packaging Metadata
 

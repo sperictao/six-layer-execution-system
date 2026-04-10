@@ -46,9 +46,25 @@ What `check_active_consistency.py` enforces:
 - `last_commit` existence and drift detection
 - waiting-focus invariants
 
+## Demand Intake
+
+- `scripts/check_demand_card_schema.py`
+- `scripts/demand_card.py`
+- `scripts/decomposition_engine.py`
+- `scripts/exec_sys.py demand decompose`
+
+Current implemented boundary:
+
+- turns a natural-language request into generated `demands/`, `roadmaps/`, `tasks/`, and `ACTIVE.md` artifacts
+- keeps generation deterministic and repo-local
+- classifies demand shape and picks a bounded decomposition strategy before rendering artifacts
+- keeps high-risk or confirmation-required generated activities non-autopilot and activation-gated until explicitly confirmed
+- validates demand-card schema separately from runtime truth
+
 ## Decomposition and Parallel-Wave Checkers
 
 - `scripts/check_task_slice_schema.py`
+- `scripts/check_generated_decomposition_consistency.py`
 - `scripts/check_task_dependency_graph.py`
 - `scripts/check_parallel_safety.py`
 - `scripts/check_active_wave_state.py`
@@ -56,14 +72,17 @@ What `check_active_consistency.py` enforces:
 Related smoke/path tests:
 
 - `tests/test_check_task_slice_schema.py`
+- `tests/test_check_generated_decomposition_consistency.py`
 - `tests/test_check_task_dependency_graph.py`
 - `tests/test_check_parallel_safety.py`
 - `tests/test_check_active_wave_state.py`
+- `tests/test_execution_system_path_demand_decompose.py`
 - `tests/test_execution_system_path_parallel_wave.py`
 
 Use these when modifying:
 
 - task slice schema
+- generated demand / roadmap / tasks / ACTIVE propagation
 - dependency graph fields
 - `parallel_safe` semantics
 - ACTIVE wave-state fields

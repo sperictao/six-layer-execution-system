@@ -176,6 +176,7 @@ Interpretation:
 
 ### 6.1 Hard-fail checker wave exists
 - [ ] `pass` ACTIVE field checker exists
+- [ ] `pass` generated decomposition consistency checker exists
 - [ ] `pass` migrated task slice schema checker exists
 - [ ] `pass` task dependency graph checker exists
 - [ ] `pass` parallel safety checker exists
@@ -184,6 +185,8 @@ Interpretation:
 Evidence:
 - `scripts/check_active_consistency.py`
 - `tests/test_check_active_consistency.py`
+- `scripts/check_generated_decomposition_consistency.py`
+- `tests/test_check_generated_decomposition_consistency.py`
 - `scripts/check_task_slice_schema.py`
 - `tests/test_check_task_slice_schema.py`
 - `scripts/check_task_dependency_graph.py`
