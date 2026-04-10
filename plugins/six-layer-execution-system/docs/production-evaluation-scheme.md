@@ -77,7 +77,7 @@
 ## 4. 评估实施路径 (Evaluation Implementation Plan)
 
 1. **Phase 1: 埋点与基线收集 (Baseline Collection)**
-   - 改造当前的 `scripts/run_execution_system_checks.py`，将每次运行的耗时、结果（Pass/Fail/Warn）和失败规则输出到本地 `.trae/telemetry.jsonl` 中。
+   - 改造当前的 `scripts/run_execution_system_checks.py`，将每次运行的耗时、结果（Pass/Fail/Warn）和失败规则输出到本地 `local-state/telemetry.jsonl` 中。
    - 在不改变当前流程的情况下运行 1-2 个 Roadmap 任务，收集**管理开销比**和**校验首通率**基线。
 2. **Phase 2: 自动化 CLI 灰度上线 (CLI Canary Release)**
    - 推出封装好的 `exec` 工具链，替换手动修改 `ACTIVE.md` 的操作。

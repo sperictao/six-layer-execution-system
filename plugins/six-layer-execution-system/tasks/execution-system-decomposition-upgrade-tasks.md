@@ -502,10 +502,10 @@
 - risk:
   - low
 
-#### Slice E6 - broaden governance-drift coverage beyond the current heartbeat/manual alignment cases
+#### Slice E6 - broaden governance-drift coverage beyond the current resume-trigger alignment cases
 - phase_id: `PH-5`
 - goal:
-  - 设计并启动下一条主线，扩展 governance-drift 测试覆盖，不再只围绕 heartbeat/manual recovery 与 parallel-dispatch 对齐
+  - 设计并启动下一条主线，扩展 governance-drift 测试覆盖，不再只围绕 resume-trigger recovery 与 parallel-dispatch 对齐
 - scope:
   - `docs/execution-system-decomposition-upgrade-plan.md`
   - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
@@ -527,7 +527,7 @@
   - `docs/execution-system-testing-inventory.md`
 - expected_artifacts:
   - governance-drift expansion scope
-  - prioritized candidate contracts/rules beyond the current heartbeat/manual cases
+  - prioritized candidate contracts/rules beyond the current resume-trigger cases
   - recommendation for the first new governance-drift test cut
   - ranked candidate list with a named `governance-drift-test-cut-1`
 - integration_notes:

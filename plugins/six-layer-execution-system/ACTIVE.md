@@ -23,24 +23,18 @@
 - repo_local_tests_root: `source checkout /tests`
 - repo_local_test_commands: `run from repo root with PYTHONPATH="plugins/six-layer-execution-system:plugins/six-layer-execution-system/scripts"`
 - standalone_plugin_full_tests_policy: `run_execution_system_full_tests.py may report unavailable outside source checkout`
-- roadmap_closeout_entrypoint: `scripts/complete_slice.sh`
+- roadmap_closeout_entrypoint: `scripts/complete_slice.py`
 - roadmap_closeout_verifier: `scripts/check_slice_closeout.py`
-- notification_state_file: `memory/notifications-state.json`
-- notification_source_of_truth: `memory/last-slice-closeout.json`
-- inflight_payload_cache: `memory/last-slice-notification.json`
+- closeout_artifact_file: `memory/last-slice-closeout.json`
+- closeout_payload_entrypoint: `scripts/build_slice_handoff.py`
 - roadmap_dedupe_key: `activity_id + completed_slice_id + commit`
 - spec_reference: `docs/execution-system-spec-v1.md`
 - wave_state_fields_policy: `roadmap activities may add execution_mode/current_wave_id/ready_slices/inflight_slices/blocked_slices/integration_step/last_wave_result only when the activity is actually using parallel-wave execution; otherwise keep ACTIVE lean`
 
 ## Runtime policy pointers
-- notification_levels: `P0/P1/P2/P3`
-- notification_policy_source: `skills/six-layer-execution-system/SKILL.md`
+- closeout_policy_source: `skills/six-layer-execution-system/SKILL.md`
 - recovery_working_buffer: `memory/working-buffer.md`
-- closeout_flow_summary: `prepare -> payload -> send -> ack | fail`
-- last_notified:
-  - level: `P1`
-  - reason: `heartbeat execution policy upgraded for roadmap-driven progress`
-  - at: `2026-03-12 23:03 Asia/Shanghai`
+- closeout_flow_summary: `prepare -> payload`
 
 ## Recovery pointers
 - active ledger: `ACTIVE.md`
@@ -284,20 +278,19 @@
     - `focus-first single source of truth`
 - last_artifact:
   - `workspace repo HEAD: f022949 (feat: enforce focus-first activity controls)`
-  - `notifications-state.json normalized to version 2`
-  - `notification helpers now default to version 2 and preserve activity_id/activity_type`
+  - `closeout artifact and handoff payload preserve activity_id/activity_type/current_focus_activity_id`
   - `simple-ledger-docs` added as a real simple activity sample
   - `set_focus_activity.py` and `validate_focus_first.py` landed; focus switch smoke test executed
   - `docs/active-ledger-v2.md` and `accept_active_ledger_v2.py` landed; acceptance passed
 - last_decision:
   - `ACTIVE.md v2 should use three-layer ledger + explicit focus activity, not a flat multi-task list`
   - `closeout dedupe must move to activity_id + completed_slice_id + commit`
-  - `notification state must be normalized to v2 before true multi-activity closeout validation`
+  - `closeout handoff must stay activity-aware before true multi-activity closeout validation`
 - done_definition:
   - schema skeleton landed
   - parser skeleton landed
   - focus-aware checker landed
-  - notification state and helper scripts are activity-aware by default
+  - closeout handoff surfaces are activity-aware by default
   - docs + acceptance checklist landed and passed
 - notes:
   - this activity is complete; focus has been handed back to `waiting-ledger-review`

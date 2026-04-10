@@ -58,20 +58,20 @@ def main() -> int:
     expect_contains(active, "current_slice_id: `ES-F.F33`", "ACTIVE", problems)
     expect_contains(
         active,
-        "notification_policy_source: `skills/six-layer-execution-system/SKILL.md`",
+        "roadmap_closeout_entrypoint: `scripts/complete_slice.py`",
         "ACTIVE",
         problems,
     )
 
     expect_contains(skill, "skills/six-layer-execution-system/SKILL.md` is the only prompt-rule source of truth", "skill", problems)
     expect_contains(skill, "默认中文回复", "skill", problems)
-    expect_contains(skill, "heartbeat 与人工触发必须遵守同一套恢复规则", "skill", problems)
-    expect_contains(skill, "与人工收到 `go` / `continue` / `继续` / `resume` / `next` / `start` 时的恢复顺序保持一致", "skill", problems)
-    expect_contains(skill, "heartbeat 不得仅凭聊天记忆、旧通知或旧 daily note 推断当前任务状态", "skill", problems)
-    expect_contains(skill, "heartbeat 内的执行规划也必须与人工执行遵守同一套并行调度口径", "skill", problems)
+    expect_contains(skill, "恢复型触发必须遵守同一套恢复规则", "skill", problems)
+    expect_contains(skill, "对 `go` / `continue` / `继续` / `resume` / `next` / `start` 这类恢复型触发来说", "skill", problems)
+    expect_contains(skill, "恢复型触发不得仅凭聊天记忆、旧 daily note 推断当前任务状态", "skill", problems)
+    expect_contains(skill, "恢复型触发后的执行规划必须与人工执行遵守同一套并行调度口径", "skill", problems)
     expect_contains(skill, "将无前置依赖、且无写冲突的子任务按同一波次并行处理", "skill", problems)
     expect_contains(skill, "若存在硬依赖链、共享写目标、或后续决策依赖前一步输出，则必须保持串行", "skill", problems)
-    expect_contains(skill, "`P0`：真实阻塞、关键 drift、危险操作前确认、统一 checker hard-fail 且无法在本轮直接修复", "skill", problems)
+    expect_contains(skill, "`scripts/complete_slice.py` is the canonical closeout entrypoint", "skill", problems)
     expect_contains(skill, "`python3 scripts/run_execution_checks.py checks --timeout 60`", "skill", problems)
 
     expect_contains(acceptance, "- `skills/six-layer-execution-system/SKILL.md`", "acceptance", problems)

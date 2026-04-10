@@ -5,9 +5,17 @@ import os
 from pathlib import Path
 
 PLUGIN_ROOT_TOKEN = "<plugin-root>"
+PLUGIN_ROOT = Path(__file__).resolve().parents[1]
+
+REPO_ROOT = Path(
+    os.environ.get("SIX_LAYER_REPO_ROOT", PLUGIN_ROOT)
+).expanduser().resolve()
 
 WORKSPACE = Path(
-    os.environ.get("SIX_LAYER_WORKSPACE", Path(__file__).resolve().parents[1])
+    os.environ.get("SIX_LAYER_WORKSPACE", REPO_ROOT)
+).expanduser().resolve()
+STATE_ROOT = Path(
+    os.environ.get("SIX_LAYER_STATE_ROOT", REPO_ROOT / "local-state")
 ).expanduser().resolve()
 SCRIPTS_DIR = WORKSPACE / "scripts"
 ACTIVE_PATH = WORKSPACE / "ACTIVE.md"

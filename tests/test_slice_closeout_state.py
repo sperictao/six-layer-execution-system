@@ -12,10 +12,8 @@ def main() -> int:
         env = workspace_env(workspace)
         create = workspace / "scripts" / "create_slice_closeout.py"
         check = workspace / "scripts" / "check_slice_closeout.py"
-        queue = workspace / "scripts" / "queue_slice_notification.py"
-        payload_script = workspace / "scripts" / "send_slice_notification_payload.py"
+        payload_script = workspace / "scripts" / "build_slice_handoff.py"
         closeout = workspace / "memory" / "last-slice-closeout.json"
-        state_path = workspace / "memory" / "notifications-state.json"
         subprocess.run(
             [
                 "python3",
@@ -62,15 +60,9 @@ def main() -> int:
         if payload.get("current_focus_activity_id") != "test-activity":
             raise AssertionError(f"payload missing current_focus_activity_id: {payload}")
 
-        subprocess.run(["python3", str(queue)], text=True, capture_output=True, check=True, env=env)
-        state = json.loads(state_path.read_text(encoding="utf-8"))
-        pending_item = state.get("pending", [{}])[0]
-        if pending_item.get("current_focus_activity_id") != "test-activity":
-            raise AssertionError(f"queue state missing current_focus_activity_id: {state}")
-
         proc = subprocess.run(["python3", str(check)], text=True, capture_output=True, check=False, env=env)
         output = proc.stdout + proc.stderr
-        if "SLICE_CLOSEOUT_OK:pending:test-activity:" not in output:
+        if "SLICE_CLOSEOUT_OK:test-activity:" not in output:
             raise AssertionError(output)
 
         bad_artifact = dict(artifact)

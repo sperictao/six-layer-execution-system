@@ -46,7 +46,7 @@
 
 #### Task A2 - update recovery rules for ledger v2
 - objective:
-  - 让 plugin skill 中的恢复/heartbeat 说明匹配新账本结构
+  - 让 plugin skill 中的恢复说明匹配新账本结构
 - files:
   - `<plugin-root>/skills/six-layer-execution-system/SKILL.md`
 - steps:
@@ -108,10 +108,10 @@
 
 ### AL-D - activity-aware closeout
 - goal:
-  - 让 closeout 与 notification 支持 `activity_id`
+  - 让 closeout 与 handoff 支持 `activity_id`
 - scope:
-  - `complete_slice.sh`
-  - closeout / queue / payload / ack scripts
+  - `complete_slice.py`
+  - closeout / payload scripts
 - validation:
   - payload 针对 focus activity 生成
 - done_definition:
@@ -125,7 +125,7 @@
 - scope:
   - roadmap + simple 或 waiting activity 共存
 - validation:
-  - focus / recovery / checker / heartbeat 行为都正确
+  - focus / recovery / checker / handoff 行为都正确
 - done_definition:
   - 真正多活动跑通
 - risk:

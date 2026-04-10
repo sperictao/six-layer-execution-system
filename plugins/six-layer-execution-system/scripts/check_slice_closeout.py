@@ -2,22 +2,9 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 from execution_system_paths import WORKSPACE
 CLOSEOUT = WORKSPACE / "memory/last-slice-closeout.json"
-STATE = WORKSPACE / "memory/notifications-state.json"
-
-
-def read_json(path: Path) -> dict:
-    if not path.exists():
-        return {"version": 2, "pending": [], "inflight": [], "sent": []}
-    data = json.loads(path.read_text(encoding="utf-8"))
-    data.setdefault("version", 2)
-    data.setdefault("pending", [])
-    data.setdefault("inflight", [])
-    data.setdefault("sent", [])
-    return data
 
 
 def main() -> int:
@@ -53,16 +40,8 @@ def main() -> int:
     if slice_state != "closed_out":
         print(f"SLICE_CLOSEOUT_INVALID:slice_state:{slice_state or 'missing'}")
         return 1
-
-    state = read_json(STATE)
-    for bucket in ("pending", "inflight", "sent"):
-        for item in state.get(bucket, []):
-            if item.get("dedupe_key") == dedupe_key:
-                print(f"SLICE_CLOSEOUT_OK:{bucket}:{activity_id}:{dedupe_key}")
-                return 0
-
-    print(f"SLICE_CLOSEOUT_MISSING:{activity_id}:{dedupe_key}")
-    return 1
+    print(f"SLICE_CLOSEOUT_OK:{activity_id}:{dedupe_key}")
+    return 0
 
 
 if __name__ == "__main__":

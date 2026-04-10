@@ -7,7 +7,7 @@
 ## Stable constraints
 - 插件根目录是默认且唯一的 execution runtime root；不得把 `workspace/`、`runtime/`、`old_version/` 或其它并行目录重新引入为第二运行真相。
 - `ACTIVE.md` 是唯一运行态真相；`roadmaps/`、`tasks/`、`decisions/`、`memory/` 只能提供恢复与设计上下文，不能替代 `ACTIVE.md` 回答当前执行状态。
-- `skills/six-layer-execution-system/SKILL.md` 是唯一 prompt 规则真相源；恢复顺序、heartbeat/manual 对齐、通知级别、行为边界与工具入口不得再拆到额外顶层 prompt 文件。
+- `skills/six-layer-execution-system/SKILL.md` 是唯一 prompt 规则真相源；恢复顺序、resume trigger 处理、closeout handoff、行为边界与工具入口不得再拆到额外顶层 prompt 文件。
 - 默认执行策略是 `focus-first`；非 focus activity 可以并存用于恢复、历史和维护，但不得默认自动推进。
 - roadmap activity 一旦声明 `path` 与 `last_commit`，它们就必须在插件根 git repo 内可解析，且 `last_commit` 必须继续接受强校验。
 - slice 完成语义必须显式落在 closeout artifact 中；`validation_state=validated` 与 `slice_state=closed_out` 不能退化为隐式约定。
@@ -25,4 +25,4 @@
 
 ## Non-goals
 - 不为外部业务仓库保存重构策略、验证命令或 repo-specific invariant。
-- 不在 contract 中记录当前 focus、下一切片或历史通知状态。
+- 不在 contract 中记录当前 focus、下一切片或历史外发状态。

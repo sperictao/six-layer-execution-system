@@ -45,7 +45,7 @@ def main() -> int:
 
         heterogeneous = tmp / "heterogeneous.md"
         heterogeneous.write_text(
-            "# sample\n\n## PR queue\n\n#### Slice C9 - heterogeneous execution-system sample\n- phase_id: `PH-3`\n- scope:\n  - `ledger schema`\n  - `checker summary`\n  - `notification payload`\n  - `maintenance rule`\n  - `path smoke`\n- target_files:\n  - `ACTIVE.md`\n  - `scripts/run_execution_system_checks.py`\n  - `scripts/check_execution_system_maintenance_mode.py`\n- done_definition:\n  - `first thing landed`\n  - `second thing landed`\n",
+            "# sample\n\n## PR queue\n\n#### Slice C9 - heterogeneous execution-system sample\n- phase_id: `PH-3`\n- scope:\n  - `ledger schema`\n  - `checker summary`\n  - `handoff payload`\n  - `maintenance rule`\n  - `path smoke`\n- target_files:\n  - `ACTIVE.md`\n  - `scripts/run_execution_system_checks.py`\n  - `scripts/check_execution_system_maintenance_mode.py`\n- done_definition:\n  - `first thing landed`\n  - `second thing landed`\n",
             encoding="utf-8",
         )
         heterogeneous_proc = run_checker(heterogeneous)
@@ -54,7 +54,7 @@ def main() -> int:
 
         focused = tmp / "focused.md"
         focused.write_text(
-            "# sample\n\n## PR queue\n\n#### Slice C1 - focused notification state slice\n- phase_id: `PH-3`\n- scope:\n  - `normalize pending notifications`\n  - `preserve inflight state`\n  - `keep sent dedupe`\n  - `retain payload identity`\n  - `document ack order`\n- target_files:\n  - `scripts/normalize_notifications_state.py`\n  - `scripts/check_slice_closeout.py`\n- done_definition:\n  - `notification state stays normalized`\n  - `closeout surface only rewired`\n",
+            "# sample\n\n## PR queue\n\n#### Slice C1 - focused closeout handoff slice\n- phase_id: `PH-3`\n- scope:\n  - `freeze closeout artifact`\n  - `retain payload identity`\n  - `preserve current focus id`\n  - `document payload contract`\n  - `keep verifier strict`\n- target_files:\n  - `scripts/build_slice_handoff.py`\n  - `scripts/check_slice_closeout.py`\n- done_definition:\n  - `handoff payload stays stable`\n  - `closeout surface only rewired`\n",
             encoding="utf-8",
         )
         focused_proc = run_checker(focused)

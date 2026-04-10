@@ -11,11 +11,9 @@ def main() -> int:
     with cloned_workspace() as workspace:
         env = workspace_env(workspace)
         create = workspace / "scripts" / "create_slice_closeout.py"
-        queue = workspace / "scripts" / "queue_slice_notification.py"
         check = workspace / "scripts" / "check_slice_closeout.py"
-        payload_script = workspace / "scripts" / "send_slice_notification_payload.py"
+        payload_script = workspace / "scripts" / "build_slice_handoff.py"
         closeout = workspace / "memory" / "last-slice-closeout.json"
-        state_path = workspace / "memory" / "notifications-state.json"
         subprocess.run(
             [
                 "python3",
@@ -43,11 +41,9 @@ def main() -> int:
             env=env,
         )
 
-        subprocess.run(["python3", str(queue)], check=True, text=True, capture_output=True, env=env)
         subprocess.run(["python3", str(check)], check=True, text=True, capture_output=True, env=env)
 
         artifact = json.loads(closeout.read_text(encoding="utf-8"))
-        state = json.loads(state_path.read_text(encoding="utf-8"))
         payload_proc = subprocess.run(
             ["python3", str(payload_script)],
             check=True,
@@ -56,13 +52,10 @@ def main() -> int:
             env=env,
         )
         payload = json.loads(payload_proc.stdout)
-
-        pending_item = state.get("pending", [{}])[0]
         expected = "test-activity"
 
         for surface_name, obj in (
             ("artifact", artifact),
-            ("queue", pending_item),
             ("payload", payload),
         ):
             if obj.get("activity_id") != expected:

@@ -72,15 +72,12 @@ Runners:
 - `<plugin-root>/scripts/run_execution_system_full_tests.py`
 - `<plugin-root>/scripts/accept_active_ledger_v2.py`
 
-Closeout/notification:
+Closeout/handoff:
 
-- `<plugin-root>/scripts/complete_slice.sh`
+- `<plugin-root>/scripts/complete_slice.py`
 - `<plugin-root>/scripts/create_slice_closeout.py`
-- `<plugin-root>/scripts/queue_slice_notification.py`
-- `<plugin-root>/scripts/flush_slice_notifications.py`
-- `<plugin-root>/scripts/send_slice_notification_payload.py`
-- `<plugin-root>/scripts/requeue_inflight_notifications.py`
-- `<plugin-root>/scripts/ack_slice_notification.py`
+- `<plugin-root>/scripts/build_slice_handoff.py`
+- `<plugin-root>/scripts/check_slice_closeout.py`
 
 Representative repo-local tests:
 
@@ -96,22 +93,6 @@ Representative repo-local tests:
 These tests exist only in the source checkout and are not shipped inside a
 standalone plugin copy.
 
-## Optional Local Install References
+## Agent Runtime Reference
 
-- `/Users/erictao/.openclaw/openclaw.json`
-
-## Optional Upstream Runtime References
-
-Package root:
-
-- `/opt/homebrew/lib/node_modules/openclaw`
-
-High-value upstream docs:
-
-- `/opt/homebrew/lib/node_modules/openclaw/README.md`
-- `/opt/homebrew/lib/node_modules/openclaw/docs/cli/agents.md`
-- `/opt/homebrew/lib/node_modules/openclaw/docs/cli/sandbox.md`
-- `/opt/homebrew/lib/node_modules/openclaw/docs/tools/multi-agent-sandbox-tools.md`
-- `/opt/homebrew/lib/node_modules/openclaw/docs/zh-CN/pi.md`
-
-Consult package internals only when you need upstream implementation details beyond the docs above.
+- `<plugin-root>/references/agent-runtime.md` — agent runtime, plugin loading, and environment variable reference

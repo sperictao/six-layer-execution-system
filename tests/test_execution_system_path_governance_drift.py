@@ -6,7 +6,7 @@ from pathlib import Path
 
 from test_workspace_clone import cloned_workspace, workspace_env
 
-TARGET_LINE = "- heartbeat 与人工触发必须遵守同一套恢复规则；不得因为是 heartbeat 就跳过 `ACTIVE.md` / focus activity / roadmap/tasks / repo fact check 这些步骤\n"
+TARGET_LINE = "- 恢复型触发必须遵守同一套恢复规则；不得跳过 `ACTIVE.md` / focus activity / roadmap/tasks / repo fact check 这些步骤\n"
 
 
 def run(script: Path, env: dict[str, str]) -> subprocess.CompletedProcess[str]:
@@ -38,7 +38,7 @@ def main() -> int:
         expect_contains(governance_output, "EXECUTION_SYSTEM_GOVERNANCE_CONSISTENCY_FAILED")
         expect_contains(
             governance_output,
-            "skill: missing `heartbeat 与人工触发必须遵守同一套恢复规则`",
+            "skill: missing `恢复型触发必须遵守同一套恢复规则`",
         )
 
         runner_proc = run(runner, env)

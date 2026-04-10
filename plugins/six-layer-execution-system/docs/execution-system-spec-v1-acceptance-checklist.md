@@ -127,11 +127,11 @@ Evidence:
 ### 5.1 Completion is treated as protocol, not vibe
 - [ ] `pass` spec defines completion as more than code landed
 - [ ] `pass` closeout artifact is part of completion semantics
-- [ ] `pass` notification traceability is part of completion semantics
+- [ ] `pass` handoff payload derivation is part of completion semantics
 
 Evidence:
 - `docs/execution-system-spec-v1.md`
-- `scripts/complete_slice.sh`
+- `scripts/complete_slice.py`
 - `scripts/create_slice_closeout.py`
 
 ### 5.2 `closed_out` is encoded in artifact semantics
@@ -155,12 +155,11 @@ Evidence:
 ### 5.3a Current focus identity is explicit in closeout surfaces
 - [ ] `pass` closeout artifact writes `current_focus_activity_id`
 - [ ] `pass` canonical payload surface includes `current_focus_activity_id`
-- [ ] `pass` path coverage verifies artifact -> queue -> payload all preserve `current_focus_activity_id`
+- [ ] `pass` path coverage verifies artifact -> payload all preserve `current_focus_activity_id`
 
 Evidence:
 - `scripts/create_slice_closeout.py`
-- `scripts/queue_slice_notification.py`
-- `scripts/send_slice_notification_payload.py`
+- `scripts/build_slice_handoff.py`
 - `tests/test_execution_system_path_closeout_payload_identity.py`
 
 ### 5.4 Full slice state machine is only partially formalized
@@ -230,7 +229,7 @@ Evidence:
 - [ ] `pass` acceptance-oriented flow reuses the unified runner
 
 Evidence:
-- `scripts/complete_slice.sh`
+- `scripts/complete_slice.py`
 - `scripts/accept_active_ledger_v2.py`
 
 ---
@@ -281,11 +280,11 @@ Evidence:
 - `scripts/validate_focus_first.py`
 - `scripts/accept_active_ledger_v2.py`
 
-### 8.3 Heartbeat and manual resume use the same recovery model
-- [ ] `pass` heartbeat explicitly follows the same recovery sequence as manual `go` / `continue` / `继续` style triggers
-- [ ] `pass` heartbeat does not infer task state from chat memory alone when `ACTIVE.md` is the declared execution truth
-- [ ] `pass` heartbeat uses the same parallel-dispatch rule as manual execution inside the current focus activity
-- [ ] `pass` heartbeat keeps hard dependency chains and write-conflicting work serial rather than forcing unsafe parallelism
+### 8.3 Resume-style triggers use the same recovery model
+- [ ] `pass` resume-style triggers explicitly follow the same recovery sequence as manual `go` / `continue` / `继续` style prompts
+- [ ] `pass` resume-style triggers do not infer task state from chat memory alone when `ACTIVE.md` is the declared execution truth
+- [ ] `pass` resume-style trigger planning uses the same parallel-dispatch rule as ordinary execution inside the current focus activity
+- [ ] `pass` resume-style trigger planning keeps hard dependency chains and write-conflicting work serial rather than forcing unsafe parallelism
 
 Evidence:
 - `skills/six-layer-execution-system/SKILL.md`

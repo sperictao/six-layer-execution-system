@@ -1,15 +1,1 @@
-{
-  "dedupe_key": "test-activity:TEST.A1:abc123",
-  "activity_id": "test-activity",
-  "activity_type": "roadmap",
-  "repo": "test-repo",
-  "completed_slice_id": "TEST.A1",
-  "next_slice_id": "TEST.A2",
-  "slice_state": "closed_out",
-  "commit": "abc123",
-  "validations": [
-    "check passed"
-  ],
-  "message": "test-repo 切片完成\n- 活动：test-activity\n- 当前切片：TEST.A1\n- 验证：check passed\n- 下一切片：TEST.A2\n- commit：abc123",
-  "created_at": "2026-03-14T10:16:19+08:00"
-}
+{}

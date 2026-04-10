@@ -19,11 +19,9 @@ def load_ledger_summary() -> dict[str, Any]:
     active_path = WORKSPACE / "ACTIVE.md"
     if not script_path.exists() or not active_path.exists():
         return {"exists": False}
-
     spec = importlib.util.spec_from_file_location("active_ledger", script_path)
     if spec is None or spec.loader is None:
         return {"exists": False, "error": "cannot import active_ledger.py"}
-
     module = importlib.util.module_from_spec(spec)
     original_sys_path = list(sys.path)
     try:
@@ -35,22 +33,18 @@ def load_ledger_summary() -> dict[str, Any]:
         return {"exists": False, "error": f"ledger import failed: {exc}"}
     finally:
         sys.path[:] = original_sys_path
-
     activities: list[dict[str, Any]] = []
     for activity in ledger.list_activities():
-        activities.append(
-            {
-                "activity_id": activity.activity_id,
-                "title": activity.scalar("title"),
-                "type": activity.scalar("type"),
-                "status": activity.scalar("status"),
-                "focus_rank": activity.scalar("focus_rank"),
-                "autopilot": activity.scalar("autopilot"),
-                "current_slice_id": activity.scalar("current_slice_id"),
-                "next_slice_id": activity.scalar("next_slice_id"),
-            }
-        )
-
+        activities.append({
+            "activity_id": activity.activity_id,
+            "title": activity.scalar("title"),
+            "type": activity.scalar("type"),
+            "status": activity.scalar("status"),
+            "focus_rank": activity.scalar("focus_rank"),
+            "autopilot": activity.scalar("autopilot"),
+            "current_slice_id": activity.scalar("current_slice_id"),
+            "next_slice_id": activity.scalar("next_slice_id"),
+        })
     return {
         "exists": True,
         "meta": dict(ledger.meta),
@@ -74,7 +68,6 @@ def build_snapshot() -> dict[str, Any]:
         str(path.relative_to(WORKSPACE))
         for path in SKILLS_DIR.rglob("SKILL.md")
     ) if SKILLS_DIR.exists() else []
-
     return {
         "plugin": {
             "root": str(WORKSPACE),
@@ -127,7 +120,6 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Inspect Six-Layer Execution System plugin state.")
     parser.add_argument("--format", choices=("json", "markdown"), default="markdown")
     args = parser.parse_args()
-
     snapshot = build_snapshot()
     if args.format == "json":
         print(json.dumps(snapshot, indent=2, ensure_ascii=False))

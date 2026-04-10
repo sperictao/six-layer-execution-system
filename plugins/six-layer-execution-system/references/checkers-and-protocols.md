@@ -7,7 +7,7 @@ Use the repo's own scripts instead of recreating logic:
 - checks runner: `<plugin-root>/scripts/run_execution_system_checks.py`
 - full-suite runner: `<plugin-root>/scripts/run_execution_system_full_tests.py`
 - ACTIVE acceptance: `<plugin-root>/scripts/accept_active_ledger_v2.py`
-- closeout flow: `<plugin-root>/scripts/complete_slice.sh`
+- closeout flow: `<plugin-root>/scripts/complete_slice.py`
 
 This skill ships a wrapper:
 
@@ -85,33 +85,25 @@ Related tests:
   - `tests/test_execution_system_path_closeout_ready_focus_drift.py`
   - `tests/test_execution_system_path_runner_hint_drift.py`
 
-## Closeout and Notification Pipeline
+## Closeout and Handoff Pipeline
 
 Primary scripts:
 
 - `scripts/check_closeout_ready.py`
 - `scripts/create_slice_closeout.py`
+- `scripts/build_slice_handoff.py`
 - `scripts/check_slice_closeout.py`
-- `scripts/queue_slice_notification.py`
-- `scripts/flush_slice_notifications.py`
-- `scripts/send_slice_notification_payload.py`
-- `scripts/requeue_inflight_notifications.py`
-- `scripts/ack_slice_notification.py`
-- `scripts/complete_slice.sh`
+- `scripts/complete_slice.py`
 
 Important caches/state files:
 
 - `memory/last-slice-closeout.json`
-- `memory/last-slice-notification.json`
-- `memory/notifications-state.json`
 
 Protocol rules:
 
 - `prepare` must run checks + closeout-ready gate before artifact creation
-- `payload` prints the canonical outbound payload
-- `ack` finalizes delivery and clears caches
-- `fail` moves inflight items back to pending
-- when a new explicit closeout field is introduced, propagate it across artifact creation, queue/state persistence, payload output, checker validation, smoke tests, and docs in the same slice
+- `payload` prints the canonical handoff payload
+- when a new explicit closeout field is introduced, propagate it across artifact creation, payload output, checker validation, smoke tests, and docs in the same slice
 
 Current explicit closeout identity fields:
 
@@ -126,7 +118,7 @@ Use the smallest test that actually proves the changed contract:
   - start with `tests/test_slice_closeout_state.py`
 - Change only the closeout-ready gate semantics:
   - start with `tests/test_check_closeout_ready.py`
-- Change a field that must survive artifact -> queue/state -> payload:
+- Change a field that must survive artifact -> payload:
   - add or update a dedicated `tests/test_execution_system_path_*`
   - current example: `tests/test_execution_system_path_closeout_payload_identity.py`
 - Change what the workspace treats as acceptance-worthy completion semantics:
@@ -137,12 +129,11 @@ Use the smallest test that actually proves the changed contract:
 For additive schema changes, the preferred order is:
 
 1. artifact writer
-2. queue/state persistence
-3. payload surface
-4. checker/verifier
-5. nearest smoke test
-6. path test when cross-surface propagation matters
-7. spec / acceptance / testing inventory docs
+2. payload surface
+3. checker/verifier
+4. nearest smoke test
+5. path test when cross-surface propagation matters
+6. spec / acceptance / testing inventory docs
 
 ## Full Test Matrix
 

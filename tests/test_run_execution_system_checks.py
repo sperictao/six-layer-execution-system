@@ -52,7 +52,7 @@ def main() -> int:
         expect_contains("controlled-pass", live_output, "- hard_fail_status: passed")
         expect_contains("controlled-pass", live_output, "- repo_smoke_tests: skipped")
         expect_contains("controlled-pass", live_output, "- repo_smoke_tests_reason: repo checkout not detected from plugin layout")
-        telemetry_path = workspace / ".trae" / "telemetry.jsonl"
+        telemetry_path = workspace / "local-state" / "telemetry.jsonl"
         if not telemetry_path.exists():
             raise AssertionError("run_execution_system_checks should emit telemetry into the workspace")
         try:

@@ -22,7 +22,7 @@ description: Plugin-root entry skill for a self-contained Six-Layer Execution Sy
    - `python3 scripts/run_execution_checks.py checks --timeout 60`
    - repo-local 开发测试位于 source checkout 根 `tests/`；如需直接运行单测，使用仓库根视角命令并显式注入 `PYTHONPATH="plugins/six-layer-execution-system:plugins/six-layer-execution-system/scripts"`
 4. 只有在需要排查底层包装或本机安装差异时，才直接运行：
-   - `python3 scripts/inspect_openclaw_execution_system.py --format markdown`
+   - `python3 scripts/inspect_execution_system.py --format markdown`
    - `python3 scripts/run_local_execution_checks.py checks --timeout 60`
    - `full-tests` 只在带根 `tests/` 的 source checkout 中可用；standalone plugin 副本返回 `unavailable` 是预期行为
 

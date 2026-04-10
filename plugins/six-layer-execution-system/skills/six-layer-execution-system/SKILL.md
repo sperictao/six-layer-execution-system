@@ -66,30 +66,15 @@ Forbidden recovery shortcuts:
 - do not auto-run a non-focus activity
 - do not answer task-status or task-resume questions from conversational memory alone when `ACTIVE.md` exists as execution truth
 
-## Heartbeat And Notification Protocol
+## Resume And Closeout Handoff Protocol
 
-- heartbeat 与人工触发必须遵守同一套恢复规则；不得因为是 heartbeat 就跳过 `ACTIVE.md` / focus activity / roadmap/tasks / repo fact check 这些步骤
-- 对 heartbeat 来说，这一步与人工收到 `go` / `continue` / `继续` / `resume` / `next` / `start` 时的恢复顺序保持一致：若 `memory/working-buffer.md` 存在，先读它；然后读 `ACTIVE.md`；再读 focus activity card；再读 roadmap/tasks；最后做 repo/workspace fact check，之后才能汇报进度或继续执行
-- heartbeat 不得仅凭聊天记忆、旧通知或旧 daily note 推断当前任务状态；工作空间执行文件优先于会话推断
-- heartbeat 内的执行规划也必须与人工执行遵守同一套并行调度口径
+- 恢复型触发必须遵守同一套恢复规则；不得跳过 `ACTIVE.md` / focus activity / roadmap/tasks / repo fact check 这些步骤
+- 对 `go` / `continue` / `继续` / `resume` / `next` / `start` 这类恢复型触发来说：若 `memory/working-buffer.md` 存在，先读它；然后读 `ACTIVE.md`；再读 focus activity card；再读 roadmap/tasks；最后做 repo/workspace fact check，之后才能汇报进度或继续执行
+- 恢复型触发不得仅凭聊天记忆、旧 daily note 推断当前任务状态；工作空间执行文件优先于会话推断
+- 恢复型触发后的执行规划必须与人工执行遵守同一套并行调度口径
 - 将无前置依赖、且无写冲突的子任务按同一波次并行处理
 - 若存在硬依赖链、共享写目标、或后续决策依赖前一步输出，则必须保持串行
 - 只有 current focus activity 可以进入自动执行路径；非 focus activities 只用于恢复、提醒、展示状态，不得擅自推进
-
-Notification levels:
-
-- `P0`：真实阻塞、关键 drift、危险操作前确认、统一 checker hard-fail 且无法在本轮直接修复
-- `P1`：roadmap 切片完成、验证通过、focus/next slice 切换、closeout 状态变化
-- `P2`：明确的低风险主动补位，且已形成可执行结论
-- `P3`：常规扫描、内部整理、未形成新结论
-
-Suppression rules:
-
-- 同类通知 30 分钟内不重复发
-- 同一切片未形成新结论不重复汇报
-- 23:00-08:00 默认只发 `P0`
-- 若只是内部推进、状态未形成新结论，保持静默
-- 使用 `memory/heartbeat-state.json` 记录最近检查与最近提醒，避免重复打扰
 
 Active work check:
 
@@ -98,11 +83,11 @@ Active work check:
 - 不要把 `run_execution_system_full_tests.py` 在 standalone plugin 副本里的 `unavailable` 误判成运行时故障；只有在 source checkout 场景下，它才是完整 suite 入口
 - 如果统一 checker 套件失败：先定位失败子命令，再按当前 focus 收敛根因；未修复前不要把状态汇报成绿色
 
-Closeout and notification rules:
+Closeout and handoff rules:
 
-- `scripts/complete_slice.sh` is the canonical closeout entrypoint
-- do not call `ack_slice_notification.py` directly during roadmap closeout
-- if `memory/notifications-state.json` has pending items, use `complete_slice.sh prepare` or inspect the inflight payload first
+- `scripts/complete_slice.py` is the canonical closeout entrypoint
+- `scripts/build_slice_handoff.py` prints the canonical handoff payload from the frozen closeout artifact
+- `payload` output must be derived from `memory/last-slice-closeout.json`, not from live `ACTIVE.md` fields
 - if validation passed but `scripts/check_slice_closeout.py` failed, treat the slice as not closed out
 
 ## Long-Term Context And Preferences
@@ -144,7 +129,7 @@ Default entrypoints:
 Validation rules:
 
 - ordinary implementation or doc changes default to `checks`
-- protocol, governance, closeout, notification, or runner changes require `full-tests`
+- protocol, governance, closeout, handoff, or runner changes require `full-tests`
 - `full-tests` requires the source checkout with repo-root `tests/` present
 - direct repo-local test commands run from the repository root with `PYTHONPATH="plugins/six-layer-execution-system:plugins/six-layer-execution-system/scripts"`
 
@@ -153,7 +138,7 @@ Path and tool ownership facts:
 - local runtime root: `<plugin-root>`
 - repo-local development tests root: `<repo-root>/tests`
 - local install snapshot belongs in `references/local-install.md`
-- upstream runtime architecture belongs in `references/upstream-openclaw-runtime.md`
+- agent runtime architecture belongs in `references/agent-runtime.md`
 - live runtime truth belongs in `ACTIVE.md`
 
 ## Task Flows
@@ -162,7 +147,7 @@ Path and tool ownership facts:
 
 1. Run `python3 scripts/inspect_execution_system.py --format markdown`.
 2. Read `ACTIVE.md` and `references/workspace-execution-system.md`.
-3. Read `references/upstream-openclaw-runtime.md` only if the question actually depends on upstream runtime mechanics.
+3. Read `references/agent-runtime.md` only if the question actually depends on agent runtime mechanics or plugin installation.
 4. Open original files only for the area you need to quote or modify.
 
 ### Recover Current Execution State
@@ -179,9 +164,10 @@ Path and tool ownership facts:
 2. Before adding a new field or protocol surface, check whether an existing field already carries the same semantics.
 3. If the user still requires a new explicit field name, add it without removing the old one, then update every downstream surface in one pass.
 4. Edit only the owning layer plus any directly dependent validators or tests.
-5. If the change affects recovery, heartbeat, prompt protocol, or behavioral rules, inspect this skill, the owning spec, and the related checker/tests together.
+5. If the change affects recovery, resume trigger handling, prompt protocol, or behavioral rules, inspect this skill, the owning spec, and the related checker/tests together.
 6. If the change affects closeout semantics, inspect:
-   - `scripts/complete_slice.sh`
+   - `scripts/complete_slice.py`
+   - `scripts/build_slice_handoff.py`
    - `scripts/create_slice_closeout.py`
    - `scripts/check_slice_closeout.py`
    - `scripts/check_closeout_ready.py`
@@ -201,7 +187,7 @@ Typical mapping:
 
 - artifact field only -> repo-local `tests/test_slice_closeout_state.py`
 - checker gate only -> the nearest repo-local `tests/test_check_*.py`
-- artifact -> queue/state -> payload propagation -> add or update repo-local `tests/test_execution_system_path_*`
+- artifact -> payload propagation -> add or update repo-local `tests/test_execution_system_path_*`
 - governance or prompt-rule drift -> `tests/test_execution_system_governance_consistency.py` and `tests/test_execution_system_path_governance_drift.py`
 - acceptance contract wording -> update `docs/execution-system-spec-v1-acceptance-checklist.md`
 
@@ -211,9 +197,8 @@ Typical mapping:
 - `references/workspace-execution-system.md`: local six-layer model and maintenance semantics
 - `references/checkers-and-protocols.md`: checker, advisory, full-suite, and closeout pipeline map
 - `references/source-map.md`: exact file path index for the local repository
-- `references/local-install.md`: current local install and wrapper-facing facts
-- `references/upstream-openclaw-runtime.md`: upstream runtime, sandbox, and prompt-assembly reference
-- `scripts/inspect_openclaw_execution_system.py`: inspect the local installation and wrapper-facing runtime snapshot
+- `references/local-install.md`: plugin runtime surface and installed assets
+- `references/agent-runtime.md`: agent runtime, plugin installation, and environment variable reference
+- `scripts/inspect_execution_system.py`: inspect the execution system plugin state and ledger
 - `scripts/run_local_execution_checks.py`: call the canonical local checker and full-test entrypoints with a bounded timeout
-- `scripts/inspect_execution_system.py`: plugin wrapper for the inspect entrypoint
 - `scripts/run_execution_checks.py`: plugin wrapper for the validation entrypoint

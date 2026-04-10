@@ -42,7 +42,7 @@ Required fields:
 - `validation_state: validated`
 - `slice_state: closed_out`
 
-Any future closeout, notification, or verifier change must preserve these semantics.
+Any future closeout, handoff, or verifier change must preserve these semantics.
 Do not move back to implicit completion inferred only from validation lists, git state, or human summary.
 
 Primary files:

@@ -9,7 +9,7 @@ It uses a three-layer ledger model:
 1. **Ledger meta**
    - global mode and focus selection
 2. **Workspace rules**
-   - execution / notification / closeout policy
+   - execution / handoff / closeout policy
 3. **Activities**
    - each activity is an explicit work card
 
@@ -108,7 +108,7 @@ Interpretation:
 python3 scripts/set_focus_activity.py <activity_id>
 ```
 
-## Notification / closeout
+## Handoff / closeout
 
 For roadmap activities, closeout is activity-aware.
 
@@ -117,10 +117,8 @@ Deduplication key:
 
 Primary flow:
 ```bash
-complete_slice.sh prepare
-complete_slice.sh payload
-# send message
-complete_slice.sh ack <dedupe_key>
+complete_slice.py prepare
+complete_slice.py payload
 ```
 
 ## Recovery checklist

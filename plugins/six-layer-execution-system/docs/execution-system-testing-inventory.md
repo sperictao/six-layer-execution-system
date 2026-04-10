@@ -96,15 +96,15 @@ Covered path:
 - hard-fail negative path
 - policy-gate path
 - closeout-blocked path
-- synthetic closeout artifact -> queue -> payload identity path for explicit `current_focus_activity_id`
+- synthetic closeout artifact -> payload identity path for explicit `current_focus_activity_id`
 - focus-switch path
-- governance drift path for heartbeat/manual recovery alignment
-- governance drift path for heartbeat/manual parallel-dispatch alignment
+- governance drift path for resume-trigger recovery alignment
+- governance drift path for resume-trigger parallel-dispatch alignment
 - governance drift path for focus/acceptance gate alignment under `FOCUS_VALIDATION_POLICY_GATE` / `OK_WITH_POLICY_GATES`
 - synthetic single-wave path coverage for execution-system parallel-wave semantics
 
 Missing paths:
-- governance drift is covered for the heartbeat rule, but not yet generalized across every governance contract
+- governance drift is covered for the resume-trigger rule, but not yet generalized across every governance contract
 - future protocol changes may still require new dedicated execution-system path tests
 
 ### 1.4 Governance / maintenance checks
@@ -116,15 +116,15 @@ What exists:
 - reopen conditions documented
 - re-entry protocol documented
 - resume-style trigger rule documented
-- heartbeat/manual recovery alignment documented
-- heartbeat/manual parallel-dispatch alignment documented
+- resume-trigger recovery alignment documented
+- resume-trigger parallel-dispatch alignment documented
 - acceptance and focus-first behavior now align with policy-gate semantics
 - `scripts/check_execution_system_governance_consistency.py`
 - `tests/test_execution_system_governance_consistency.py`
 - `tests/test_execution_system_path_governance_drift.py`
 
 What is missing:
-- broader governance-drift coverage beyond the current heartbeat/manual recovery alignment case
+- broader governance-drift coverage beyond the current resume-trigger recovery alignment case
 - broader inventory/docs coverage so every testing document reflects the same governance scope
 
 ---
@@ -207,7 +207,7 @@ Notes:
 - maintenance-mode transitions where the live focus is a first-class `waiting` activity instead of a runnable roadmap or non-execution-system activity
 
 ### Weak coverage
-- broader governance-drift matrix beyond the current heartbeat/manual recovery alignment case
+- broader governance-drift matrix beyond the current resume-trigger recovery alignment case
 - future protocol additions that could introduce new negative paths
 
 ---
@@ -215,7 +215,7 @@ Notes:
 ## 4. Immediate backlog implications
 
 ### Highest-value missing tests
-1. broader governance-drift matrix tests beyond the current heartbeat/manual recovery alignment case
+1. broader governance-drift matrix tests beyond the current resume-trigger recovery alignment case
 2. any remaining negative-path execution-system path cases discovered during future protocol changes
 
 ### Why these matter

@@ -26,6 +26,7 @@ REPO_TESTS = [
     ("task-slice-smoke", "test_check_task_slice_schema.py"),
     ("oversized-advisory-smoke", "test_check_oversized_migration_slices.py"),
     ("summary-footer-smoke", "test_run_execution_system_checks.py"),
+    ("inspect-smoke", "test_inspect_execution_system.py"),
     ("closeout-state-smoke", "test_slice_closeout_state.py"),
     ("closeout-ready-smoke", "test_check_closeout_ready.py"),
 ]

@@ -4,7 +4,7 @@ from __future__ import annotations
 import argparse
 import subprocess
 
-from repo_paths import WORKSPACE
+from plugin_paths import WORKSPACE
 
 COMMANDS = {
     "active": ["python3", str(WORKSPACE / "scripts" / "check_active_consistency.py")],
@@ -15,7 +15,7 @@ COMMANDS = {
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Run canonical local OpenClaw execution-system checks.")
+    parser = argparse.ArgumentParser(description="Run canonical local Six-Layer execution-system checks.")
     parser.add_argument("mode", choices=sorted(COMMANDS))
     parser.add_argument("--timeout", type=int, default=60, help="Timeout in seconds. Default: 60.")
     args = parser.parse_args()

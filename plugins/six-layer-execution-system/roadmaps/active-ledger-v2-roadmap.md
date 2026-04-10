@@ -3,14 +3,14 @@
 ## Goal
 - 把当前单活动 `ACTIVE.md` 升级成支持多活动的三层账本模型。
 - 保持 `ACTIVE.md` 仍是唯一运行时真相源。
-- 让 heartbeat、consistency check、closeout、notification 都能在多活动下稳定工作。
+- 让 resume recovery、consistency check、closeout 与 handoff 都能在多活动下稳定工作。
 
 ## Constraints / non-goals
 - 不恢复 `SESSION-STATE.md`
 - 不把运行时状态拆到多个平行状态文件
 - 不直接切纯 JSON/YAML 作为主账本
-- 不让 heartbeat 默认在多个活动之间自由切换
-- 第一阶段先升级 schema 与解析层，不抢先改所有通知链路细节
+- 不让恢复型触发默认在多个活动之间自由切换
+- 第一阶段先升级 schema 与解析层，不抢先扩张 handoff 协议细节
 
 ## Validation baseline
 - `python3 scripts/check_active_consistency.py`
@@ -64,26 +64,26 @@
 - risks:
   - 规则太严导致噪音过高
 
-### Phase 4 - Activity-aware closeout & notification
+### Phase 4 - Activity-aware closeout & handoff
 - objective:
-  - 让 closeout / notification / dedupe 支持多活动，不串线
+  - 让 closeout / handoff / dedupe 支持多活动，不串线
 - outputs:
-  - `complete_slice.sh` 与通知链路脚本支持 `activity_id`
+  - `complete_slice.py` 与 handoff 链路脚本支持 `activity_id`
   - dedupe key 升级为 `activity_id + completed_slice_id + commit`
 - exit criteria:
-  - roadmap activity 的通知链路不再依赖全文件唯一任务假设
+  - roadmap activity 的 handoff 链路不再依赖全文件唯一任务假设
 - validation:
-  - prepare / payload / ack 走 focus activity
+  - prepare / payload 走 focus activity
 - risks:
-  - 历史 pending / inflight 状态迁移
+  - 历史 closeout 工件与新 handoff 口径的兼容
 
-### Phase 5 - Focus-first heartbeat semantics
+### Phase 5 - Focus-first resume semantics
 - objective:
-  - 在多活动下保持 heartbeat 可控，只推进 focus
+  - 在多活动下保持恢复型触发可控，只围绕 focus 收敛
 - outputs:
-  - plugin skill 中的 heartbeat / recovery 语义升级为 `focus-first`
+  - plugin skill 中的 recovery 语义升级为 `focus-first`
 - exit criteria:
-  - heartbeat 默认只推进 focus activity
+  - 恢复型触发默认只围绕 focus activity 恢复与规划
   - blocked / waiting activity 不会误跑
 - validation:
   - 手工走读规则与 recovery 行为一致
@@ -92,7 +92,7 @@
 
 ### Phase 6 - Real multi-activity validation
 - objective:
-  - 引入第二个真实 activity，验证恢复/通知/heartbeat/校验全链路
+  - 引入第二个真实 activity，验证恢复/handoff/校验全链路
 - outputs:
   - 至少两个并存的 activity
 - exit criteria:

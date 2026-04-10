@@ -145,7 +145,7 @@ Rules:
 - roadmap owns phase structure, not live runtime state
 - roadmap may describe decomposition strategy and recommended wave shape at the phase level
 - roadmap must not describe current live wave, inflight slices, or alternate runtime truth
-- do not store current commit / inflight notification / daily progress in roadmap
+- do not store current commit / inflight handoff / daily progress in roadmap
 
 ---
 
@@ -400,7 +400,7 @@ Use this when deciding whether a roadmap slice is truly complete.
 - [ ] commit recorded
 - [ ] ACTIVE switched to next slice atomically
 - [ ] closeout artifact created
-- [ ] notification state traceable (`pending|inflight|sent`)
+- [ ] canonical handoff payload derivable from the frozen closeout artifact
 
 Rule:
 - only closed-out slices may be announced externally as complete

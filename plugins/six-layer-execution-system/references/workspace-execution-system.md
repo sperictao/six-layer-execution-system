@@ -92,25 +92,18 @@ Do not regress to implicit completion inferred from:
 - git cleanliness alone
 - a human summary alone
 
-## Closeout and Notification Flow
+## Closeout and Handoff Flow
 
-The canonical flow is implemented in `<plugin-root>/scripts/complete_slice.sh`.
+The canonical flow is implemented in `<plugin-root>/scripts/complete_slice.py`.
 
 Flow summary:
 
 1. `prepare`
 2. `payload`
-3. external send
-4. `ack <dedupe_key>`
-5. or `fail`
+3. external host handoff, if needed
 
-Important local rule:
-
-- do not call `ack_slice_notification.py` directly during roadmap closeout
-- only `complete_slice.sh ack` may finalize notification delivery
-
-Durable notification truth lives in workspace memory artifacts, not in `ACTIVE.md`.
-The canonical notification payload should explicitly carry `current_focus_activity_id` from the frozen closeout artifact instead of re-reading live focus state.
+Durable closeout truth lives in the frozen closeout artifact, not in `ACTIVE.md`.
+The canonical handoff payload should explicitly carry `current_focus_activity_id` from that artifact instead of re-reading live focus state.
 
 ## Maintenance-Mode Guardrails
 
@@ -138,7 +131,7 @@ The local system prefers:
 Use smoke tests for local field invariants.
 Use synthetic path tests when a value must survive multiple surfaces such as:
 
-- artifact -> queue/state -> payload
+- artifact -> payload
 - runner -> acceptance
 - focus state -> closeout-ready gate
 

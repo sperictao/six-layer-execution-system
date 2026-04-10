@@ -91,7 +91,7 @@
   - `integration_step`
   - `last_wave_result`
 - exit criteria:
-  - heartbeat/manual execution 可基于 ACTIVE 波次状态恢复与调度
+  - resume-style triggers 与普通执行可基于 ACTIVE 波次状态恢复与调度
   - 至少一个低风险 pilot activity 在真实 `ACTIVE.md` 上通过 `check_active_wave_state.py`
 - decomposition_strategy:
   - 先落 schema，再用 decomposition-upgrade activity 自举成低风险 pilot，不急于马上接入 unified runner

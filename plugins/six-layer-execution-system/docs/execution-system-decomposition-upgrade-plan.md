@@ -166,7 +166,7 @@ Roadmap must not describe:
 - current live wave
 - inflight slices
 - current runtime state
-- notification state
+- closeout handoff state
 
 ### Outcome
 Roadmap becomes the phase-level dependency skeleton while `ACTIVE` remains the runtime truth.
@@ -258,7 +258,7 @@ Status:
 ### Rules
 - these fields live only in `ACTIVE.md`
 - roadmap/tasks must not become alternate runtime truth sources
-- heartbeat and manual execution must both read these fields before dispatching work
+- resume-style triggers and ordinary execution must both read these fields before dispatching work
 
 ### Outcome
 `ACTIVE.md` becomes a dispatch console rather than a passive status ledger.
@@ -291,7 +291,7 @@ A wave-aware closeout should require:
 - inflight slices cleared or reconciled
 - ready/blocked state refreshed
 - validation results captured
-- normal slice/notification closeout rules still satisfied when a roadmap slice is complete
+- normal slice/handoff closeout rules still satisfied when a roadmap slice is complete
 
 ### Outcome
 Execution no longer jumps directly from "tasks ran" to "slice complete" without recording wave integration state.
@@ -428,7 +428,7 @@ The upgraded system should eventually satisfy all of the following:
 - task slices declare dependencies and parallel safety
 - `ACTIVE.md` tracks current wave state for roadmap activities that use parallel-wave mode
 - checker suite validates dependency graph and parallel safety semantics
-- heartbeat and manual execution use the same recovery and dispatch model
+- resume-style triggers and ordinary execution use the same recovery and dispatch model
 - at least one real activity completes a true parallel-wave -> integration -> validation -> closeout loop
 
 ### Acceptance deltas for decomposition-engine v1
@@ -471,8 +471,8 @@ The canonical execution backlog for this upgrade now lives in:
 - use a low-risk path to validate wave-state ergonomics
 
 ### Phase D - Workflow adoption
-- teach heartbeat to read wave-state fields
-- teach manual execution recovery to read the same fields
+- teach resume-style triggers to read wave-state fields
+- keep ordinary execution recovery on the same field set
 - wire the new checkers into runner + full test suite
 - update acceptance checklist and inventory docs
 

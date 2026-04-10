@@ -12,7 +12,7 @@ from typing import Iterator
 from execution_system_paths import WORKSPACE
 
 
-IGNORE_NAMES = {".git", ".clawhub", ".openclaw", "__pycache__", ".DS_Store"}
+IGNORE_NAMES = {".git", "__pycache__", ".DS_Store"}
 
 
 def _ignore(_src: str, names: list[str]) -> set[str]:

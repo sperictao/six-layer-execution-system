@@ -7,7 +7,7 @@
 ## Context
 - 工作区已经从单活动执行升级到多 activity ledger。
 - 一旦允许多个 activity 并存，就必须解决“系统默认推进哪一条”的问题。
-- 如果不收紧默认执行边界，heartbeat 或自动推进很容易跨 activity 串线。
+- 如果不收紧默认执行边界，恢复型触发或自动推进很容易跨 activity 串线。
 
 ## Options considered
 - A. 多 activity 并存时，任何 `autopilot=true` 的 activity 都可被自动推进
@@ -24,7 +24,7 @@
 
 ## Rejected because
 - A 风险太高，会导致“系统自己在多条线之间跳转”。
-- C 太保守，会让 heartbeat 和主动推进能力退化。
+- C 太保守，会让恢复型触发与主动推进能力退化。
 
 ## Review trigger
 - 如果未来引入更强的 activity scheduler，或允许显式的 fallback execution policy，则需要重审本决策。

@@ -79,10 +79,10 @@
 - risk:
   - medium
 
-#### Slice B2 - migrate notification / WAL prose out of ACTIVE
+#### Slice B2 - migrate closeout / WAL prose out of ACTIVE
 - phase_id: `PH-2`
 - goal:
-  - 将 ACTIVE 中过长的通知/规则说明迁移到 spec 或 docs
+  - 将 ACTIVE 中过长的 closeout / 规则说明迁移到 spec 或 docs
 - scope:
   - `ACTIVE.md`
   - `docs/execution-system-spec-v1.md`
@@ -615,14 +615,14 @@
   - `docs/execution-system-spec-v1.md`
   - `tasks/execution-system-spec-v1-tasks.md`
 - target_files:
-  - `scripts/complete_slice.sh`
+  - `scripts/complete_slice.py`
   - `scripts/accept_active_ledger_v2.py`
   - `docs/execution-system-spec-v1.md`
   - `tasks/execution-system-spec-v1-tasks.md`
 - depends_on:
   - `ES-F.F9`
 - validation:
-  - `complete_slice.sh prepare` 先跑统一 checker 套件
+  - `complete_slice.py prepare` 先跑统一 checker 套件
   - `accept_active_ledger_v2.py` 复用统一 checker 套件
   - adoption 不隐藏原子失败子命令
 - done_definition:
@@ -649,7 +649,7 @@
 - validation:
   - 文档明确 routine validation 默认走统一 checker 入口
   - 文档明确单独修 ACTIVE 或 task schema 时何时走单项 checker
-  - heartbeat active work check 改为优先跑统一 checker 套件
+  - 默认恢复/执行入口改为优先跑统一 checker 套件
 - done_definition:
   - 入口选择规则与预期失败口径已稳定落盘
 - rollback_strategy:
@@ -1012,7 +1012,7 @@
 - validation:
   - closeout artifact 包含 `slice_state: closed_out`
   - closeout verifier 要求 `slice_state=closed_out`
-  - 不改变现有 closeout / notification 主流程
+  - 不改变现有 closeout / handoff 主流程
 - done_definition:
   - `closed_out` 已从文档状态机推进成真实工件字段
 - rollback_strategy:

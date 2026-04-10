@@ -13,7 +13,7 @@ def get_telemetry_file() -> Path:
     env_path = os.environ.get("TELEMETRY_FILE_PATH")
     if env_path:
         return Path(env_path).expanduser()
-    return WORKSPACE / ".trae" / "telemetry.jsonl"
+    return WORKSPACE / "local-state" / "telemetry.jsonl"
 
 
 def record_event(event_type: str, payload: dict) -> None:

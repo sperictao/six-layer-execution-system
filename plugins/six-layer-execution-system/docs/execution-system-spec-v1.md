@@ -178,7 +178,7 @@ Allowed `task_type` values:
 Demand Intake cards must not contain:
 - current live wave state
 - inflight slice state
-- notification state
+- closeout handoff state
 - alternate runtime truth that competes with `ACTIVE.md`
 
 ## 5.1 Contract files
@@ -216,7 +216,7 @@ Contract files must not contain:
 - current phase
 - current slice
 - current commit
-- notification state
+- closeout handoff state
 - daily progress
 
 ## 5.2 Roadmap files
@@ -245,7 +245,7 @@ Guidance intent:
 Roadmap files must not contain:
 - current live slice state
 - recent commit logs
-- notification status
+- closeout handoff status
 - execution diary
 
 ## 5.3 Tasks files
@@ -285,7 +285,7 @@ DAG intent:
 
 Tasks files must not contain:
 - live focus activity selection
-- notification inflight state
+- closeout handoff inflight state
 - daily recovery notes
 
 ## 5.4 ACTIVE
@@ -353,7 +353,7 @@ Use for:
 - high-impact design choices
 - rejected alternatives
 - risky tradeoffs
-- changes to contract / completion / notification semantics
+- changes to contract / completion / closeout handoff semantics
 
 ## 5.6 Memory
 Recommended paths:
@@ -479,7 +479,7 @@ Definitions:
 - `in_progress` -> code / docs / structure are actively changing
 - `implemented` -> changes landed but full validation not yet complete
 - `validated` -> required validation passed and should be representable explicitly in closeout-adjacent artifact semantics
-- `closed_out` -> validation passed, commit recorded, ACTIVE advanced atomically, closeout artifact frozen with `validation_state: validated`, `slice_state: closed_out`, and explicit `current_focus_activity_id`, notification state traceable
+- `closed_out` -> validation passed, commit recorded, ACTIVE advanced atomically, closeout artifact frozen with `validation_state: validated`, `slice_state: closed_out`, and explicit `current_focus_activity_id`, handoff payload derivable
 
 Rule:
 **Only `closed_out` slices may be announced externally as complete.**
@@ -495,12 +495,12 @@ A roadmap slice is considered complete only when all of the following are true:
 3. commit recorded
 4. `ACTIVE.md` switched to next slice atomically
 5. closeout artifact created and explicitly marked `validation_state: validated` plus `slice_state: closed_out`, with explicit `current_focus_activity_id`
-6. notification state is traceable (`pending`, `inflight`, or `sent`)
+6. canonical handoff payload is derivable from the frozen closeout artifact
 
 This is the workspace-wide completion contract.
 
-### 8.1 Notification publication rule
-Completion notifications must be generated from the frozen closeout artifact, not from live ACTIVE fields.
+### 8.1 Closeout handoff rule
+Completion handoff payloads must be generated from the frozen closeout artifact, not from live ACTIVE fields.
 The canonical payload surface must explicitly include `current_focus_activity_id` from that frozen artifact.
 
 ### 8.2 Phase completion rule
@@ -526,7 +526,7 @@ When resuming after a reset / compaction / interruption:
 Short imperative or resume-like user messages must be treated as execution recovery, not general chat.
 
 Operational prompt-rule source:
-- `skills/six-layer-execution-system/SKILL.md` is the single prompt-rule source of truth for resume handling, heartbeat/manual alignment, notification levels, behavior boundaries, and tool entrypoints
+- `skills/six-layer-execution-system/SKILL.md` is the single prompt-rule source of truth for resume handling, closeout handoff, behavior boundaries, and tool entrypoints
 - `ACTIVE.md` remains runtime truth and must not be replaced by prompt prose
 
 Examples:
@@ -758,7 +758,7 @@ The current Phase 6 checker suite can be run together via:
 
 Current workflow adoption:
 - `scripts/accept_active_ledger_v2.py` now reuses this suite instead of calling the ACTIVE checker directly
-- `scripts/complete_slice.sh prepare` now uses this suite before creating closeout artifacts
+- `scripts/complete_slice.py prepare` now uses this suite before creating closeout artifacts
 - the unified runner now also prints advisory-only outputs such as oversized migration slice warnings, while keeping hard-fail exit semantics unchanged
 
 Operational rule of thumb:
