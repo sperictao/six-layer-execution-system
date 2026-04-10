@@ -29,23 +29,20 @@ def write_json(path: Path, data: dict) -> None:
     path.write_text(json.dumps(data, ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
 
 
-def main() -> int:
+def queue_notification() -> str:
     raw = CLOSEOUT.read_text(encoding="utf-8").strip() if CLOSEOUT.exists() else "{}"
     if not raw or raw == "{}":
-        print("NO_SLICE_CLOSEOUT")
-        return 1
+        raise ValueError("NO_SLICE_CLOSEOUT")
     artifact = json.loads(raw)
     dedupe_key = artifact.get("dedupe_key", "")
     if not dedupe_key:
-        print("INVALID_SLICE_CLOSEOUT")
-        return 1
+        raise ValueError("INVALID_SLICE_CLOSEOUT")
 
     state = read_json(STATE)
     for bucket in ("pending", "inflight", "sent"):
         for item in state.get(bucket, []):
             if item.get("dedupe_key") == dedupe_key:
-                print(dedupe_key)
-                return 0
+                return dedupe_key
 
     item = {
         "dedupe_key": dedupe_key,
@@ -62,8 +59,17 @@ def main() -> int:
     }
     state.setdefault("pending", []).append(item)
     write_json(STATE, state)
-    print(dedupe_key)
-    return 0
+    return dedupe_key
+
+
+def main() -> int:
+    try:
+        dedupe_key = queue_notification()
+        print(dedupe_key)
+        return 0
+    except ValueError as e:
+        print(str(e))
+        return 1
 
 
 if __name__ == "__main__":

@@ -23,11 +23,10 @@ def write_json(path: Path, data: dict) -> None:
     path.write_text(json.dumps(data, ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
 
 
-def main() -> int:
+def requeue_notifications() -> int:
     state = read_json(STATE)
     inflight = state.get("inflight", [])
     if not inflight:
-        print("NO_INFLIGHT_NOTIFICATIONS")
         return 0
 
     pending = state.get("pending", [])
@@ -41,6 +40,14 @@ def main() -> int:
     state["pending"] = pending
     state["inflight"] = []
     write_json(STATE, state)
+    return moved
+
+def main() -> int:
+    moved = requeue_notifications()
+    if moved == 0:
+        print("NO_INFLIGHT_NOTIFICATIONS")
+        return 0
+
     print(f"REQUEUED:{moved}")
     return 0
 

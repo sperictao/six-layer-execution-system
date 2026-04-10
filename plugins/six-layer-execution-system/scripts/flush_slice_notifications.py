@@ -28,18 +28,26 @@ def write_json(path: Path, data: dict) -> None:
     path.write_text(json.dumps(data, ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
 
 
-def main() -> int:
+def flush_notification() -> dict | None:
     state = read_json(STATE)
     pending = state.get("pending", [])
     if not pending:
-        print("NO_PENDING_NOTIFICATIONS")
-        return 0
+        return None
 
     item = pending.pop(0)
     item["flushed_at"] = now_iso()
     state.setdefault("inflight", []).append(item)
     state["pending"] = pending
     write_json(STATE, state)
+
+    return item
+
+
+def main() -> int:
+    item = flush_notification()
+    if item is None:
+        print("NO_PENDING_NOTIFICATIONS")
+        return 0
 
     print(json.dumps(item, ensure_ascii=True))
     return 0

@@ -52,6 +52,8 @@ class Activity:
     heading: str
     fields: Dict[str, str]
     list_fields: Dict[str, List[str]]
+    _raw_lines: List[str] = __import__("dataclasses").field(default_factory=list)
+    _ledger: Optional['Ledger'] = None
 
     @property
     def activity_id(self) -> Optional[str]:
@@ -98,12 +100,48 @@ class Activity:
             "list_fields": self.list_fields,
         }
 
+    def update_fields(self, **updates: str) -> None:
+        for key, value in updates.items():
+            self.fields[key] = value
+            updated = False
+            for i, line in enumerate(self._raw_lines):
+                if re.match(rf"^\s*- {re.escape(key)}: `[^`]+`\s*$", line):
+                    m = re.match(rf"^(\s*- {re.escape(key)}: `)[^`]+(`\s*)$", line)
+                    if m:
+                        self._raw_lines[i] = f"{m.group(1)}{value}{m.group(2)}"
+                        updated = True
+                        break
+                elif re.match(rf"^\s*- {re.escape(key)}: .+$", line):
+                    m = re.match(rf"^(\s*- {re.escape(key)}: ).+$", line)
+                    if m:
+                        self._raw_lines[i] = f"{m.group(1)}{value}"
+                        updated = True
+                        break
+            
+            if not updated:
+                insert_idx = len(self._raw_lines)
+                for i, line in enumerate(self._raw_lines):
+                    if re.match(r"^\s*- [^:]+:\s*$", line):
+                        insert_idx = i
+                        break
+                self._raw_lines.insert(insert_idx, f"- {key}: `{value}`")
+
+    def save(self) -> None:
+        if self._ledger:
+            self._ledger.save()
+        else:
+            raise RuntimeError("Activity is not attached to a Ledger; cannot save.")
+
 
 @dataclass
 class Ledger:
     meta: Dict[str, str]
     activities: Dict[str, Activity]
     activity_index: List[str]
+    _path: Optional[Path] = None
+    _all_lines: Optional[List[str]] = None
+    _activities_section_range: Optional[tuple[int, int]] = None
+    _pre_activities_lines: Optional[List[str]] = None
 
     @property
     def current_focus_activity_id(self) -> Optional[str]:
@@ -153,6 +191,63 @@ class Ledger:
             "activities": {k: v.as_dict() for k, v in self.activities.items()},
         }
 
+    def update_fields(self, **updates: str) -> None:
+        if self._all_lines is None:
+            raise RuntimeError("Ledger was not fully parsed with file content; cannot update.")
+        
+        for key, value in updates.items():
+            self.meta[key] = value
+            updated = False
+            # Find the Ledger meta section in _all_lines and update it
+            in_meta = False
+            for i, line in enumerate(self._all_lines):
+                if line.strip() == "## Ledger meta":
+                    in_meta = True
+                    continue
+                if in_meta and line.startswith("## "):
+                    # Insert if not found before next section
+                    self._all_lines.insert(i, f"- {key}: `{value}`")
+                    # Adjust _activities_section_range because we inserted a line before it
+                    if self._activities_section_range:
+                        start, end = self._activities_section_range
+                        if i < start:
+                            self._activities_section_range = (start + 1, end + 1)
+                    updated = True
+                    break
+                
+                if in_meta:
+                    if re.match(rf"^\s*- {re.escape(key)}: `[^`]+`\s*$", line):
+                        m = re.match(rf"^(\s*- {re.escape(key)}: `)[^`]+(`\s*)$", line)
+                        if m:
+                            self._all_lines[i] = f"{m.group(1)}{value}{m.group(2)}"
+                            updated = True
+                            break
+                    elif re.match(rf"^\s*- {re.escape(key)}: .+$", line):
+                        m = re.match(rf"^(\s*- {re.escape(key)}: ).+$", line)
+                        if m:
+                            self._all_lines[i] = f"{m.group(1)}{value}"
+                            updated = True
+                            break
+            
+            if not updated and in_meta:
+                # We hit EOF while in meta
+                self._all_lines.append(f"- {key}: `{value}`")
+                
+    def save(self) -> None:
+        if not self._path or self._all_lines is None or self._activities_section_range is None:
+            raise RuntimeError("Ledger was not fully parsed with file content; cannot save.")
+            
+        start, end = self._activities_section_range
+        new_activities_lines = list(self._pre_activities_lines) if self._pre_activities_lines else []
+        
+        for act in self.list_activities():
+            new_activities_lines.extend(act._raw_lines)
+            
+        self._all_lines = self._all_lines[:start] + new_activities_lines + self._all_lines[end:]
+        self._activities_section_range = (start, start + len(new_activities_lines))
+        
+        self._path.write_text("\n".join(self._all_lines) + "\n", encoding="utf-8")
+
 
 def _parse_backtick_value(line: str, key: str) -> Optional[str]:
     match = re.match(rf"^- {re.escape(key)}: `([^`]+)`$", line.strip())
@@ -164,20 +259,23 @@ def _parse_simple_value(line: str, key: str) -> Optional[str]:
     return match.group(1).strip() if match else None
 
 
-def _extract_section(lines: List[str], title: str) -> List[str]:
+def _extract_section_with_range(lines: List[str], title: str) -> tuple[List[str], int, int]:
     start = None
     for idx, line in enumerate(lines):
         if line.strip() == f"## {title}":
             start = idx + 1
             break
     if start is None:
-        return []
+        return [], -1, -1
     end = len(lines)
     for idx in range(start, len(lines)):
         if lines[idx].startswith("## "):
             end = idx
             break
-    return lines[start:end]
+    return lines[start:end], start, end
+
+def _extract_section(lines: List[str], title: str) -> List[str]:
+    return _extract_section_with_range(lines, title)[0]
 
 
 def parse_ledger(path: Path = ACTIVE) -> Ledger:
@@ -198,11 +296,12 @@ def parse_ledger(path: Path = ACTIVE) -> Ledger:
         if m:
             activity_index.append(m.group(1))
 
-    activities_lines = _extract_section(lines, "Activities")
+    activities_lines, sec_start, sec_end = _extract_section_with_range(lines, "Activities")
     activities: Dict[str, Activity] = {}
 
     current_heading: Optional[str] = None
     block: List[str] = []
+    pre_activities_lines: List[str] = []
 
     def flush() -> None:
         nonlocal current_heading, block
@@ -237,6 +336,7 @@ def parse_ledger(path: Path = ACTIVE) -> Ledger:
             else:
                 current_list_key = None
         activity = Activity(current_heading, fields, list_fields)
+        activity._raw_lines = block.copy()
         if activity.activity_id:
             activities[activity.activity_id] = activity
         current_heading = None
@@ -246,13 +346,24 @@ def parse_ledger(path: Path = ACTIVE) -> Ledger:
         if line.startswith("### Activity: "):
             flush()
             current_heading = line[len("### Activity: ") :].strip()
-            block = []
+            block = [line]
         else:
             if current_heading is not None:
                 block.append(line)
+            else:
+                pre_activities_lines.append(line)
     flush()
 
-    return Ledger(meta=meta, activities=activities, activity_index=activity_index)
+    ledger = Ledger(meta=meta, activities=activities, activity_index=activity_index)
+    ledger._path = path
+    ledger._all_lines = lines
+    ledger._activities_section_range = (sec_start, sec_end)
+    ledger._pre_activities_lines = pre_activities_lines
+
+    for act in ledger.activities.values():
+        act._ledger = ledger
+
+    return ledger
 
 
 def get_current_focus_activity(path: Path = ACTIVE) -> Optional[Activity]:
