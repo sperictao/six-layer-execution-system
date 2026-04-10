@@ -55,8 +55,14 @@ def main() -> int:
         telemetry_path = workspace / ".trae" / "telemetry.jsonl"
         if not telemetry_path.exists():
             raise AssertionError("run_execution_system_checks should emit telemetry into the workspace")
+        try:
+            telemetry_lines = telemetry_path.read_text(encoding="utf-8").splitlines()
+        except OSError as error:
+            raise AssertionError(f"telemetry file should be readable: {telemetry_path}") from error
+        except UnicodeDecodeError as error:
+            raise AssertionError(f"telemetry file should be valid UTF-8: {telemetry_path}") from error
         telemetry_events = []
-        for line in telemetry_path.read_text(encoding="utf-8").splitlines():
+        for line in telemetry_lines:
             if not line.strip():
                 continue
             try:
