@@ -2,7 +2,6 @@
 import argparse
 import subprocess
 import sys
-import re
 from pathlib import Path
 
 WORKSPACE = Path(__file__).resolve().parents[1]
@@ -14,59 +13,19 @@ ACTIVE = WORKSPACE / "ACTIVE.md"
 
 def update_active_slice_id(new_slice_id: str) -> bool:
     ledger = parse_ledger(ACTIVE)
-    focus_id = ledger.current_focus_activity_id
-    if not focus_id:
+    focus = ledger.get_current_focus_activity()
+    if not focus:
         print("No current focus activity found in ACTIVE.md", file=sys.stderr)
         return False
     
-    text = ACTIVE.read_text(encoding="utf-8")
-    
-    # We need to find the block for the current focus activity and replace current_slice_id
-    # A simple string split for the first occurrence after the activity heading
-    heading_pattern = f"### Activity: {focus_id}"
-    
-    parts = text.split(heading_pattern)
-    if len(parts) < 2:
-        print(f"Could not find heading '{heading_pattern}' in ACTIVE.md", file=sys.stderr)
+    focus.update_fields(status="in_progress", current_slice_id=new_slice_id)
+    try:
+        ledger.save()
+        print(f"Updated current_slice_id to {new_slice_id} for activity {focus.activity_id}")
+        return True
+    except Exception as e:
+        print(f"Failed to update ACTIVE.md: {e}", file=sys.stderr)
         return False
-        
-    after_heading = parts[1]
-    
-    # Update status to in_progress
-    after_heading, _ = re.subn(
-        r"(^- status: `)([^`]+)(`$)",
-        r"\g<1>in_progress\g<3>",
-        after_heading,
-        count=1,
-        flags=re.MULTILINE
-    )
-
-    # Replace current_slice_id in the block
-    new_after, count = re.subn(
-        r"(^- current_slice_id: `)([^`]+)(`$)",
-        rf"\g<1>{new_slice_id}\g<3>",
-        after_heading,
-        count=1,
-        flags=re.MULTILINE
-    )
-    
-    if count == 0:
-        # Insert current_slice_id if not present, e.g., after tasks_doc or status
-        new_after, count = re.subn(
-            r"(^- status: `in_progress`\n)",
-            rf"\g<1>- current_slice_id: `{new_slice_id}`\n",
-            after_heading,
-            count=1,
-            flags=re.MULTILINE
-        )
-        if count == 0:
-            print("Could not find a place to insert current_slice_id", file=sys.stderr)
-            return False
-        
-    new_text = parts[0] + heading_pattern + new_after
-    ACTIVE.write_text(new_text, encoding="utf-8")
-    print(f"Updated current_slice_id to {new_slice_id} for activity {focus_id}")
-    return True
 
 def cmd_slice_start(args):
     if update_active_slice_id(args.id):
@@ -76,10 +35,12 @@ def cmd_slice_start(args):
 
 def cmd_slice_complete(args):
     print("Running execution system checks and closeout generation...")
-    # call complete_slice.sh prepare
-    script = WORKSPACE / "scripts" / "complete_slice.sh"
-    result = subprocess.run(["zsh", str(script), "prepare"], cwd=WORKSPACE)
-    sys.exit(result.returncode)
+    import complete_slice
+    try:
+        complete_slice.prepare_slice()
+    except SystemExit as e:
+        sys.exit(e.code)
+    sys.exit(0)
 
 def cmd_status(args):
     ledger = parse_ledger(ACTIVE)
