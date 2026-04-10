@@ -3,10 +3,12 @@ from __future__ import annotations
 
 import os
 import subprocess
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
 from execution_system_paths import WORKSPACE
+import telemetry
 
 CHECKS = [
     ["python3", str(WORKSPACE / "scripts" / "check_active_consistency.py")],
@@ -186,8 +188,20 @@ def summary_footer(summary: ExecutionSystemSummary) -> list[str]:
 
 
 def collect_summary(print_output: bool = True) -> tuple[int, ExecutionSystemSummary]:
+    start_time = time.time()
     first_failure: str | None = None
     advisory_hits: list[str] = []
+    
+    def finish(code: int, summary: ExecutionSystemSummary) -> tuple[int, ExecutionSystemSummary]:
+        elapsed = time.time() - start_time
+        telemetry.record_event("execution_system_check", {
+            "elapsed_seconds": elapsed,
+            "status": "passed" if code == 0 else "failed",
+            "first_failing_command": summary.first_failing_command,
+            "hard_fail_status": summary.hard_fail_status,
+            "repo_smoke_tests_status": summary.repo_smoke_tests_status,
+        })
+        return code, summary
 
     for command in CHECKS:
         pretty = " ".join(command)
@@ -201,7 +215,7 @@ def collect_summary(print_output: bool = True) -> tuple[int, ExecutionSystemSumm
                 print(f"EXECUTION_SYSTEM_CHECKS_FAILED: {pretty}")
                 for line in summary_footer(summary):
                     print(line)
-            return completed.returncode, summary
+            return finish(completed.returncode, summary)
 
     for command in ADVISORIES:
         pretty = " ".join(command)
@@ -228,7 +242,7 @@ def collect_summary(print_output: bool = True) -> tuple[int, ExecutionSystemSumm
             print("EXECUTION_SYSTEM_CHECKS_OK")
             for line in summary_footer(summary):
                 print(line)
-        return 0, summary
+        return finish(0, summary)
 
     for command in repo_test_commands(tests_root):
         pretty = " ".join(command)
@@ -253,7 +267,7 @@ def collect_summary(print_output: bool = True) -> tuple[int, ExecutionSystemSumm
                 print(f"EXECUTION_SYSTEM_CHECKS_FAILED: {pretty}")
                 for line in summary_footer(summary):
                     print(line)
-            return completed.returncode, summary
+            return finish(completed.returncode, summary)
 
     summary = build_summary(
         first_failure,
@@ -266,7 +280,7 @@ def collect_summary(print_output: bool = True) -> tuple[int, ExecutionSystemSumm
         print("EXECUTION_SYSTEM_CHECKS_OK")
         for line in summary_footer(summary):
             print(line)
-    return 0, summary
+    return finish(0, summary)
 
 
 def main() -> int:
