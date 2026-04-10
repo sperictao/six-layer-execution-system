@@ -68,6 +68,13 @@ def main() -> int:
         latest_event = telemetry_events[-1]
         if latest_event.get("event_type") != "execution_system_check":
             raise AssertionError(f"unexpected telemetry event: {latest_event}")
+        if "timestamp" not in latest_event:
+            raise AssertionError(f"telemetry event should include a timestamp: {latest_event}")
+        payload = latest_event.get("payload")
+        if not isinstance(payload, dict):
+            raise AssertionError(f"telemetry event should include a payload object: {latest_event}")
+        if "elapsed_seconds" not in payload:
+            raise AssertionError(f"telemetry payload should include elapsed_seconds: {latest_event}")
 
     unavailable_env, unavailable_root = repo_checkout_without_tests_env()
     unavailable_root_resolved = unavailable_root.resolve()

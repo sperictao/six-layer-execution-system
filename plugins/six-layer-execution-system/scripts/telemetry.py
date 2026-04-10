@@ -35,7 +35,7 @@ def record_event_safely(event_type: str, payload: dict) -> None:
         record_event(event_type, payload)
     except Exception as error:
         if os.environ.get("TELEMETRY_DEBUG"):
-            print(f"telemetry write failed: {error}", file=sys.stderr)
+            print(f"telemetry write failed for event '{event_type}': {error}", file=sys.stderr)
         return
 
 
