@@ -36,7 +36,7 @@
 
 补充说明：
 
-- `skills/`、`SKILL.md`、`AGENTS.md` 提供 prompt/protocol 规则入口。
+- `skills/six-layer-execution-system/SKILL.md` 提供唯一 prompt/protocol 规则入口，`AGENTS.md` 只负责恢复导航。
 - `scripts/` 是整个系统的执行面和校验面。
 - `.codex-plugin/`、`agents/`、`assets/` 提供插件发现与交互元数据。
 - `references/` 是辅助参考层，不是运行态真相。

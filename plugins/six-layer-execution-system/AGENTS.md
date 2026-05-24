@@ -14,6 +14,6 @@
 
 - `README.md` 负责安装和入口说明，不替代运行态真相。
 - `references/` 只提供辅助参考，不替代运行态真相。
-- `SKILL.md` 是插件根薄入口；如果和 `skills/six-layer-execution-system/SKILL.md` 漂移，以后者为准。
+- `skills/six-layer-execution-system/SKILL.md` 是唯一 prompt-rule source of truth。
 - repo 根的 `.agents/plugins/marketplace.json` 只是可选开发/演示元数据，不是插件运行前提。
 - repo 根 `tests/` 属于 source checkout 的开发资产；独立复制插件目录时，`full-tests` 返回 `unavailable` 属于预期行为。

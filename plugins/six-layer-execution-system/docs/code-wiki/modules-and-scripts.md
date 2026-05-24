@@ -7,7 +7,6 @@
 | 路径 | 作用 |
 | --- | --- |
 | `AGENTS.md` | subject root 约束与恢复顺序 |
-| `SKILL.md` | 插件根薄入口 |
 | `skills/six-layer-execution-system/SKILL.md` | 唯一详细 prompt/protocol 规则源 |
 | `.codex-plugin/plugin.json` | 插件元数据、展示文案、默认 prompt |
 | `agents/openai.yaml` | agent interface 元信息 |

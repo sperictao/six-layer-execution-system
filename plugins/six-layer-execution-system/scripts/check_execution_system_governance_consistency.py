@@ -13,6 +13,7 @@ ACTIVE = WORKSPACE / "ACTIVE.md"
 CARD_SPEC_V1 = SPEC_ACTIVITY_ROOT / "card.md"
 ACCEPTANCE = WORKSPACE / "docs/execution-system-spec-v1-acceptance-checklist.md"
 README = WORKSPACE / "README.md"
+ROOT_SKILL = WORKSPACE / "SKILL.md"
 SOURCE_MAP = WORKSPACE / "references/source-map.md"
 LOCAL_INSTALL = WORKSPACE / "references/local-install.md"
 SKILL = WORKSPACE / "skills" / "six-layer-execution-system" / "SKILL.md"
@@ -88,6 +89,8 @@ def main() -> int:
     expect_contains(acceptance, "- `skills/six-layer-execution-system/SKILL.md`", "acceptance", problems)
     if any(name in acceptance for name in DELETED_PROMPT_FILES):
         problems.append("acceptance: deleted prompt files still referenced")
+    if ROOT_SKILL.exists():
+        problems.append("root-skill: root-level SKILL.md must not exist; keep prompt authority under skills/six-layer-execution-system/SKILL.md")
 
     expect_contains(readme, "`activities/<activity-id>/0-demand.md`", "README", problems)
     expect_contains(readme, "`recycle/` 保存已确认回收的历史 activity", "README", problems)
@@ -126,6 +129,7 @@ def main() -> int:
     print("- reentry_protocol: documented")
     print("- resume_trigger_rule: documented")
     print("- prompt_authority: documented")
+    print("- root_skill_shim: absent")
     print("- skill_recovery_alignment: documented")
     print("- skill_parallel_dispatch_alignment: documented")
     print("- parked_activity_state: documented")

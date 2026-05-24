@@ -38,6 +38,29 @@ Follow this order unless the task is clearly narrower:
 
 If you need to point these entrypoints at another extracted repo, override `SIX_LAYER_REPO_ROOT` and `SIX_LAYER_WORKSPACE` before running them.
 
+## Init A New Root
+
+Use init only when the user asks to initialize a new six-layer execution-system root, or when the target directory lacks the plugin runtime files.
+
+Canonical entrypoint:
+
+```bash
+python3 scripts/exec_sys.py init --target /abs/path/to/new-root
+```
+
+Behavior:
+
+- copies the portable plugin surface from the current plugin root
+- creates a fresh idle `ACTIVE.md`, `activities/`, and `local-state/`
+- preserves any existing `ACTIVE.md`
+- refuses differing support files unless `--force` is explicitly supplied
+
+After init, run the active checker from the target root:
+
+```bash
+python3 scripts/run_execution_checks.py active --timeout 60
+```
+
 ## Recovery And Resume Triggers
 
 Short imperative or resume-like messages must be treated as execution recovery, not general chat.

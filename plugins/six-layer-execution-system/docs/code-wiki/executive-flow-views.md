@@ -16,7 +16,7 @@
 
 ```mermaid
 flowchart LR
-    U["用户请求<br/>新需求 / 恢复 / 查询"] --> R["规则入口<br/>SKILL.md"]
+    U["用户请求<br/>新需求 / 恢复 / 查询"] --> R["规则入口<br/>skills/six-layer-execution-system/SKILL.md"]
     R --> G{"请求类型"}
 
     G -->|恢复 / 查询| A["ACTIVE.md<br/>唯一运行态真相"]

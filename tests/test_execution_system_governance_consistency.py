@@ -24,6 +24,7 @@ def main() -> int:
     expect(output, "- reentry_protocol: documented")
     expect(output, "- resume_trigger_rule: documented")
     expect(output, "- prompt_authority: documented")
+    expect(output, "- root_skill_shim: absent")
     expect(output, "- skill_recovery_alignment: documented")
     expect(output, "- skill_parallel_dispatch_alignment: documented")
 

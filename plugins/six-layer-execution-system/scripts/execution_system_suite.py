@@ -58,6 +58,7 @@ FULL_REPO_TEST_SPECS = (
     ("oversized-advisory-smoke", "test_check_oversized_migration_slices.py"),
     ("summary-footer-smoke", "test_run_execution_system_checks.py"),
     ("inspect-smoke", "test_inspect_execution_system.py"),
+    ("init-smoke", "test_init_execution_system.py"),
     ("exec-sys-smoke", "test_exec_sys.py"),
     ("suite-registry-smoke", "test_execution_system_suite_registry.py"),
     ("closeout-state-smoke", "test_slice_closeout_state.py"),

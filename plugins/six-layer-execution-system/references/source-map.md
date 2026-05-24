@@ -93,6 +93,9 @@ Demand decomposition:
 - `<plugin-root>/scripts/decomposition_engine.py`
 - `<plugin-root>/scripts/exec_sys.py`
 
+Initialization:
+- `<plugin-root>/scripts/init_execution_system.py` — initializes a new execution-system root from the current plugin template
+
 ## Repo-Local Tests
 
 These tests exist only in the source checkout and are not shipped inside a standalone plugin copy.

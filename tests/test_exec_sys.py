@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+from pathlib import Path
 
 from execution_system_paths import WORKSPACE
 from test_workspace_clone import cloned_workspace
@@ -10,18 +11,45 @@ from test_workspace_clone import cloned_workspace
 EXEC_SYS = WORKSPACE / "scripts" / "exec_sys.py"
 
 
+def activate_simple_fixture(workspace: Path) -> None:
+    activity_id = "simple-ledger-docs"
+    activity_dir = workspace / "activities" / activity_id
+    activity_dir.mkdir(parents=True, exist_ok=True)
+    (activity_dir / "card.md").write_text(
+        """### Activity: simple-ledger-docs
+- activity_id: `simple-ledger-docs`
+- title: `Simple ledger docs`
+- type: `simple`
+- status: `ready`
+- priority: `P2`
+- autopilot: `true`
+- focus_rank: `1`
+- goal: `exercise exec_sys status`
+- done_definition: `status command reports focus`
+- next_step:
+  - run status
+- validation:
+  - inspect output
+""",
+        encoding="utf-8",
+    )
+
+    active = workspace / "ACTIVE.md"
+    active_text = active.read_text(encoding="utf-8")
+    active_text = active_text.replace(
+        "- current_focus_activity_id: `none`",
+        "- current_focus_activity_id: `simple-ledger-docs`",
+        1,
+    )
+    row = "| simple-ledger-docs | simple | ready | P2 | activities/simple-ledger-docs/ |\n"
+    marker = "|------------|------|--------|----------|------|\n"
+    active_text = active_text.replace(marker, marker + row, 1)
+    active.write_text(active_text, encoding="utf-8")
+
+
 def main() -> int:
     with cloned_workspace() as workspace:
-        active = workspace / "ACTIVE.md"
-        active_text = active.read_text(encoding="utf-8")
-        active.write_text(
-            active_text.replace(
-                "- current_focus_activity_id: `waiting-ledger-review`",
-                "- current_focus_activity_id: `simple-ledger-docs`",
-                1,
-            ),
-            encoding="utf-8",
-        )
+        activate_simple_fixture(workspace)
 
         env = os.environ.copy()
         env.pop("SIX_LAYER_WORKSPACE", None)

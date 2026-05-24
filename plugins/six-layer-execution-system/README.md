@@ -25,6 +25,8 @@
 
 ## First Entry Points
 
+- init:
+  - `python3 scripts/exec_sys.py init --target /abs/path/to/new-root`
 - inspect:
   - `python3 scripts/inspect_execution_system.py --format markdown`
 - checks:
@@ -36,6 +38,7 @@
   - `python3 scripts/exec_sys.py demand decompose --request-file /abs/path/request.txt --activate`
 
 说明：
+- `init` 从当前插件根复制可运行的插件表面，并生成新的 idle `ACTIVE.md`；默认不覆盖既有 `ACTIVE.md`，遇到不同内容的支持文件会失败并报告冲突。
 - `checks` 始终可用；它会先跑插件内 checker，再在可检测到源仓库根 `tests/` 时追加 repo smoke tests。
 - `full-tests` 依赖源仓库 checkout 的根 `tests/` 目录；单独复制插件目录时，该入口会返回 `unavailable`，这是当前设计边界。
 
@@ -59,7 +62,6 @@ python3 scripts/run_local_execution_checks.py full-tests --timeout 60
 - `.codex-plugin/plugin.json`
 - `AGENTS.md`
 - `skills/six-layer-execution-system/SKILL.md`
-- `SKILL.md`
 - `agents/openai.yaml`
 
 这些文件服务于插件发现与交互，但不构成运行态真相。

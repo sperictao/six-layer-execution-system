@@ -31,8 +31,8 @@ python3 scripts/run_execution_checks.py checks --timeout 60
 `skills/six-layer-execution-system/SKILL.md` is the sole prompt-rule source of truth.
 All behavioral rules, recovery sequences, and closeout handoff protocols are defined there.
 
-In Claude Code, skills are loaded from the `skills/<skill-name>/SKILL.md` path within
-the plugin root. The root-level `SKILL.md` serves as a short entry pointer.
+Skills are loaded from the `skills/<skill-name>/SKILL.md` path within the plugin root.
+There is no root-level skill shim; use `AGENTS.md` and `README.md` only for navigation.
 
 ---
 

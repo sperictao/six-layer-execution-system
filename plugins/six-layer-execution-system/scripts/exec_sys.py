@@ -124,9 +124,36 @@ def cmd_activity_recycle(args):
     sys.exit(code)
 
 
+def cmd_init(args):
+    import init_execution_system
+
+    code = init_execution_system.main(
+        [
+            "--target",
+            args.target,
+            *(["--force"] if args.force else []),
+            *(["--dry-run"] if args.dry_run else []),
+        ]
+    )
+    sys.exit(code)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Unified CLI Tooling for Execution System")
     subparsers = parser.add_subparsers(dest="command", required=True)
+
+    init_parser = subparsers.add_parser("init", help="Initialize a six-layer execution-system root")
+    init_parser.add_argument(
+        "--target",
+        default=str(WORKSPACE),
+        help="Directory to initialize. Defaults to SIX_LAYER_WORKSPACE, then the plugin root.",
+    )
+    init_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite differing copied support files. Existing ACTIVE.md is still preserved.",
+    )
+    init_parser.add_argument("--dry-run", action="store_true", help="Report planned changes without writing files.")
 
     slice_parser = subparsers.add_parser("slice", help="Slice commands")
     slice_subparsers = slice_parser.add_subparsers(dest="subcommand", required=True)
@@ -174,6 +201,8 @@ def main():
     elif args.command == "activity":
         if args.subcommand == "recycle":
             cmd_activity_recycle(args)
+    elif args.command == "init":
+        cmd_init(args)
     elif args.command == "status":
         cmd_status(args)
 
