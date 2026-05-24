@@ -5,14 +5,17 @@ import sys
 from pathlib import Path
 
 from demand_card import validate_demand_card_text
-from execution_system_paths import DEMANDS_DIR
+from execution_system_paths import ACTIVITIES_DIR, DEMANDS_DIR
 
 
 def demand_files_from_args(args: list[str]) -> list[Path]:
     if not args:
-        if not DEMANDS_DIR.exists():
-            return []
-        return sorted(path for path in DEMANDS_DIR.glob("*.md") if path.is_file())
+        files: list[Path] = []
+        if ACTIVITIES_DIR.exists():
+            files.extend(sorted(path for path in ACTIVITIES_DIR.glob("*/0-demand.md") if path.is_file()))
+        if DEMANDS_DIR.exists():
+            files.extend(sorted(path for path in DEMANDS_DIR.glob("*.md") if path.is_file()))
+        return files
 
     files: list[Path] = []
     for raw in args:

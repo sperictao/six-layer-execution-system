@@ -107,6 +107,7 @@ Existing tests:
 - `tests/test_execution_system_path_closeout_ready_focus_drift.py`
 - `tests/test_execution_system_path_runner_hint_drift.py`
 - `tests/test_execution_system_path_parallel_wave.py`
+- `tests/test_activity_recycle.py`
 - `tests/test_notification_script_tools.py`
 - `tests/test_wrapper_and_runner_tools.py`
 - `tests/test_introspection_and_control_tools.py`
@@ -129,6 +130,7 @@ Covered path:
 - governance drift path for resume-trigger parallel-dispatch alignment
 - governance drift path for focus/acceptance gate alignment under `FOCUS_VALIDATION_POLICY_GATE` / `OK_WITH_POLICY_GATES`
 - synthetic single-wave path coverage for execution-system parallel-wave semantics
+- confirmed activity recycling path coverage for ACTIVE index removal, activity directory move, and `recycle/history.md`
 
 Missing paths:
 - governance drift is covered for the heartbeat rule, but not yet generalized across every governance contract
@@ -210,6 +212,7 @@ Notes:
 - `tests/test_execution_system_path_closeout_ready_focus_drift.py`
 - `tests/test_execution_system_path_runner_hint_drift.py`
 - `tests/test_execution_system_path_parallel_wave.py`
+- `tests/test_activity_recycle.py`
 
 ---
 

@@ -32,6 +32,8 @@ def resolve_live_task_target(active_path: Path = ACTIVE_PATH) -> Path:
     ledger = parse_ledger(active_path)
     focus = ledger.get_current_focus_activity()
     if focus is None:
+        if ledger.current_focus_activity_id == "none":
+            raise TaskTargetNotRequired("no current focus activity")
         raise ValueError("ACTIVE current focus activity is missing")
 
     for field in ("tasks_dir", "tasks_doc", "current_tasks_file"):

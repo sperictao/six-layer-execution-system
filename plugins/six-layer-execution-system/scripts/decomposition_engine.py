@@ -16,9 +16,9 @@ from demand_card import (
     sanitize_inline,
     slugify,
 )
-from execution_system_paths import ACTIVE_PATH, DEMANDS_DIR, WORKSPACE
+from execution_system_paths import ACTIVE_PATH, WORKSPACE
 
-CONTRACT_DOC = "contracts/execution-system-contract.md"
+CONTRACT_DOC = "docs/execution-system-spec-v1.md"
 VALIDATION_CHECKS_COMMAND = "python3 scripts/run_execution_checks.py checks --timeout 60"
 DEMAND_SCHEMA_COMMAND = "python3 scripts/check_demand_card_schema.py"
 CONSISTENCY_COMMAND = "python3 scripts/check_generated_decomposition_consistency.py"
@@ -1372,7 +1372,7 @@ class ArtifactApplier:
         if activate and not activation_allowed:
             activation_blocked_reason = MANUAL_REVIEW_OR_CONFIRM_REASON
 
-        DEMANDS_DIR.mkdir(parents=True, exist_ok=True)
+        demand_path.parent.mkdir(parents=True, exist_ok=True)
         roadmap_path.parent.mkdir(parents=True, exist_ok=True)
         tasks_path.parent.mkdir(parents=True, exist_ok=True)
 

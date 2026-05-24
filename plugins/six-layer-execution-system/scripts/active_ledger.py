@@ -326,12 +326,68 @@ class Ledger:
         activity._ledger = self
         self.activities[activity_id] = activity
         self.activity_index.append(activity_id)
+
+    def remove_activity(self, activity_id: str) -> None:
+        if self._all_lines is None:
+            raise RuntimeError("Ledger was not fully parsed with file content; cannot remove activity.")
+        if self.meta.get("version") != "3":
+            raise RuntimeError("Activity recycling requires ledger version 3.")
+        if activity_id not in self.activities:
+            raise RuntimeError(f"Activity `{activity_id}` does not exist.")
+
+        index_start = None
+        index_end = len(self._all_lines)
+        for idx, line in enumerate(self._all_lines):
+            if line.strip() == "## Activity index":
+                index_start = idx + 1
+                continue
+            if index_start is not None and idx > index_start - 1 and line.startswith("## "):
+                index_end = idx
+                break
+        if index_start is None:
+            raise RuntimeError("Ledger is missing the `Activity index` section.")
+
+        remove_idx = None
+        for idx in range(index_start, index_end):
+            stripped = self._all_lines[idx].strip()
+            if not stripped.startswith("|"):
+                continue
+            parts = [part.strip() for part in stripped.split("|") if part.strip()]
+            if parts and parts[0] == activity_id:
+                remove_idx = idx
+                break
+        if remove_idx is None:
+            raise RuntimeError(f"Activity index row for `{activity_id}` does not exist.")
+
+        del self._all_lines[remove_idx]
+        self.activities.pop(activity_id, None)
+        self.activity_index = [item for item in self.activity_index if item != activity_id]
                 
     def _sync_v3_focus_section(self) -> None:
         if self._all_lines is None:
             return
 
         focus_id = self.current_focus_activity_id
+        if focus_id == "none":
+            start = None
+            end = len(self._all_lines)
+            for idx, line in enumerate(self._all_lines):
+                if line.startswith("## Focus:"):
+                    start = idx
+                    continue
+                if start is not None and idx > start and line.startswith("## "):
+                    end = idx
+                    break
+            if start is None:
+                return
+            focus_lines = [
+                "## Focus: none",
+                "- status: `none`",
+                "",
+            ]
+            self._all_lines = self._all_lines[:start] + focus_lines + self._all_lines[end:]
+            return
+
         focus = self.get_current_focus_activity() if focus_id else None
         if focus is None or focus_id is None:
             return

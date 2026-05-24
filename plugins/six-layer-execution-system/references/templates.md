@@ -98,7 +98,7 @@ Rules:
 - ...
 
 ## Contract reference
-- contracts/<project>-contract.md
+- activities/<activity-id>/1-contract.md
 
 ## Validation baseline
 - ...
@@ -151,7 +151,7 @@ Rules:
 
 ## 3. Tasks: single-slice file template
 
-Each slice gets its own independent file under `tasks/<activity-id>/<slice-id>.md`.
+Each slice gets its own independent file under `activities/<activity-id>/3-tasks/<slice-id>.md`.
 The file is the **plan artifact** for that slice — written before execution, updated after completion.
 
 ```md
@@ -306,7 +306,29 @@ activities/<activity-id>/
 
 ---
 
-## 5. ACTIVE roadmap activity card template
+## 6. Recycle history template
+
+Confirmed activity recycling moves completed activity directories out of live runtime truth:
+
+```md
+# Recycled activities
+
+| recycled_at | activity_id | type | status | priority | original_path | recycled_path | last_commit |
+|---|---|---|---|---|---|---|---|
+| <timestamp> | <activity-id> | roadmap | done | P1 | activities/<activity-id> | recycle/activities/<activity-id> | <commit> |
+```
+
+Rules:
+
+- recycle only `status: done` activities
+- never recycle the current focus or default reply activity
+- remove recycled activities from `ACTIVE.md` Activity index
+- keep recycled content under `recycle/activities/<activity-id>/`
+- use `recycle/history.md` as an index, not runtime truth
+
+---
+
+## 7. ACTIVE roadmap activity card template
 
 ```md
 ### Activity: <activity-id>
@@ -320,8 +342,8 @@ activities/<activity-id>/
 - repo: `...`
 - path: `...`
 - roadmap_doc: `...`
-- tasks_dir: `tasks/<activity-id>/`
-- current_tasks_file: `tasks/<activity-id>/<slice-id>.md`
+- tasks_dir: `activities/<activity-id>/3-tasks/`
+- current_tasks_file: `activities/<activity-id>/3-tasks/<slice-id>.md`
 - current_slice_id: `...`
 - next_slice_id: `...`
 - objective: `...`
@@ -369,7 +391,7 @@ Rules:
 
 ---
 
-## 6. ACTIVE waiting activity card template
+## 8. ACTIVE waiting activity card template
 
 ```md
 ### Activity: <activity-id>
@@ -407,7 +429,7 @@ Rules:
 
 ---
 
-## 7. ACTIVE simple activity card template
+## 9. ACTIVE simple activity card template
 
 ```md
 ### Activity: <activity-id>
@@ -445,7 +467,7 @@ Rules:
 
 ---
 
-## 8. Decision template
+## 10. Decision template
 
 ```md
 # Decision: <title>
@@ -477,7 +499,7 @@ Rules:
 
 ---
 
-## 9. Slice closeout checklist
+## 11. Slice closeout checklist
 
 Use this when deciding whether a roadmap slice is truly complete.
 

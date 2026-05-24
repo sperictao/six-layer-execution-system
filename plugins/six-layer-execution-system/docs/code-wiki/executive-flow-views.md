@@ -48,9 +48,9 @@ flowchart TD
     C1 --> S3["提取 constraints / non_goals"]
     C1 --> S4["生成 3 段切片<br/>A1 -> B1 -> C1"]
 
-    S1 --> W1["写 demands/*.md"]
-    S2 --> W2["写 roadmap"]
-    S3 --> W3["写 tasks"]
+    S1 --> W1["写 activities/&lt;id&gt;/0-demand.md"]
+    S2 --> W2["写 activities/&lt;id&gt;/2-roadmap.md"]
+    S3 --> W3["写 activities/&lt;id&gt;/3-tasks/*.md"]
     S4 --> W4["写 ACTIVE activity"]
 
     W1 --> B["形成可恢复 backlog 基线"]
@@ -80,7 +80,7 @@ flowchart TD
     G -->|是| C["complete_slice.py"]
 
     C --> A1["create_slice_closeout.py"]
-    A1 --> A2["memory/last-slice-closeout.json"]
+    A1 --> A2["local-state/last-slice-closeout.json"]
     A2 --> A3["build_slice_handoff.py"]
     A3 --> O["Handoff Payload / 最终输出"]
 ```

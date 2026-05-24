@@ -32,12 +32,12 @@ Use these result labels when reviewing:
 - [ ] `pass` `memory` exists for historical/recovery notes
 
 Evidence:
-- `contracts/execution-system-contract.md`
-- `roadmaps/execution-system-spec-v1-roadmap.md`
-- `tasks/execution-system-spec-v1-tasks.md`
+- `recycle/activities/execution-system-spec-v1/1-contract.md`
+- `recycle/activities/execution-system-spec-v1/2-roadmap.md`
+- `recycle/activities/execution-system-spec-v1/3-tasks/execution-system-spec-v1-tasks.md`
 - `ACTIVE.md`
-- `decisions/`
-- `memory/`
+- `recycle/activities/execution-system-spec-v1/4-decisions/`
+- `recycle/activities/execution-system-spec-v1/5-memory/`
 
 ### 1.2 Single-layer single-truth boundaries are documented
 - [ ] `pass` spec states that each layer owns one class of truth
@@ -106,8 +106,8 @@ Evidence:
 - [ ] `pass` roadmap does not act as the live current-state source
 
 Evidence:
-- `roadmaps/execution-system-spec-v1-roadmap.md`
-- `roadmaps/execution-system-testing-roadmap.md`
+- `recycle/activities/execution-system-spec-v1/2-roadmap.md`
+- `recycle/activities/execution-system-testing/2-roadmap.md`
 
 ### 4.2 Tasks own slice design
 - [ ] `pass` migrated task slices use `phase_id`
@@ -244,15 +244,14 @@ Evidence:
 - [ ] `pass` contract contains stable constraints rather than current runtime state
 
 Evidence:
-- `contracts/execution-system-contract.md`
+- `recycle/activities/execution-system-spec-v1/1-contract.md`
 
 ### 7.2 Decision layer is real, not theoretical
 - [ ] `pass` runtime / execution-system decisions exist as durable records
 - [ ] `pass` execution-system strategic decisions exist as durable records
 
 Evidence:
-- `decisions/runtime/`
-- `decisions/README.md`
+- `recycle/activities/execution-system-spec-v1/4-decisions/`
 
 ---
 
@@ -268,8 +267,8 @@ Evidence:
 
 Evidence:
 - `docs/execution-system-spec-v1.md`
-- `roadmaps/execution-system-spec-v1-roadmap.md`
-- `tasks/execution-system-spec-v1-tasks.md`
+- `recycle/activities/execution-system-spec-v1/2-roadmap.md`
+- `recycle/activities/execution-system-spec-v1/3-tasks/execution-system-spec-v1-tasks.md`
 - `ACTIVE.md`
 - `skills/six-layer-execution-system/SKILL.md`
 

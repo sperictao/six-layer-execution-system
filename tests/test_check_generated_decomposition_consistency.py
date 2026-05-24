@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import shutil
 import subprocess
 
 from execution_system_paths import WORKSPACE
@@ -22,6 +23,20 @@ def run_checker(workspace, env):
     )
 
 
+def seed_generated_activity(workspace) -> None:
+    live = workspace / "activities" / ACTIVITY_ID
+    if not live.exists():
+        recycled = workspace / "recycle" / "activities" / ACTIVITY_ID
+        shutil.copytree(recycled, live)
+
+    active = workspace / "ACTIVE.md"
+    text = active.read_text(encoding="utf-8")
+    row = f"| {ACTIVITY_ID} | roadmap | blocked | P1 | activities/{ACTIVITY_ID}/ |"
+    if row not in text:
+        text = text.replace("|------------|------|--------|----------|------|\n", f"|------------|------|--------|----------|------|\n{row}\n", 1)
+        active.write_text(text, encoding="utf-8")
+
+
 def expect_ok(name: str, proc, needle: str) -> None:
     output = proc.stdout + proc.stderr
     if proc.returncode != 0:
@@ -41,6 +56,7 @@ def expect_fail(name: str, proc, needle: str) -> None:
 def main() -> int:
     with cloned_workspace() as workspace:
         env = workspace_env(workspace)
+        seed_generated_activity(workspace)
         init_git_repo(workspace)
 
         expect_ok(
@@ -51,6 +67,7 @@ def main() -> int:
 
     with cloned_workspace() as workspace:
         env = workspace_env(workspace)
+        seed_generated_activity(workspace)
         init_git_repo(workspace)
 
         # v3: update the activity card instead of ACTIVE.md
@@ -72,6 +89,7 @@ def main() -> int:
 
     with cloned_workspace() as workspace:
         env = workspace_env(workspace)
+        seed_generated_activity(workspace)
         init_git_repo(workspace)
 
         # v3: update card.md instead of ACTIVE.md

@@ -7,7 +7,40 @@ from pathlib import Path
 
 from execution_system_paths import WORKSPACE
 CHECKER = WORKSPACE / "scripts" / "check_parallel_safety.py"
-TASK_DOC = WORKSPACE / "_archive" / "tasks" / "execution-system-decomposition-upgrade-tasks.md"
+HAPPY_TASKS = """# sample
+
+## PR queue
+
+#### Slice A1 - parallel
+- phase_id: `PH-1`
+- depends_on:
+  - none
+- parallel_safe:
+  - true
+- shared_write_targets:
+  - none
+- expected_artifacts:
+  - a
+- integration_notes:
+  - a
+- rollback_strategy:
+  - revert a
+
+#### Slice B1 - serial
+- phase_id: `PH-1`
+- depends_on:
+  - `DX-A.A1`
+- parallel_safe:
+  - false
+- shared_write_targets:
+  - `docs/b.md`
+- expected_artifacts:
+  - b
+- integration_notes:
+  - b
+- rollback_strategy:
+  - revert b
+"""
 
 
 def run_checker(task_doc: Path) -> subprocess.CompletedProcess[str]:
@@ -33,13 +66,11 @@ def expect_fail(name: str, proc: subprocess.CompletedProcess[str], needle: str) 
 
 
 def main() -> int:
-    original = TASK_DOC.read_text(encoding="utf-8")
-
     with tempfile.TemporaryDirectory(prefix="parallel-safety-") as tmpdir:
         tmp = Path(tmpdir)
 
         happy = tmp / "tasks-happy.md"
-        happy.write_text(original, encoding="utf-8")
+        happy.write_text(HAPPY_TASKS, encoding="utf-8")
         expect_ok("happy-path", run_checker(happy))
 
         conflict = tmp / "tasks-conflict.md"

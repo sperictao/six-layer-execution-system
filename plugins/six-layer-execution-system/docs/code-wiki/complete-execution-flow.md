@@ -13,8 +13,8 @@
 其中最重要的边界是：
 
 - `ACTIVE.md` 仍然是唯一 live runtime truth
-- `demands/` 是上游 intake 工件，不替代运行态真相
-- `roadmaps/` 和 `tasks/` 承载执行设计，真正的当前执行状态仍落在 `ACTIVE.md`
+- `activities/<activity-id>/0-demand.md` 是上游 intake 工件，不替代运行态真相
+- `activities/<activity-id>/2-roadmap.md` 和 `3-tasks/` 承载执行设计，真正的当前执行状态仍落在 `ACTIVE.md`
 
 如果需要更适合汇报的简化视图，见：
 
@@ -50,14 +50,14 @@ flowchart TD
         D1 --> D2["规范化请求<br/>derive_title + slugify + build_project_code"]
         D1 --> D3["推断语义<br/>task_type + risk_level + constraints + non_goals"]
         D1 --> D4["构造 DemandCard"]
-        D4 --> D5["demand_card.render_demand_card()<br/>渲染 demands/*.md"]
+        D4 --> D5["demand_card.render_demand_card()<br/>渲染 activities/&lt;id&gt;/0-demand.md"]
         D1 --> D6["生成 roadmap Markdown<br/>Phase / exit criteria / wave shape"]
         D1 --> D7["生成 tasks Markdown<br/>Slice / depends_on / validation / rollback"]
         D1 --> D8["生成 Activity 卡片<br/>current_slice_id / next_slice_id / validation / retrieval_keys"]
         D8 --> D9["Ledger.add_activity()<br/>追加 Activity index 和 Activity block"]
-        D5 --> D10["写入 demands/<date>-<slug>.md"]
-        D6 --> D11["写入 roadmaps/<slug>-roadmap.md"]
-        D7 --> D12["写入 tasks/<slug>-tasks.md"]
+        D5 --> D10["写入 activities/&lt;id&gt;/0-demand.md"]
+        D6 --> D11["写入 activities/&lt;id&gt;/2-roadmap.md"]
+        D7 --> D12["写入 activities/&lt;id&gt;/3-tasks/*.md"]
         D9 --> D13["更新 ACTIVE.md meta<br/>至少刷新 updated_at"]
         D13 --> D14{"是否使用 --activate"}
         D14 -->|是| D15["切换 current_focus_activity_id<br/>和 default_reply_activity_id"]
@@ -104,7 +104,7 @@ flowchart TD
         H5 --> H6{"focus 是 roadmap<br/>且 current_slice_id / next_slice_id / last_commit / last_validation 齐全"}
         H6 -->|否| H7["停止并输出 CLOSEOUT_READY_FAILED"]
         H6 -->|是| H8["create_slice_closeout.py<br/>生成 frozen closeout artifact"]
-        H8 --> H9["写入 memory/last-slice-closeout.json"]
+        H8 --> H9["写入 local-state/last-slice-closeout.json"]
         H9 --> H10["build_slice_handoff.py<br/>从 frozen artifact 构建 payload"]
         H10 --> H11["输出 handoff payload<br/>供下游 host 或后续流程消费"]
     end
@@ -127,6 +127,6 @@ flowchart TD
 ## 4. 读图重点
 
 - 如果入口是“恢复 / 继续”，系统先走 `ACTIVE.md`，不是先看 roadmap。
-- 如果入口是“新自然语言需求”，系统先生成 `demands/ + roadmaps/ + tasks/ + ACTIVE activity`，再进入 canonical checks。
+- 如果入口是“新自然语言需求”，系统先生成 `activities/<activity-id>/ + ACTIVE activity`，再进入 canonical checks。
 - `--activate` 只影响 focus 切换，不改变 demand/roadmap/tasks 的生成结构。
-- `closeout` 不直接依赖实时 `ACTIVE.md` 输出 payload，而是先冻结到 `memory/last-slice-closeout.json`，再从 frozen artifact 生成 handoff。
+- `closeout` 不直接依赖实时 `ACTIVE.md` 输出 payload，而是先冻结到 `local-state/last-slice-closeout.json`，再从 frozen artifact 生成 handoff。

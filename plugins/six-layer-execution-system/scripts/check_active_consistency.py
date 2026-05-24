@@ -110,7 +110,11 @@ def validate_ledger_level(problems: list[str], ledger) -> None:
     if ledger.meta.get("selection_policy") not in {"focus-first", "focus-then-fallback"}:
         add_problem(problems, "ledger", "selection_policy must be `focus-first` or `focus-then-fallback`")
 
-    if not ledger.activity_index:
+    focus_id = ledger.current_focus_activity_id
+    reply_id = ledger.meta.get("default_reply_activity_id")
+    empty_idle_ledger = not ledger.activity_index and focus_id == "none" and reply_id == "none"
+
+    if not ledger.activity_index and not empty_idle_ledger:
         add_problem(problems, "ledger", "Activity index is empty")
 
     if len(set(ledger.activity_index)) != len(ledger.activity_index):
@@ -120,14 +124,15 @@ def validate_ledger_level(problems: list[str], ledger) -> None:
         if activity_id not in ledger.activities:
             add_problem(problems, "ledger", f"Activity index references missing activity `{activity_id}`")
 
-    focus_id = ledger.current_focus_activity_id
     if not focus_id:
         add_problem(problems, "ledger", "missing current focus activity")
+    elif focus_id == "none":
+        if ledger.activity_index:
+            add_problem(problems, "ledger", "current focus cannot be `none` while Activity index is not empty")
     elif focus_id not in ledger.activities:
         add_problem(problems, "ledger", f"current focus activity `{focus_id}` does not exist")
 
-    reply_id = ledger.meta.get("default_reply_activity_id")
-    if reply_id and reply_id not in ledger.activities:
+    if reply_id and reply_id != "none" and reply_id not in ledger.activities:
         add_problem(problems, "ledger", f"default reply activity `{reply_id}` does not exist")
 
 

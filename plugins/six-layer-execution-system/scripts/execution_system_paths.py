@@ -19,8 +19,16 @@ STATE_ROOT = Path(
 ).expanduser().resolve()
 SCRIPTS_DIR = WORKSPACE / "scripts"
 ACTIVE_PATH = WORKSPACE / "ACTIVE.md"
-DEMANDS_DIR = WORKSPACE / "demands"
-DEFAULT_MIGRATED_TASK_DOC = WORKSPACE / "tasks" / "execution-system-testing-tasks.md"
+ACTIVITIES_DIR = WORKSPACE / "activities"
+DEMANDS_DIR = WORKSPACE / "demands"  # legacy compatibility only
+DEFAULT_MIGRATED_TASK_DOC = (
+    WORKSPACE
+    / "recycle"
+    / "activities"
+    / "execution-system-testing"
+    / "3-tasks"
+    / "execution-system-testing-tasks.md"
+)
 DEFAULT_PARALLEL_WAVE_TASK_DOC = (
     WORKSPACE / "tasks" / "execution-system-decomposition-upgrade-tasks.md"
 )

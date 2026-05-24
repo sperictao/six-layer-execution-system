@@ -76,12 +76,72 @@ def write_card(workspace: Path, activity_id: str, card_text: str) -> Path:
     return card_path
 
 
+def seed_focus_activity(workspace: Path, active_text: str) -> tuple[str, str]:
+    focus_id = "synthetic-focus"
+    activity_dir = workspace / "activities" / focus_id
+    tasks_dir = activity_dir / "3-tasks"
+    tasks_dir.mkdir(parents=True, exist_ok=True)
+    (activity_dir / "0-demand.md").write_text("# Synthetic demand\n", encoding="utf-8")
+    (activity_dir / "2-roadmap.md").write_text("# Synthetic roadmap\n", encoding="utf-8")
+    (tasks_dir / "S-1.md").write_text(
+        "\n".join(
+            [
+                "# Slice S-1 - synthetic",
+                "",
+                "- phase_id: `S`",
+                "- rollback_strategy:",
+                "  - revert synthetic change",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    card_text = "\n".join(
+        [
+            "### Activity: synthetic-focus",
+            "- activity_id: `synthetic-focus`",
+            "- title: `synthetic focus`",
+            "- type: `roadmap`",
+            "- owner: `test`",
+            "- status: `ready`",
+            "- priority: `P2`",
+            "- autopilot: `false`",
+            "- focus_rank: `1`",
+            "- path: `.`",
+            "- repo: `six-layer-execution-system`",
+            "- source_doc: `activities/synthetic-focus/0-demand.md`",
+            "- roadmap_doc: `activities/synthetic-focus/2-roadmap.md`",
+            "- tasks_dir: `activities/synthetic-focus/3-tasks/`",
+            "- current_slice_id: `S-1`",
+            "- next_slice_id: `S-2`",
+            "- last_commit: `test123`",
+            "- next_step:",
+            "  - continue synthetic test",
+            "- validation:",
+            "  - synthetic validation",
+            "- blocked_by:",
+            "  - none",
+        ]
+    )
+    write_card(workspace, focus_id, card_text + "\n")
+
+    row = "| synthetic-focus | roadmap | ready | P2 | activities/synthetic-focus/ |"
+    if "- current_focus_activity_id: `none`" in active_text:
+        active_text = active_text.replace("- current_focus_activity_id: `none`", "- current_focus_activity_id: `synthetic-focus`", 1)
+        active_text = active_text.replace("- default_reply_activity_id: `none`", "- default_reply_activity_id: `synthetic-focus`", 1)
+        active_text = active_text.replace("|------------|------|--------|----------|------|\n", f"|------------|------|--------|----------|------|\n{row}\n", 1)
+        active_text = active_text.replace("## Focus: none\n- status: `none`", "## Focus: synthetic-focus\n- card: `activities/synthetic-focus/card.md`\n- status: `ready`", 1)
+    return focus_id, active_text
+
+
 def main() -> int:
     with cloned_workspace() as workspace:
         env = workspace_env(workspace)
         active_path = workspace / "ACTIVE.md"
         active_text = active_path.read_text(encoding="utf-8")
         real_focus_id = extract_current_focus(active_text)
+        if real_focus_id == "none":
+            real_focus_id, active_text = seed_focus_activity(workspace, active_text)
 
         # Find a roadmap activity for testing (v3: check index table)
         focus_id = real_focus_id

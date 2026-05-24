@@ -50,6 +50,7 @@ FULL_REPO_TEST_SPECS = (
     ("system-path-closeout-ready-focus-drift", "test_execution_system_path_closeout_ready_focus_drift.py"),
     ("system-path-runner-hint-drift", "test_execution_system_path_runner_hint_drift.py"),
     ("system-path-parallel-wave", "test_execution_system_path_parallel_wave.py"),
+    ("activity-recycle-smoke", "test_activity_recycle.py"),
     ("active-checker-smoke", "test_check_active_consistency.py"),
     ("demand-card-smoke", "test_check_demand_card_schema.py"),
     ("generated-decomposition-consistency-smoke", "test_check_generated_decomposition_consistency.py"),

@@ -13,7 +13,7 @@ Read these first when the task is about the local execution system:
 
 ## Core Model
 
-The local root-hosted execution system is built on:
+The local plugin-hosted execution system is built on:
 
 - layered truth
 - focus-first execution
@@ -23,7 +23,7 @@ The six owned layers are:
 
 1. contract: long-lived constraints and invariants
 2. roadmap: phases, dependencies, exit criteria
-3. tasks: individual slice plan/outcome files under `tasks/<activity-id>/<slice-id>.md`
+3. tasks: individual slice plan/outcome files under `activities/<activity-id>/3-tasks/<slice-id>.md`
 4. ACTIVE: current runtime truth
 5. decisions: durable rationale
 6. memory: history and recovery aids
@@ -41,10 +41,11 @@ Demand intake exists upstream of those layers but is not runtime truth.
 When asked to recover or report status:
 
 1. read `ACTIVE.md`
-2. resolve the focus activity
-3. read its card at `activities/<focus>/card.md`
-4. read the linked `2-roadmap.md` and `3-tasks/<slice>.md` within the activity directory
-5. only then reply
+2. if the focus activity is `none`, report the ledger as idle and use `recycle/history.md` only as historical context
+3. otherwise resolve the focus activity
+4. read its card at `activities/<focus>/card.md`
+5. read the linked `2-roadmap.md` and `3-tasks/<slice>.md` within the activity directory
+6. only then reply
 
 ## Focus-First and Parallel-Wave Semantics
 
@@ -105,6 +106,26 @@ Flow summary:
 
 Durable closeout truth lives in the frozen closeout artifact, not in `ACTIVE.md`.
 The canonical handoff payload should explicitly carry `current_focus_activity_id` from that artifact instead of re-reading live focus state.
+
+## Activity Recycling
+
+Completed activities can leave the live ledger after explicit user confirmation.
+
+Rules:
+
+- only `status: done` activities may be recycled
+- current focus and default reply activities must not be recycled
+- dry-run output must ask for confirmation and must not mutate files
+- confirmed recycling removes the activity from `ACTIVE.md` Activity index
+- confirmed recycling moves `activities/<activity-id>/` to `recycle/activities/<activity-id>/`
+- `recycle/history.md` is the durable recycled-activity index
+
+Recycled activity content is historical context, not live runtime truth. Recovery starts from `ACTIVE.md`, not from `recycle/history.md`.
+
+If every activity has been force-recycled, `ACTIVE.md` may intentionally hold
+`current_focus_activity_id: none`, an empty Activity index, and `Focus: none`.
+That state means the execution ledger is idle; focus-dependent path tests are
+not applicable until a new activity is created.
 
 ## Maintenance-Mode Guardrails
 

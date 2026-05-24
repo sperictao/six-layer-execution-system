@@ -43,7 +43,7 @@ Examples:
 Owns phase order, milestones, dependencies, exit criteria, and phase risks.
 
 ### 2.3 Tasks layer
-Owns individual slice design files. Each slice gets its own file under `tasks/<activity-id>/<slice-id>.md`.
+Owns individual slice design files. Each slice gets its own file under `activities/<activity-id>/3-tasks/<slice-id>.md`.
 Each file is a self-contained plan artifact: scope, target files, execution plan, validation, done definition, rollback strategy, and actual outcome.
 
 A tasks file is written **before** execution (as a plan), confirmed by the user, and updated **after** completion (with outcome).
@@ -156,7 +156,7 @@ Parallelism is an execution tactic, not a reason to violate focus-first. Only th
 
 ## 5.0 Demand Intake cards
 Recommended path:
-- `demands/<date>-<topic>.md`
+- `activities/<activity-id>/0-demand.md`
 
 Demand Intake cards are recommended for complex work before contract / roadmap / tasks are written or expanded.
 
@@ -197,7 +197,7 @@ Demand Intake cards must not contain:
 
 ## 5.1 Contract files
 Recommended path:
-- `contracts/<project>-contract.md`
+- `activities/<activity-id>/1-contract.md`
 
 Contract files contain:
 - goal
@@ -235,7 +235,7 @@ Contract files must not contain:
 
 ## 5.2 Roadmap files
 Recommended path:
-- `roadmaps/<project>-roadmap.md`
+- `activities/<activity-id>/2-roadmap.md`
 
 Roadmap files contain:
 - goal
@@ -264,7 +264,7 @@ Roadmap files must not contain:
 
 ## 5.3 Tasks files
 Recommended path:
-- `tasks/<activity-id>/<slice-id>.md` — one file per slice
+- `activities/<activity-id>/3-tasks/<slice-id>.md` — one file per slice
 
 Each tasks file is a self-contained plan artifact for a single slice:
 - activity id
@@ -348,7 +348,7 @@ For roadmap activities, this generally means:
 
 ## 5.5 Decisions
 Recommended path:
-- `decisions/<project>/YYYY-MM-DD-<topic>.md`
+- `activities/<activity-id>/4-decisions/YYYY-MM-DD-<topic>.md`
 
 Use for:
 - high-impact design choices
@@ -358,8 +358,9 @@ Use for:
 
 ## 5.6 Memory
 Recommended paths:
-- `memory/YYYY-MM-DD.md`
-- `memory/working-buffer.md`
+- `activities/<activity-id>/5-memory/YYYY-MM-DD.md`
+- `activities/<activity-id>/5-memory/working-buffer.md`
+- `local-state/last-slice-closeout.json` for machine-local closeout state
 
 Use for:
 - daily notes
@@ -541,8 +542,8 @@ Examples:
 - `what were we doing`
 
 Required recovery sequence:
-1. read `memory/working-buffer.md` first when it exists
-2. read `ACTIVE.md`
+1. read `ACTIVE.md`
+2. if `current_focus_activity_id` is `none`, report idle state and use `recycle/history.md` only as historical context
 3. resolve `current_focus_activity_id`
 4. read the focus activity card
 5. if it is a roadmap activity, read its linked roadmap/tasks docs
@@ -584,7 +585,7 @@ Recommended rollout pattern:
 6. use memory only for logs and recovery breadcrumbs
 
 ### 11.1 Decisions adoption guidance
-Use `decisions/` when one of the following is true:
+Use activity-local `4-decisions/` when one of the following is true:
 - a long-lived constraint is chosen or revised
 - multiple plausible options were considered
 - a risky tradeoff is intentionally accepted
@@ -816,7 +817,7 @@ The second checker should target migrated task slice schema only, not all task p
 #### Hard-fail scope
 The checker should evaluate only slices that already clearly claim migrated structure.
 
-A slice counts as in-scope when it exists as an independent file under `tasks/<activity-id>/` and includes at least one of:
+A slice counts as in-scope when it exists as an independent file under `activities/<activity-id>/3-tasks/` and includes at least one of:
 - `phase_id`
 - `rollback_strategy`
 - `actual_execution_plan`

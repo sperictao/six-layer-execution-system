@@ -55,7 +55,7 @@ What `check_active_consistency.py` enforces:
 
 Current implemented boundary:
 
-- turns a natural-language request into generated `demands/`, `roadmaps/`, `tasks/`, and `ACTIVE.md` artifacts
+- turns a natural-language request into generated `activities/<activity-id>/` artifacts and an `ACTIVE.md` entry
 - keeps generation deterministic and repo-local
 - classifies demand shape and picks a bounded decomposition strategy before rendering artifacts
 - keeps high-risk or confirmation-required generated activities non-autopilot and activation-gated until explicitly confirmed
@@ -63,7 +63,7 @@ Current implemented boundary:
 
 ## Decomposition and Parallel-Wave Checkers
 
-- `scripts/check_task_slice_schema.py` — validates per-slice files under `tasks/<activity-id>/` for required fields (`phase_id`, `rollback_strategy`) and status-aware checks (`actual_execution_plan` when in_progress, `actual_outcome` when done)
+- `scripts/check_task_slice_schema.py` — validates per-slice files under `activities/<activity-id>/3-tasks/` for required fields (`phase_id`, `rollback_strategy`) and status-aware checks (`actual_execution_plan` when in_progress, `actual_outcome` when done)
 - `scripts/check_task_dependency_graph.py`
 - `scripts/check_parallel_safety.py`
 - `scripts/check_active_wave_state.py`
@@ -116,7 +116,7 @@ Primary scripts:
 
 Important caches/state files:
 
-- `memory/last-slice-closeout.json`
+- `local-state/last-slice-closeout.json`
 
 Protocol rules:
 

@@ -17,13 +17,10 @@
 | 路径 | 作用 |
 | --- | --- |
 | `ACTIVE.md` | 运行账本，唯一 live runtime truth |
-| `demands/` | 自然语言需求的上游 intake 工件 |
-| `contracts/` | 稳定 contract |
+| `activities/` | live activity 的 demand、contract、roadmap、tasks、decisions、memory |
+| `recycle/` | 已确认回收的历史 activity 与 `history.md` |
 | `docs/` | spec、acceptance、maintenance、testing inventory |
-| `roadmaps/` | phase 级计划 |
-| `tasks/` | slice 级设计 |
-| `decisions/` | durable rationale |
-| `memory/` | working buffer / closeout artifact / 恢复辅助 |
+| `local-state/` | 本机 closeout artifact / telemetry，默认忽略 |
 | `references/` | source map、checker 协议、安装/runtime 说明 |
 
 ### 1.3 执行代码模块
@@ -177,7 +174,7 @@
 
 职责：
 
-- 生成 `memory/last-slice-closeout.json`
+- 生成 `local-state/last-slice-closeout.json`
 - 写入切片完成产物
 
 关键字段：
@@ -239,7 +236,7 @@
 
 职责：
 
-- 扫描 `demands/*.md` 或指定 demand 文件
+- 扫描 `activities/*/0-demand.md` 或指定 demand 文件
 - 校验 demand intake 是否具备最小 schema
 - 保护“自然语言需求上游工件”不会退化成无结构文本
 
@@ -296,7 +293,7 @@
 作用：
 
 - 将自然语言需求做确定性分解
-- 生成 `demands/`、`roadmaps/`、`tasks/` 和 `ACTIVE` activity
+- 生成 `activities/<activity-id>/` 和 `ACTIVE` activity
 - 当前是一阶段规则引擎，不依赖外部模型
 
 ### `telemetry.py`

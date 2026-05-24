@@ -69,7 +69,7 @@ Keep content in `ACTIVE.md` when it directly answers:
 Move content out of `ACTIVE.md` when it is mainly:
 - a chronological milestone log
 - repeated historical narrative
-- rationale better stored in `decisions/`
+- rationale better stored in activity-local `4-decisions/`
 - policy prose already captured in spec/docs
 
 For roadmap activities:
@@ -80,8 +80,8 @@ For roadmap activities:
 Primary files:
 - `ACTIVE.md`
 - `docs/execution-system-spec-v1.md`
-- `memory/*.md`
-- `decisions/`
+- `activities/<activity-id>/5-memory/*.md`
+- `activities/<activity-id>/4-decisions/`
 
 Review question:
 - is this line helping recovery, or just preserving history?
@@ -154,8 +154,8 @@ This line should be treated as infrastructure in maintenance, not as a standing 
 Primary references:
 - `docs/execution-system-spec-v1.md`
 - `docs/execution-system-spec-v1-acceptance-checklist.md`
-- `roadmaps/execution-system-spec-v1-roadmap.md`
-- `tasks/execution-system-spec-v1-tasks.md`
+- `recycle/activities/execution-system-spec-v1/2-roadmap.md`
+- `recycle/activities/execution-system-spec-v1/3-tasks/execution-system-spec-v1-tasks.md`
 - `ACTIVE.md`
 
 ---

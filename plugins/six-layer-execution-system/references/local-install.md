@@ -24,14 +24,13 @@ Key execution files:
 
 Key execution directories:
 
-- `contracts/`
-- `roadmaps/`
-- `tasks/`
-- `decisions/`
-- `memory/`
+- `activities/` (new live activity directories)
+- `recycle/` (historical activity directories and index)
+- `docs/`
 - `references/`
 - `scripts/`
 - `skills/`
+- `local-state/` (ignored machine-local closeout and telemetry state)
 
 ---
 
@@ -45,17 +44,10 @@ Docs:
 - `docs/execution-system-spec-v1-acceptance-checklist.md`
 - `<repo-root>/tests/execution-system-testing-inventory.md` (source-checkout authority)
 
-Roadmaps:
+Activity history:
 
-- `roadmaps/execution-system-spec-v1-roadmap.md`
-- `roadmaps/execution-system-testing-roadmap.md`
-- `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
-
-Tasks:
-
-- `tasks/execution-system-spec-v1-tasks.md`
-- `tasks/execution-system-testing-tasks.md`
-- `tasks/execution-system-decomposition-upgrade-tasks.md`
+- `recycle/history.md`
+- `recycle/activities/<activity-id>/`
 
 Scripts:
 

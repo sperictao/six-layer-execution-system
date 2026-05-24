@@ -13,6 +13,12 @@ def main() -> int:
     ledger = parse_ledger()
     focus = ledger.get_current_focus_activity()
     if focus is None:
+        if ledger.current_focus_activity_id == "none" and not ledger.activity_index:
+            print("FOCUS_VALIDATION_POLICY_GATE")
+            print("- focus_activity_id: none")
+            print("- no live activities remain after explicit recycling")
+            print("- note: focus-first remains intact; there is no runnable focus")
+            return 2
         print("FOCUS_VALIDATION_FAILED:no_focus")
         return 1
 

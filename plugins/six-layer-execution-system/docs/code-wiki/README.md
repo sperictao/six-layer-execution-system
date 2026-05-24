@@ -7,7 +7,7 @@
 这套系统的核心目标是：
 
 - 用 `ACTIVE.md` 作为唯一运行态真相，回答“现在在做什么”。
-- 用 `contract / roadmap / tasks / decisions / memory` 分层承载稳定约束、计划、切片设计、决策与恢复信息。
+- 用每个 `activities/<activity-id>/` 目录内的 contract / roadmap / tasks / decisions / memory 分层承载稳定约束、计划、切片设计、决策与恢复信息。
 - 用脚本把“文档规范”升级为“可执行、可验证、可恢复”的执行系统。
 - 让插件目录本身即可迁移到另一台机器使用，不依赖仓库根的开发资产。
 
@@ -27,12 +27,12 @@
 | 层 | 主要载体 | 职责 |
 | --- | --- | --- |
 | Layer 0 | Demand Intake（上游概念） | 需求进入系统前的最小 intake，不是运行态真相 |
-| Layer 1 | `contracts/` | 长期稳定约束、不可轻易漂移的规则 |
-| Layer 2 | `roadmaps/` | phase 级计划、依赖、退出条件 |
-| Layer 3 | `tasks/` | slice 级任务设计、验证、回滚、并行信息 |
+| Layer 1 | `activities/<id>/1-contract.md` | 长期稳定约束、不可轻易漂移的规则 |
+| Layer 2 | `activities/<id>/2-roadmap.md` | phase 级计划、依赖、退出条件 |
+| Layer 3 | `activities/<id>/3-tasks/` | slice 级任务设计、验证、回滚、并行信息 |
 | Layer 4 | `ACTIVE.md` | 唯一 live runtime truth，记录当前 focus 和活动卡片 |
-| Layer 5 | `decisions/` | 长期设计取舍和决策理由 |
-| Layer 6 | `memory/` | 恢复辅助、closeout 产物、工作缓冲，不替代运行态真相 |
+| Layer 5 | `activities/<id>/4-decisions/` | 长期设计取舍和决策理由 |
+| Layer 6 | `activities/<id>/5-memory/` / `local-state/` | 恢复辅助、closeout 产物、工作缓冲，不替代运行态真相 |
 
 补充说明：
 
@@ -45,14 +45,11 @@
 
 | 路径 | 类型 | 说明 |
 | --- | --- | --- |
-| `ACTIVE.md` | 运行账本 | 当前 focus、活动索引、活动卡片、恢复指针 |
-| `demands/` | 需求 intake | 自然语言复杂需求的上游分解工件 |
-| `contracts/` | 规范 | execution-system 的稳定 contract |
+| `ACTIVE.md` | 运行账本 | 当前 focus、活动索引、恢复指针 |
+| `activities/` | 活动运行资产 | live activity 的 demand、contract、roadmap、tasks、decisions、memory |
+| `recycle/` | 历史活动 | 已确认回收的 activity 目录与 `history.md` 索引 |
 | `docs/` | 设计/验收文档 | spec、维护守则、acceptance、testing inventory 等 |
-| `roadmaps/` | 路线图 | phase 级推进计划 |
-| `tasks/` | 切片任务 | slice 级拆分、验证与回滚策略 |
-| `decisions/` | 决策记录 | durable rationale |
-| `memory/` | 恢复/closeout | `working-buffer.md`、`last-slice-closeout.json` 等 |
+| `local-state/` | 本机状态 | closeout 与 telemetry，本地忽略，不作为分发真相 |
 | `scripts/` | 核心代码 | 解析、校验、runner、closeout、wrapper、CLI |
 | `references/` | 参考资料 | source map、checker 协议、安装/runtime 说明 |
 | `.codex-plugin/` | 插件元数据 | `plugin.json` |

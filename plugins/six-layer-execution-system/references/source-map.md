@@ -17,11 +17,11 @@ Source checkout root for repo-local development assets:
 
 - `<plugin-root>/ACTIVE.md` — thin index (v3), ~58 lines
 - `<plugin-root>/skills/six-layer-execution-system/SKILL.md` — prompt rule source of truth
-- `<plugin-root>/memory/working-buffer.md` — recovery buffer (archived: `_archive/memory/`)
+- `<plugin-root>/local-state/last-slice-closeout.json` — local closeout artifact when present; ignored state, not distributed truth
 
 ## Per-Activity Resources (v3)
 
-Activities live under `<plugin-root>/activities/<activity-id>/`:
+New live activities are created under `<plugin-root>/activities/<activity-id>/`:
 
 ```
 activities/<activity-id>/
@@ -34,28 +34,14 @@ activities/<activity-id>/
   5-memory/        ← activity-specific memory (optional)
 ```
 
-Current activities:
+Current live activity state is not maintained in this source map. Read `ACTIVE.md`.
+When `current_focus_activity_id` is `none`, no live activity is runnable.
 
-- `activities/ledger-v3-activity-isolation/` — active (in_progress)
-- `activities/one-publish-architecture-fix/` — done
-- `activities/execution-system-spec-v1/` — parked
-- `activities/execution-system-decomposition-upgrade/` — ready
-- `activities/active-ledger-v2/` — done
-- `activities/execution-system-testing/` — done
-- `activities/waiting-ledger-review/` — blocked
-- `activities/simple-ledger-docs/` — ready
-- `activities/auto-auto-decompose-natural-language-demand/` — blocked
+## Recycled Resources
 
-## Archived Resources
-
-Old layer-bucket files preserved in `<plugin-root>/_archive/`:
-
-- `_archive/demands/`
-- `_archive/contracts/`
-- `_archive/roadmaps/`
-- `_archive/tasks/`
-- `_archive/decisions/`
-- `_archive/memory/`
+Confirmed recycled activities live under `<plugin-root>/recycle/activities/<activity-id>/`.
+The durable historical index is `<plugin-root>/recycle/history.md`.
+Recycled content is historical context, not live runtime truth.
 
 ## Cross-Activity Resources
 

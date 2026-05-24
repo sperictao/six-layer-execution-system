@@ -133,7 +133,7 @@ python3 scripts/exec_sys.py demand decompose --request-file /abs/path/request.tx
 - `slice start`：修改 focus activity 的 `current_slice_id`
 - `slice complete`：执行 checks + closeout + payload 输出
 - `--agile`：跳过 repo smoke tests，适合快速 closeout
-- `demand decompose`：把自然语言需求生成 `demands/*.md`、`roadmaps/*-roadmap.md`、`tasks/*-tasks.md` 和 `ACTIVE` activity
+- `demand decompose`：把自然语言需求生成 `activities/<activity-id>/` 和 `ACTIVE` activity
 
 ## 4. 检查器与 runner 体系
 
@@ -210,7 +210,7 @@ closeout 前至少满足：
 
 路径：
 
-- `memory/last-slice-closeout.json`
+- `local-state/last-slice-closeout.json`
 
 主要字段：
 
@@ -291,7 +291,7 @@ payload 里会记录：
 ## 8. 运行边界与常见误区
 
 - 不要把仓库根当成 execution-system 的 runtime truth。
-- 不要从 `memory/` 或聊天历史推断当前状态，应先读 `ACTIVE.md`。
+- 不要从 activity-local memory 或聊天历史推断当前状态，应先读 `ACTIVE.md`。
 - 不要把 standalone plugin 中 `full-tests unavailable` 误判成系统故障。
 - 不要把 advisory 输出当成 hard-fail。
-- closeout/handoff 的最终事实在 `memory/last-slice-closeout.json`，不是 live `ACTIVE.md`。
+- closeout/handoff 的最终事实在 `local-state/last-slice-closeout.json`，不是 live `ACTIVE.md`。

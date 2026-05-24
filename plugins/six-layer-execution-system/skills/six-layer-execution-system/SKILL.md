@@ -11,13 +11,16 @@ Use this skill when the task is about a repository that follows the six-layer ex
 
 - `skills/six-layer-execution-system/SKILL.md` is the only prompt-rule source of truth for this plugin.
 - `ACTIVE.md` remains the only live runtime truth.
-- `memory/working-buffer.md` is only a recovery buffer, never runtime truth.
+- `local-state/` is machine-local scratch state for closeout and telemetry, never runtime truth.
+- activity-local `5-memory/` is only a recovery buffer, never runtime truth.
 - Repo-local development tests live under the source checkout root `tests/`.
 - Standalone plugin copies do not carry repo-root `tests/`.
 
 Treat the current repository as the subject:
 
-- the repository root stores runtime truth, docs, scripts, and skills
+- the plugin root stores runtime truth, docs, scripts, and skills
+- live activity artifacts belong under `activities/<activity-id>/`
+- recycled activity artifacts belong under `recycle/activities/<activity-id>/`
 - `references/` stores helper docs and source maps
 - `scripts/inspect_execution_system.py` and `scripts/run_execution_checks.py` are the plugin-safe wrapper commands
 
@@ -68,7 +71,7 @@ Forbidden recovery shortcuts:
 ## Resume And Closeout Handoff Protocol
 
 - 恢复型触发必须遵守同一套恢复规则；不得跳过 `ACTIVE.md` / focus activity / roadmap/tasks / repo fact check 这些步骤
-- 对 `go` / `continue` / `继续` / `resume` / `next` / `start` 这类恢复型触发来说：若 `memory/working-buffer.md` 存在，先读它；然后读 `ACTIVE.md`；再读 focus activity card；再读 roadmap/tasks；最后做 repo/workspace fact check，之后才能汇报进度或继续执行
+- 对 `go` / `continue` / `继续` / `resume` / `next` / `start` 这类恢复型触发来说：先读 `ACTIVE.md`；如果没有 live focus，只能报告 idle 状态并把 `recycle/history.md` 当历史索引；否则再读 focus activity card、roadmap/tasks 和必要的 activity-local `5-memory/`，最后做 repo/workspace fact check，之后才能汇报进度或继续执行
 - 恢复型触发不得仅凭聊天记忆、旧 daily note 推断当前任务状态；工作空间执行文件优先于会话推断
 - 恢复型触发后的执行规划必须与人工执行遵守同一套并行调度口径
 - 将无前置依赖、且无写冲突的子任务按同一波次并行处理
@@ -86,8 +89,10 @@ Closeout and handoff rules:
 
 - `scripts/complete_slice.py` is the canonical closeout entrypoint
 - `scripts/build_slice_handoff.py` prints the canonical handoff payload from the frozen closeout artifact
-- `payload` output must be derived from `memory/last-slice-closeout.json`, not from live `ACTIVE.md` fields
+- `payload` output must be derived from `local-state/last-slice-closeout.json`, not from live `ACTIVE.md` fields
 - if validation passed but `scripts/check_slice_closeout.py` failed, treat the slice as not closed out
+- activity recycling is a separate user-confirmed operation: dry-run first, then `scripts/recycle_activity.py <activity_id> --confirm`
+- recycled activities move to `recycle/activities/<activity_id>/` and are indexed in `recycle/history.md`; they are not live runtime truth
 
 ## Long-Term Context And Preferences
 
@@ -97,11 +102,11 @@ User and working preferences for this repository:
 - 涉及执行系统状态、进展或恢复问题时，先查 `ACTIVE.md`、相关 tasks/roadmap、repo 事实，再回答
 - 复杂任务优先维护 `roadmap + tasks`；`ACTIVE.md` 只保留当前运行真相与恢复指针
 - 对进行中的项目，优先维护一份可恢复的活动任务账本
-- 回答“结果怎么样了 / 进展如何”这类问题前，先检查 `ACTIVE.md`、`memory/YYYY-MM-DD.md`、当前 skill，以及最近会话转录（若可用）
+- 回答“结果怎么样了 / 进展如何”这类问题前，先检查 `ACTIVE.md`、focus activity 文件、当前 skill，以及最近会话转录（若可用）
 
 Continuity model:
 
-- 跨会话连续性来自 `ACTIVE.md`、`memory/`、durable docs、以及当前 skill，不是模型记忆
+- 跨会话连续性来自 `ACTIVE.md`、activity-local memory、durable docs、以及当前 skill，不是模型记忆
 - 长期约定直接收敛到当前 skill，不再拆到单独的记忆 prompt 文件
 - 如果发生会影响执行判断的重要决定但尚未落盘，优先写回 `ACTIVE.md` 或 owning docs
 
@@ -151,19 +156,19 @@ Path and tool ownership facts:
 
 ### Recover Current Execution State
 
-1. Read `memory/working-buffer.md` when it exists.
-2. Read `ACTIVE.md`.
+1. Read `ACTIVE.md`.
+2. If `current_focus_activity_id` is `none`, report idle state and use `recycle/history.md` only as historical context.
 3. Resolve the current focus activity and its linked docs.
-4. Read the current slice's tasks file at `tasks/<activity-id>/<current_slice_id>.md`.
+4. Read the current slice's tasks file at `activities/<activity-id>/3-tasks/<current_slice_id>.md`.
 5. Verify repository and workspace facts before reporting status.
-6. Read daily notes only after runtime truth is loaded.
+6. Read activity-local `5-memory/` only after runtime truth is loaded.
 
 ### Execute a Slice (the canonical workflow)
 
 Every slice execution follows this exact sequence:
 
 1. **Evaluate** — read the focus activity, roadmap, and existing tasks files.
-2. **Plan** — derive the execution plan and write it as a new tasks file at `tasks/<activity-id>/<slice-id>.md` with `actual_execution_plan` filled.
+2. **Plan** — derive the execution plan and write it as a new tasks file at `activities/<activity-id>/3-tasks/<slice-id>.md` with `actual_execution_plan` filled.
 3. **Present** — show the complete plan to the user and wait for explicit confirmation.
 4. **Execute** — only after confirmation, carry out the plan.
 5. **Update** — if reality differs from the initial plan during execution, update the tasks file immediately.
@@ -211,7 +216,7 @@ Typical mapping:
 ## Resources
 
 - `ACTIVE.md`: live runtime truth
-- `tasks/<activity-id>/`: per-slice plan and outcome files
+- `activities/<activity-id>/3-tasks/`: per-slice plan and outcome files
 - `references/templates.md`: canonical templates for all layers, including the single-slice tasks file format
 - `references/workspace-execution-system.md`: local six-layer model and maintenance semantics
 - `references/checkers-and-protocols.md`: checker, advisory, full-suite, and closeout pipeline map

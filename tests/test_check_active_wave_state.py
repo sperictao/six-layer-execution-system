@@ -8,8 +8,6 @@ from pathlib import Path
 from execution_system_paths import WORKSPACE
 CHECKER = WORKSPACE / "scripts" / "check_active_wave_state.py"
 ACTIVE = WORKSPACE / "ACTIVE.md"
-# v3: wave state fields live in the activity card
-CARD_DECOMP = WORKSPACE / "activities" / "execution-system-decomposition-upgrade" / "card.md"
 
 
 def run_checker(active_path: Path) -> subprocess.CompletedProcess[str]:
@@ -39,9 +37,6 @@ def replace_once(original: str, old: str, new: str) -> str:
 
 
 def main() -> int:
-    # v3: test against the activity card that has wave-state fields
-    original = CARD_DECOMP.read_text(encoding="utf-8")
-
     with tempfile.TemporaryDirectory(prefix="active-wave-state-") as tmpdir:
         tmp = Path(tmpdir)
         # Write a test ACTIVE.md pointing to the test card

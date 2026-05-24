@@ -47,17 +47,16 @@ flowchart TD
     U["User Or Resume Trigger"] --> S["Skill Rules<br/>skills/six-layer-execution-system/SKILL.md"]
     S --> A["ACTIVE.md<br/>Live Runtime Truth"]
 
-    C["contracts/"] --> A
-    R["roadmaps/"] --> A
-    T["tasks/"] --> A
-    D["decisions/"] -. rationale .-> A
-    M["memory/"] -. recovery aids .-> A
+    ACT["activities/&lt;id&gt;/<br/>0-demand / 1-contract / 2-roadmap / 3-tasks"] --> A
+    D["activities/&lt;id&gt;/4-decisions"] -. rationale .-> A
+    M["activities/&lt;id&gt;/5-memory"] -. recovery aids .-> A
+    REC["recycle/history.md"] -. historical index .-> A
 
     A --> P["active_ledger.py<br/>Ledger Parser"]
     P --> V["Checkers"]
     V --> CR["check_closeout_ready.py"]
     CR --> CC["create_slice_closeout.py"]
-    CC --> LSC["memory/last-slice-closeout.json"]
+    CC --> LSC["local-state/last-slice-closeout.json"]
     LSC --> BH["build_slice_handoff.py"]
     BH --> O["Handoff Payload"]
 
@@ -74,14 +73,14 @@ flowchart TD
 ### 4.1 Contract 层
 
 - 负责稳定约束与不变量
-- 典型文件：`contracts/execution-system-contract.md`
+- 典型文件：`activities/<activity-id>/1-contract.md`
 - 回答“什么长期成立”
 - 不记录当前 focus、当前 slice、日常进度
 
 ### 4.2 Roadmap 层
 
 - 负责 phase 级计划与退出条件
-- 典型文件：`roadmaps/execution-system-spec-v1-roadmap.md`
+- 典型文件：`activities/<activity-id>/2-roadmap.md`
 - 回答“按什么阶段推进”
 - 不替代运行态
 
@@ -102,15 +101,15 @@ flowchart TD
 ### 4.5 Decisions 层
 
 - 负责 durable rationale
-- 典型文件：`decisions/runtime/2026-03-13-execution-system-focus-first.md`
+- 典型文件：`activities/<activity-id>/4-decisions/YYYY-MM-DD-topic.md`
 - 回答“为什么做了这个长期选择”
 
 ### 4.6 Memory 层
 
 - 负责恢复辅助、工作缓冲、closeout 产物
 - 典型文件：
-  - `memory/working-buffer.md`
-  - `memory/last-slice-closeout.json`
+  - `activities/<activity-id>/5-memory/working-buffer.md`
+  - `local-state/last-slice-closeout.json`
 - 不能替代 `ACTIVE.md`
 
 ## 5. 运行时主流程
@@ -152,7 +151,7 @@ flowchart TD
 
 1. 运行 `collect_summary()`，确认 hard-fail 通过
 2. 运行 `check_closeout_ready()`，确认 focus/slice/commit/validation 信息齐全
-3. 基于 focus activity 生成 `memory/last-slice-closeout.json`
+3. 基于 focus activity 生成 `local-state/last-slice-closeout.json`
 4. 从 closeout artifact 生成 handoff payload
 5. 输出 payload 给外部 host 或后续流程使用
 

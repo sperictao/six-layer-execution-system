@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check per-slice tasks files under a tasks directory.
 
-Each file under tasks/<activity-id>/<slice-id>.md is a self-contained slice.
+Each file under activities/<activity-id>/3-tasks/<slice-id>.md is a self-contained slice.
 Required fields: phase_id, rollback_strategy.
 Expected fields: actual_execution_plan (before execution), actual_outcome (after).
 """

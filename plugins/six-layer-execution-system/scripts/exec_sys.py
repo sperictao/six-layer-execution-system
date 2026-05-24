@@ -117,6 +117,13 @@ def cmd_demand_decompose(args):
     sys.exit(0)
 
 
+def cmd_activity_recycle(args):
+    import recycle_activity
+
+    code = recycle_activity.recycle_activity(args.activity_id, confirm=args.confirm, force=args.force)
+    sys.exit(code)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Unified CLI Tooling for Execution System")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -130,6 +137,14 @@ def main():
     complete_parser = slice_subparsers.add_parser("complete", help="Complete the current slice")
     complete_parser.add_argument("--agile", action="store_true", help="Run in Agile Mode (skip repo smoke tests for faster execution)")
     subparsers.add_parser("status", help="Show current status")
+
+    activity_parser = subparsers.add_parser("activity", help="Activity commands")
+    activity_subparsers = activity_parser.add_subparsers(dest="subcommand", required=True)
+
+    recycle_parser = activity_subparsers.add_parser("recycle", help="Recycle a completed activity")
+    recycle_parser.add_argument("activity_id", help="Activity ID to recycle")
+    recycle_parser.add_argument("--confirm", action="store_true", help="Confirm recycling and move the activity")
+    recycle_parser.add_argument("--force", action="store_true", help="Recycle even when the activity is not done or is current focus")
 
     demand_parser = subparsers.add_parser("demand", help="Demand decomposition commands")
     demand_subparsers = demand_parser.add_subparsers(dest="subcommand", required=True)
@@ -156,6 +171,9 @@ def main():
     elif args.command == "demand":
         if args.subcommand == "decompose":
             cmd_demand_decompose(args)
+    elif args.command == "activity":
+        if args.subcommand == "recycle":
+            cmd_activity_recycle(args)
     elif args.command == "status":
         cmd_status(args)
 

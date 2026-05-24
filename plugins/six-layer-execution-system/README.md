@@ -14,9 +14,11 @@
 
 ## Runtime Truth
 
-- 插件根目录控制文件、`contracts/`、`docs/`、`roadmaps/`、`tasks/`、`decisions/`、`memory/` 共同构成 execution-system 本体。
+- 插件根目录控制文件、`activities/`、`docs/`、`references/`、`scripts/`、`skills/` 与插件元数据共同构成 execution-system 本体。
 - `ACTIVE.md` 是唯一 live runtime truth。
-- `demands/` 保存复杂自然语言需求的上游 intake 工件，不替代运行态真相。
+- 新 activity 的 demand、contract、roadmap、tasks、decisions、memory 都应收在 `activities/<activity-id>/` 内。
+- `recycle/` 保存已确认回收的历史 activity 与 `history.md` 索引，不替代运行态真相。
+- `local-state/` 保存本机 closeout / telemetry 等临时状态，默认不进入插件分发真相。
 - `references/` 只保存辅助参考，不替代运行态真相。
 - `scripts/` 提供 inspect、checker、closeout、handoff 与 acceptance 入口。
 - repo-local 开发测试位于源仓库根 `tests/`，不随插件目录单独分发。
@@ -47,10 +49,10 @@ python3 scripts/run_local_execution_checks.py full-tests --timeout 60
 
 生成自然语言需求分解时，会自动写入：
 
-- `demands/*.md`
-- `roadmaps/*-roadmap.md`
-- `tasks/*-tasks.md`
-- `ACTIVE.md` 中的新 activity 卡片
+- `activities/<activity-id>/0-demand.md`
+- `activities/<activity-id>/2-roadmap.md`
+- `activities/<activity-id>/3-tasks/*.md`
+- `ACTIVE.md` 中的新 activity 索引与 focus 指针（仅在确认激活时）
 
 ## Packaging Metadata
 
