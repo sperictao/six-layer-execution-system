@@ -5,12 +5,13 @@ import re
 import sys
 from pathlib import Path
 
-from execution_system_paths import DEFAULT_PARALLEL_WAVE_TASK_DOC as DEFAULT_TASK_DOC
-SLICE_HEADING_RE = re.compile(r"^#### Slice ([A-Z]\d+) - .+$")
+from task_inputs import TaskTargetNotRequired, iter_task_slices, resolve_task_target
+
 FIELD_RE = re.compile(r"^- ([^:]+):(?: `([^`]+)`| (.+))$")
 LIST_KEY_RE = re.compile(r"^- ([^:]+):$")
 LIST_ITEM_RE = re.compile(r"^  - (.+)$")
-SLICE_ID_REF_RE = re.compile(r"`([A-Z]{2,}-[A-Z]\.([A-Z]\d+))`")
+SLICE_ID_REF_RE = re.compile(r"([A-Z]{2,}-[A-Z]\.([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)?))")
+SHORT_SLICE_ID_RE = re.compile(r"[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)?")
 
 
 def add_problem(problems: list[str], scope: str, message: str) -> None:
@@ -80,14 +81,14 @@ def parse_dep_values(raw: str) -> list[str]:
         return []
     values: list[str] = []
     for part in raw.split(" | "):
-        part = part.strip()
+        part = part.strip().strip("`")
         if not part or part == "none":
             continue
         match = SLICE_ID_REF_RE.fullmatch(part)
         if match:
             values.append(match.group(2))
             continue
-        if re.fullmatch(r"[A-Z]\d+", part):
+        if SHORT_SLICE_ID_RE.fullmatch(part):
             values.append(part)
             continue
         values.append(f"INVALID:{part}")
@@ -96,19 +97,22 @@ def parse_dep_values(raw: str) -> list[str]:
 
 def validate_task_doc(task_doc: Path) -> list[str]:
     problems: list[str] = []
-    blocks = parse_slice_blocks(task_doc.read_text(encoding="utf-8").splitlines())
     graph: dict[str, list[str]] = {}
 
-    for heading, block in blocks:
-        match = SLICE_HEADING_RE.match(heading)
-        if not match:
+    try:
+        task_slices = iter_task_slices(task_doc)
+    except FileNotFoundError as exc:
+        add_problem(problems, f"task_target:{task_doc}", str(exc))
+        return problems
+
+    for task_slice in task_slices:
+        if not task_slice.slice_id:
             continue
-        slice_short_id = match.group(1)
-        fields = extract_fields(block)
+        fields = extract_fields(task_slice.lines)
         if "parallel_safe" not in fields and "shared_write_targets" not in fields:
             continue
 
-        scope = f"task_doc:{task_doc.name}:{heading.replace('#### ', '')}"
+        scope = f"task_doc:{task_slice.source.name}:{task_slice.heading.lstrip('# ').strip()}"
         if not fields.get("depends_on"):
             add_problem(problems, scope, "missing `depends_on`")
             continue
@@ -118,7 +122,7 @@ def validate_task_doc(task_doc: Path) -> list[str]:
             if dep.startswith("INVALID:"):
                 add_problem(problems, scope, f"invalid dependency reference `{dep.removeprefix('INVALID:')}`")
         clean_deps = [dep for dep in deps if not dep.startswith("INVALID:")]
-        graph[slice_short_id] = clean_deps
+        graph[task_slice.slice_id] = clean_deps
 
     for slice_id, deps in graph.items():
         scope = f"task_doc:{task_doc.name}:Slice {slice_id}"
@@ -152,8 +156,19 @@ def validate_task_doc(task_doc: Path) -> list[str]:
 
 
 def main() -> int:
-    task_doc = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_TASK_DOC
-    problems = validate_task_doc(task_doc)
+    path_arg = sys.argv[1] if len(sys.argv) > 1 else None
+    try:
+        task_target = resolve_task_target(path_arg)
+    except TaskTargetNotRequired as exc:
+        print("TASK_DEPENDENCY_GRAPH_CHECK_OK")
+        print(f"- task_target: skipped ({exc})")
+        return 0
+    except Exception as exc:
+        print("TASK_DEPENDENCY_GRAPH_CHECK_FAILED")
+        print(f"- task_target: {exc}")
+        return 1
+
+    problems = validate_task_doc(task_target)
     if problems:
         print("TASK_DEPENDENCY_GRAPH_CHECK_FAILED")
         for problem in problems:
@@ -161,7 +176,7 @@ def main() -> int:
         return 1
 
     print("TASK_DEPENDENCY_GRAPH_CHECK_OK")
-    print(f"- task_doc: {task_doc}")
+    print(f"- task_target: {task_target}")
     return 0
 
 

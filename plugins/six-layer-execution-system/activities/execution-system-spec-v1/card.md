@@ -1,0 +1,65 @@
+### Activity: execution-system-spec-v1
+- activity_id: `execution-system-spec-v1`
+- title: `implement execution system spec v1`
+- type: `roadmap`
+- owner: `Spero`
+- status: `parked`
+- priority: `P1`
+- autopilot: `false`
+- focus_rank: `0`
+- path: `.`
+- source_doc: `docs/execution-system-spec-v1.md`
+- roadmap_doc: `activities/execution-system-spec-v1/2-roadmap.md`
+- tasks_dir: `activities/execution-system-spec-v1/3-tasks/execution-system-spec-v1-tasks.md`
+- current_slice_id: `ES-F.F33`
+- next_slice_id: `ES-F.F34`
+- objective: `将 execution-system-spec-v1 从文档规范推进为可实施、可迁移、可验证的执行系统；在维护态下为 acceptance / summary / closeout 一体化链路冻结第一版薄整合计划`
+- done_when:
+  - `ACTIVE.md` 完成第一轮 lean runtime truth 瘦身
+  - 至少一份 execution-system-owned roadmap/tasks 样例完成模板对齐迁移
+  - `decisions/` 层落地并补关键样例
+- next_step:
+  - 仅围绕 acceptance / summary / closeout 一体化链路规划第一版薄整合步骤
+  - 保持 raw output 可见，不把 advisory 升级成 hard-fail
+  - 完成后再决定是否值得真的重开实现切片
+- validation:
+  - `python3 scripts/check_active_consistency.py`
+  - `first checker exact contract 与 non-goals 已明确`
+  - `不与现有 checker 语义冲突`
+- last_commit: `c7344bb`
+- blocked_by:
+  - maintenance mode until a concrete reopen trigger appears
+- retrieval_keys:
+  - `execution-system-spec-v1`
+  - `roadmaps/execution-system-spec-v1-roadmap.md`
+  - `tasks/execution-system-spec-v1-tasks.md`
+  - `docs/execution-system-spec-v1.md`
+  - `contracts/execution-system-contract.md`
+  - `references/templates.md`
+- query_recipe:
+  - exact anchors first:
+    - `execution-system-spec-v1`
+    - `roadmaps/execution-system-spec-v1-roadmap.md`
+    - `tasks/execution-system-spec-v1-tasks.md`
+  - intent / constraint refinement:
+    - `execution system spec implement lean ACTIVE`
+    - `contract roadmap tasks active completion protocol migration`
+- last_artifact:
+  - `core spec baseline: docs/execution-system-spec-v1.md (landed from 570a222 onward)`
+  - `runtime checker suite: scripts/check_active_consistency.py + scripts/check_task_slice_schema.py + scripts/run_execution_system_checks.py`
+  - `advisory/reporting layer: scripts/check_oversized_migration_slices.py + workflow summary footer`
+  - `closeout state semantics: create/check slice closeout now encode validation_state=validated and slice_state=closed_out`
+  - `acceptance baseline: docs/execution-system-spec-v1-acceptance-checklist.md`
+  - `maintenance guardrails: docs/execution-system-maintenance-guardrails.md`
+  - `migration sample and contract anchors: tasks/execution-system-testing-tasks.md + contracts/execution-system-contract.md`
+- last_decision:
+  - `ACTIVE should keep runtime truth and concise recovery pointers, not a running milestone diary`
+  - `Phase 6 is sufficiently landed; next waves default to advisory/workflow improvements before any third hard-fail checker`
+  - `slice completion semantics should move from doc-only wording into explicit closeout artifact fields`
+  - `workflow reporting may summarize outcomes, but must not replace raw checker output`
+- done_definition:
+  - roadmap/tasks landed
+  - runtime slimming rules defined and partially applied
+  - at least one execution-system-owned migration sample completed
+- notes:
+  - this activity governs implementation of the execution system itself, not external repository refactor work

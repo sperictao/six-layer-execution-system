@@ -7,7 +7,7 @@ from pathlib import Path
 
 from execution_system_paths import WORKSPACE
 CHECKER = WORKSPACE / "scripts" / "check_parallel_safety.py"
-TASK_DOC = WORKSPACE / "tasks" / "execution-system-decomposition-upgrade-tasks.md"
+TASK_DOC = WORKSPACE / "_archive" / "tasks" / "execution-system-decomposition-upgrade-tasks.md"
 
 
 def run_checker(task_doc: Path) -> subprocess.CompletedProcess[str]:

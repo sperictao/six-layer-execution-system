@@ -1,0 +1,478 @@
+# one-publish 架构修复 tasks
+
+## Current phase
+- Phase 0 — 架构债务清理 (P0)
+
+## Dependency graph (PR level)
+```
+P0-1 (remove execute_publish)
+  └─→ P0-2 (de-dotnet PublishConfig)
+        └─→ P0-3 (extract App.tsx state)
+              └─→ P1-W1 (parallel wave: 4 slices)
+                    └─→ P2-1 (command middleware)
+                          └─→ P2-W2 (parallel wave: 2 slices)
+```
+
+## PR queue
+
+### PR-P0 — 架构债务清理 (3/3) ✅
+- goal:
+  - 移除双路径执行系统，消除 dotnet 类型污染，提取前端状态编排
+- validation:
+  - 全部 slice 完成后: `cargo test && pnpm vitest run && pnpm typecheck && cargo clippy`
+- done_definition:
+  - execute_publish 完全移除，PublishConfig 为通用结构，App.tsx < 200 行
+- risk: medium
+- progress: P0-1 ✅ P0-2 ✅ P0-3 ✅
+
+#### Slice P0-1 — 移除废弃的 execute_publish 路径 ✅ DONE
+- phase_id: `PH-0`
+- status: `done`
+- goal:
+  - 彻底移除 `execute_publish` 命令和 `src-tauri/src/publish.rs` 模块
+  - 确保 `execute_provider_publish` 是唯一的发布执行入口
+- scope:
+  - Rust 后端 + Tauri command 注册
+- target_files:
+  - `src-tauri/src/publish.rs` — 删除整个文件
+  - `src-tauri/src/lib.rs` — 移除 `execute_publish` 注册和 `pub mod publish`
+  - `src-tauri/src/commands/publish/mod.rs` — 移除 `execute_publish` 导出
+  - 全局搜索 `execute_publish` 确认无残留引用
+- depends_on:
+  - none
+- parallel_safe: false
+- shared_write_targets:
+  - `src-tauri/src/lib.rs`
+- expected_artifacts:
+  - 删除 1 个文件（publish.rs）
+  - 修改 2 个文件（lib.rs, commands/publish/mod.rs）
+- integration_notes:
+  - 先全局搜索所有 `execute_publish` 引用，列出完整清单后再逐个移除
+  - 确认前端没有通过 `invoke('execute_publish', ...)` 的调用
+  - 如果前端有调用，先迁移到 `execute_provider_publish` 后再删后端
+- handoff_output:
+  - `cargo check && cargo clippy` 通过
+- validation:
+  - `cargo check` — 编译通过
+  - `cargo clippy -- -D warnings` — 无警告
+  - `rg execute_publish src-tauri/` — 无残留（注释除外）
+  - `cargo test` — 全量测试通过
+- done_definition:
+  - execute_publish 命令已注销
+  - publish.rs 文件已删除
+  - 无编译错误或警告
+- rollback_strategy:
+  - `git revert` 单 commit
+- risk: low
+
+#### Slice P0-2 — 移除死代码 PublishConfig（dotnet 遗留类型） ✅ DONE
+- phase_id: `PH-0`
+- status: `done`
+- goal:
+  - 删除 `commands/publish/contracts.rs` 中的 `PublishConfig` struct——P0-1 后已无人引用
+  - 清理 re-exports，确认前端不受影响（前端使用的是 `store::PublishConfigStore`，不同类
+    型）
+- scope:
+  - Rust 后端，3 个文件
+- target_files:
+  - `src-tauri/src/commands/publish/contracts.rs` — 删除 PublishConfig struct + impl Default
+  - `src-tauri/src/commands/publish/mod.rs` — 移除 re-export 中的 PublishConfig
+  - `src-tauri/src/commands/mod.rs` — 移除 re-export 中的 PublishConfig
+- actual_execution_plan:
+  - Step 1: contracts.rs 删除 PublishConfig（行 8-23 struct + 行 25-44 impl Default）
+  - Step 2: mod.rs 移除 `PublishConfig` token
+  - Step 3: commands/mod.rs 移除 `PublishConfig` token
+  - Step 4: cargo check（零警告）+ cargo test（全量通过）
+- depends_on:
+  - P0-1（execute_publish 已移除，PublishConfig 成为死代码）
+- parallel_safe: false
+- shared_write_targets:
+  - `src-tauri/src/commands/publish/` 目录
+- expected_artifacts:
+  - contracts.rs 从 78 行缩减至 ~42 行
+  - 无编译警告
+- integration_notes:
+  - P0-1 已发现：PublishConfig（commands::publish::contracts）与 PublishConfigStore
+    （store::types）是两个独立类型，前端只使用后者
+  - contracts.rs 生成 TypeScript 时从未包含 PublishConfig（只生成 PublishConfigStore）
+  - 因此无需重新生成 TypeScript 契约或修改前端
+- handoff_output:
+  - `cargo check` 零警告 + `cargo test` 全量通过
+- validation:
+  - `cargo check` — 零警告
+  - `cargo test` — 152 passed
+  - `rg PublishConfig src-tauri/src/commands/` — 仅注释残留
+- done_definition:
+  - PublishConfig struct 已从 contracts.rs 删除
+  - re-exports 已清理
+  - cargo check 零警告
+- rollback_strategy:
+  - `git revert` 单 commit
+- risk: low
+
+#### Slice P0-3 — 提取 App.tsx 状态编排为 useAppBoot
+- phase_id: `PH-0`
+- status: `done`
+- goal:
+  - 将 `App.tsx` (919L) 中 ~480 行 hook 编排逻辑提取到 `useAppBoot.ts`
+  - `App.tsx` 回归纯 UI 壳（目标 < 250 行）
+- scope:
+  - 前端 `src/App.tsx` + 覆写 `src/hooks/useAppBoot.ts`（当前为空壳）
+- target_files:
+  - `src/hooks/useAppBoot.ts` — 覆写，承载所有 hook 调用、PRESETS、派生状态、JSX 条件准备
+  - `src/App.tsx` — 大幅减少，仅保留 `lazy()` imports + `useAppBoot()` 调用 + JSX return
+- actual_execution_plan:
+  - Step 1: 覆写 `src/hooks/useAppBoot.ts`
+    - 从 App.tsx 搬入: 所有 hook imports、PRESETS 常量、EMPTY_STRING_LIST、SPEC_VERSION、DotnetPreset/RightPanelView 类型
+    - 搬入全部 hook 调用（~20 个 use* hooks）
+    - 搬入 useCallback/useMemo/useEffect 派生逻辑
+    - 搬入 publishRunCardProps / commandImportResultCardProps / diagnosticsSectionProps 等 JSX 条件准备
+    - 返回 TypeScript 自动推导的统一对象（不手写 interface）
+  - Step 2: 瘦身 `src/App.tsx`
+    - 删除搬出的 imports、常量、类型、hook 调用、计算逻辑
+    - 新增 `import { useAppBoot } from "@/hooks/useAppBoot"`，`const boot = useAppBoot()`
+    - JSX 全部局部变量改为 `boot.xxx`
+    - `lazy()` imports 保留（组件加载不是状态编排）
+    - 目标 < 250 行
+  - Step 3: 验证 `pnpm typecheck && pnpm vitest run`
+  - Step 4: 更新治理文件（ACTIVE.md、tasks 标记 done）
+- depends_on:
+  - P0-2（类型系统已稳定）
+  - ✅ P1-3（Zustand）已完成，不影响此 slice（纯机械提取）
+- parallel_safe: false
+- shared_write_targets:
+  - `src/App.tsx`（只有 P0-3 修改它）
+- expected_artifacts:
+  - `useAppBoot.ts` (~550 行，覆写空壳）
+  - `App.tsx` 缩减至 < 250 行
+- integration_notes:
+  - **纯机械提取**：不改变任何逻辑、不优化 props、不引入新抽象
+  - PRESETS 常量（DotnetPreset[]）搬入 useAppBoot
+  - 所有 lazy() import 留在 App.tsx
+  - useAppBoot 已存在 4 行空壳（P1-3 时创建），本次覆写
+- handoff_output:
+  - `pnpm typecheck && pnpm vitest run` 通过
+- validation:
+  - `pnpm typecheck` — 零错误
+  - `pnpm vitest run` — 全部通过
+  - `wc -l src/App.tsx` < 250
+  - `wc -l src/hooks/useAppBoot.ts` > 500
+- done_definition:
+  - useAppBoot.ts 创建完成，承载全部 hook 组合
+  - App.tsx 仅做 UI 壳（无 hook 调用，仅有 useAppBoot）
+  - 全量测试通过
+- rollback_strategy:
+  - `git revert` 单 commit（两个文件一次性回滚）
+- risk: low
+
+---
+
+### PR-P1 — 代码健康 (4/4) ✅
+- goal:
+  - 拆分超大文件，引入轻量状态管理
+- validation:
+  - 每个 slice 独立验证 + 全量测试 + 冒烟
+- done_definition:
+  - 所有目标文件拆至 < 300 行，props drilling 消除
+- risk: low
+- progress: P1-1 ✅ P1-2 ✅ P1-3 ✅ P1-4 ✅
+
+#### Slice P1-1 — 拆分 usePublishRunner (732L) ✅ DONE
+- phase_id: `PH-1`
+- status: `done`
+- goal:
+  - 将 `usePublishRunner` 按职责拆为 3 个独立 hook:
+    - `usePublishValidate` — 参数校验 + preflight
+    - `usePublishExecute` — 执行 + 流式日志
+    - `usePublishNotify` — 通知 + 历史记录
+- scope:
+  - 前端 hooks
+- target_files:
+  - `src/hooks/usePublishRunner.ts` — 简化为薄组合层（~80 行）
+  - `src/hooks/usePublishValidate.ts` — 新建（~300 行）
+  - `src/hooks/usePublishExecute.ts` — 新建（~250 行）
+  - `src/hooks/usePublishNotify.ts` — 新建（~80 行）
+  - `src/hooks/__tests__/usePublishRunner.test.ts` — 适配（若需要）
+- depends_on:
+  - P0-3（skip，不影响此拆分——usePublishRunner 保持原有接口不变）
+- actual_execution_plan:
+  - Step 1: 创建 `usePublishNotify.ts`（~80 行）— 搬入 notifyFeedback/openOutputDirectoryIfNeeded/restoreMainWindowIfNeeded/syncTrayPublishStatus
+  - Step 2: 创建 `usePublishValidate.ts`（~300 行）— 搬入 spec 构建、preflight pipeline、preview 渲染
+  - Step 3: 创建 `usePublishExecute.ts`（~250 行）— 搬入 runPublishSpec/startPublish/cancelPublish，接收 validate + notify hook 输出作为参数
+  - Step 4: 重构 `usePublishRunner.ts` — 删除已搬出代码，变为调用 3 个 sub-hook 的薄组合层
+  - Step 5: 适配测试 `usePublishRunner.test.ts`（若需要）
+  - Step 6: 验证 pnpm typecheck + pnpm vitest run
+- parallel_safe: true (与其他 P1 slice 无文件冲突)
+- shared_write_targets:
+  - none（操作独立文件）
+- expected_artifacts:
+  - 3 个新 hook 文件（各 < 400 行）
+  - 更新 usePublishRunnerTypes.ts 以支持跨 hook 类型共享
+- integration_notes:
+  - 保持 `usePublishRunner` 作为薄组合层，避免一次性替换所有调用点
+  - 新 hook 通过接口通信，不共享 mutable state
+- handoff_output:
+  - `pnpm typecheck && pnpm vitest run` 通过
+- validation:
+  - `pnpm typecheck`
+  - `pnpm vitest run`（特别关注 usePublishRunner 相关测试）
+- done_definition:
+  - 3 个独立 hook 各司其职
+  - usePublishRunner 可安全删除或变为薄 wrapper
+- rollback_strategy:
+  - `git revert`
+- risk: low
+
+#### Slice P1-2 — 拆分 registry.rs (700L) 为独立 provider 文件 ✅ DONE
+- phase_id: `PH-1`
+- status: `done`
+- goal:
+  - 将 `provider/registry.rs` 中 4 个 BuiltInProvider 迁移到独立文件
+  - 单文件不再包含所有 provider 的实现细节
+- scope:
+  - Rust provider 模块
+- target_files:
+  - `src-tauri/src/provider/mod.rs` — Provider trait + 类型（不变）
+  - `src-tauri/src/provider/registry.rs` — 简化为注册表 + 工厂
+  - `src-tauri/src/provider/providers/dotnet.rs` — 新建
+  - `src-tauri/src/provider/providers/cargo.rs` — 新建
+  - `src-tauri/src/provider/providers/go.rs` — 新建
+  - `src-tauri/src/provider/providers/java_gradle.rs` — 新建
+- depends_on:
+  - P0-2（PublishConfig 已通用化，provider 不再依赖 dotnet 类型）
+- parallel_safe: true
+- shared_write_targets:
+  - `src-tauri/src/provider/` 目录（新增文件，无冲突）
+- expected_artifacts:
+  - 4 个独立 provider 文件
+  - registry.rs 缩减到 < 150 行（纯注册 + 查找逻辑）
+- integration_notes:
+  - 每个 provider 导出 `pub fn dotnet() -> BuiltInProvider` 或等效构造函数
+  - registry 通过 `providers::dotnet::create()` 等调用组装
+- handoff_output:
+  - `cargo check && cargo clippy` 通过
+  - `cargo test` 通过
+- validation:
+  - `cargo check && cargo clippy`
+  - `cargo test`（provider 相关测试）
+- done_definition:
+  - 4 个独立 provider 文件
+  - registry.rs < 150 行
+- rollback_strategy:
+  - `git revert`
+- risk: low
+
+#### Slice P1-3 — 引入 Zustand 状态管理 ✅ DONE
+- phase_id: `PH-1`
+- status: `done`
+- goal:
+  - 用 Zustand 替代 `useAppState` 中的手动状态传播
+  - 消除 hook 间的 props drilling
+- scope:
+  - 前端状态管理
+- target_files:
+  - `src/stores/appStore.ts` — 新建 (~400 行)，Zustand store + 防抖持久化
+  - `src/hooks/useAppState.ts` — 重写为 ~30 行薄 wrapper
+  - `src/hooks/__tests__/useAppState.test.ts` — 适配
+- depends_on:
+  - P0-3（skip，不影响；Zustand 已安装，publishStore 已存在）
+- actual_execution_plan:
+  - Step 1: 创建 `src/stores/appStore.ts` — Zustand store，将所有 state/actions/防抖持久化从 useAppState 搬入
+  - Step 2: 重写 `useAppState` 为薄 wrapper — 调用 useAppStore() 返回相同接口
+  - Step 3: 适配测试 — 测试 mock 改为 mock appStore
+  - Step 4: 验证 pnpm typecheck + pnpm vitest run
+- parallel_safe: true
+- shared_write_targets:
+  - `src/hooks/` 目录（修改现有 hook，但与 P1-1/P1-4 操作不同文件）
+- expected_artifacts:
+  - `src/stores/appStore.ts` — Zustand store
+  - 更新 package.json（新增 zustand）
+  - 至少 3 个 hook 改为直接 subscribe store 而非接收 props
+- integration_notes:
+  - 分两步：先引入 Zustand 并建 store，保持现有 hook 不变
+  - 再逐步迁移 hook 从 props 改为 store subscription
+  - useAppState 保留作为迁移兼容层
+- handoff_output:
+  - `pnpm install && pnpm typecheck && pnpm vitest run` 通过
+- validation:
+  - `pnpm install` — 依赖安装成功
+  - `pnpm typecheck` — 类型正确
+  - `pnpm vitest run` — 全部测试通过
+- done_definition:
+  - Zustand store 已建立
+  - 核心数据流（仓库列表、选中仓库、发布配置）通过 store 订阅
+- rollback_strategy:
+  - `git revert` + `pnpm install`
+- risk: medium
+
+#### Slice P1-4 — 拆分 repository.rs (1190L) 为子模块 ✅ DONE
+- phase_id: `PH-1`
+- status: `done`
+- goal:
+  - 将 `commands/repository.rs` 拆为 scanner / connector / resolver 三个子模块
+- scope:
+  - Rust 命令模块
+- target_files:
+  - `src-tauri/src/commands/repository.rs` — 拆分后变为 mod.rs
+  - `src-tauri/src/commands/repository/scanner.rs` — 新建
+  - `src-tauri/src/commands/repository/connector.rs` — 新建
+  - `src-tauri/src/commands/repository/resolver.rs` — 新建
+- depends_on:
+  - P0-1（旧路径已移除，repository 模块无隐式依赖）
+- parallel_safe: true
+- shared_write_targets:
+  - `src-tauri/src/commands/repository/` 目录（新增文件）
+- expected_artifacts:
+  - 3 个新子模块文件
+  - repository.rs 变为 mod.rs，仅做 re-export
+- integration_notes:
+  - scanner: 扫描项目文件、检测 Provider
+  - connector: 分支连接检测
+  - resolver: 项目信息解析、publish profile 读取
+- handoff_output:
+  - `cargo check && cargo clippy` 通过
+- validation:
+  - `cargo check && cargo clippy`
+  - `cargo test`（repository 相关测试）
+- done_definition:
+  - 3 个子模块文件各司其职
+  - repository.rs（mod.rs）< 100 行
+- rollback_strategy:
+  - `git revert`
+- risk: low
+
+---
+
+### PR-P2 — 可扩展性 (3/3) ✅
+- goal:
+  - 建立中间件层 + 动态 Provider 发现 + 事件总线
+- validation:
+  - 全量测试 + 冒烟 + 新增 Provider 流程验证
+- done_definition:
+  - 所有 Tauri command 经中间件，Provider 可动态加载，事件总线运作
+- risk: medium
+- progress: P2-1 ✅ P2-2 ✅ P2-3 ✅
+
+#### Slice P2-1 — Tauri Command 中间件层 ✅ DONE
+- phase_id: `PH-2`
+- status: `done`
+- goal:
+  - 建立一个薄封装层，为所有 Tauri command 提供统一的日志、计时
+- scope:
+  - Rust 后端（15 个文件，63 个 command 函数）
+- target_files:
+  - `src-tauri/src/commands/middleware.rs` — 新建（~40 行）
+  - `src-tauri/src/commands/mod.rs` — 注册 middleware 模块
+  - 15 个 command 文件 — 机械插入 CommandTimer
+- actual_execution_plan:
+  - Step 1: 创建 `middleware.rs`（CommandTimer: RAII 结构体，构造 log::debug，drop log::info + 耗时）
+  - Step 2: Python 脚本扫描所有 `#[tauri::command]` 函数，在 `{` 后插入计时器行
+  - Step 3: 验证 `cargo check && cargo clippy && cargo test`
+  - Step 4: 更新治理文件
+- depends_on:
+  - P1 完成（代码结构稳定，中间件插入点清晰）
+- parallel_safe: false（先于 P2-2/P2-3）
+- shared_write_targets:
+  - `src-tauri/src/lib.rs`
+  - `src-tauri/src/commands/` 目录
+- expected_artifacts:
+  - `middleware.rs` — 提供 `wrap_command` 或等效高阶函数
+  - 更新 generate_handler! 注册
+- integration_notes:
+  - 中间件是薄封装：接收 command function，返回带日志/计时的 wrapped function
+  - 不改变任何 Tauri IPC 契约
+  - 日志级别: DEBUG（普通命令）、WARN（err 分类）、INFO（计时摘要）
+- handoff_output:
+  - `cargo check && cargo clippy` 通过
+  - 验证: 运行应用，检查日志输出确认中间件生效
+- validation:
+  - `cargo check && cargo clippy`
+  - `cargo test`
+  - 手动验证: 启动应用 → 执行发布 → 检查日志输出包含中间件标记
+- done_definition:
+  - 所有 command 经过中间件层
+  - 日志输出包含统一格式
+- rollback_strategy:
+  - `git revert`
+- risk: medium
+
+#### Slice P2-2 — Provider 动态发现 ✅ DONE
+- phase_id: `PH-2`
+- status: `done`
+- goal:
+  - 将 Provider 注册从硬编码改为目录扫描 + schema JSON 加载
+  - 使新增语言只需添加文件，不需修改核心代码
+- scope:
+  - Rust provider 系统
+- target_files:
+  - `src-tauri/src/provider/registry.rs` — 改为扫描模式
+  - `src-tauri/src/provider/providers/` — 每个文件自描述
+  - Provider schema JSON 文件 — 可能新增 manifest 字段
+- depends_on:
+  - P2-1（动态发现可以利用中间件的日志/错误基础设施）
+- parallel_safe: true（与 P2-3 无文件冲突）
+- shared_write_targets:
+  - `src-tauri/src/provider/registry.rs`
+- expected_artifacts:
+  - 动态发现机制：扫描 `providers/` 目录，加载每个 provider 的 manifest
+  - 至少 1 个 provider 已迁移到新格式
+- integration_notes:
+  - 分两步：先实现扫描逻辑，保持硬编码作为 fallback
+  - 再逐个迁移 provider 到独立 manifest
+  - Provider 文件格式: 每个 .rs 文件导出一个 `pub fn create() -> BuiltInProvider` + 一个描述性常量
+- handoff_output:
+  - `cargo check && cargo clippy` 通过
+  - 验证: 启动应用，确认 4 个 provider 都能被动态发现
+- validation:
+  - `cargo check && cargo clippy`
+  - `cargo test`
+  - 手动: 启动应用 → 检查 Provider 列表完整
+- done_definition:
+  - 新增 Provider 只需: 添加文件 → 重启应用 → 自动注册
+  - 至少 1 个现有 provider 已迁移到动态发现
+- rollback_strategy:
+  - `git revert`
+- risk: medium
+
+#### Slice P2-3 — 事件总线
+- phase_id: `PH-2`
+- status: `done`
+- goal:
+  - 建立内部事件总线，解耦发布成功/失败事件与通知、历史记录、tray 更新
+- scope:
+  - 前端事件系统
+- target_files:
+  - `src/lib/eventBus.ts` — 新建
+  - `src/hooks/usePublishNotify.ts` — 改为发布事件而非直接调用
+  - 订阅方: tray 更新、通知显示、历史记录保存
+- actual_execution_plan:
+  - Step 1: 创建 `eventBus.ts`（零依赖 pub/sub，emit/on/off）
+  - Step 2: 创建 `publishEvents.ts`（4 个事件接口）
+  - Step 3: `usePublishExecute` 移除直接 `notify.*` + `savePublishRecord` 调用，改为 `emit()`
+  - Step 4: `usePublishNotify` 新增 `useEffect` 订阅事件，处理 tray/toast/history 全部副作用
+  - Step 5: `usePublishRunner` 传递 `publishT` + `savePublishRecord` 给 notify，移除传给 execute 的 notify
+  - Step 6: 验证 `pnpm typecheck`
+- depends_on:
+  - P2-1（事件总线可以利用中间件层的事件类型定义）
+- parallel_safe: true（与 P2-2 无文件冲突）
+- shared_write_targets:
+  - none（操作独立文件）
+- expected_artifacts:
+  - `eventBus.ts` — 提供 `emit(event, payload)` / `on(event, handler)` / `off(event, handler)`
+  - 至少 2 个订阅方迁移到事件驱动
+- integration_notes:
+  - 事件总线是纯前端实现，不涉及 Tauri IPC
+  - 事件类型: `publish:started`, `publish:completed`, `publish:failed`, `publish:cancelled`
+  - 使用简单的 pub/sub 模式，不引入 EventEmitter 库
+- handoff_output:
+  - `pnpm typecheck && pnpm vitest run` 通过
+- validation:
+  - `pnpm typecheck`
+  - `pnpm vitest run`
+  - 手动: 执行发布 → 验证通知、历史记录、tray 更新正常
+- done_definition:
+  - 事件总线运作
+  - 发布相关副作用通过事件总线解耦
+- rollback_strategy:
+  - `git revert`
+- risk: low

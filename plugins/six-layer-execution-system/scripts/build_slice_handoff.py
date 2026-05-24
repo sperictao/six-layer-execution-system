@@ -3,9 +3,9 @@ from __future__ import annotations
 
 import json
 
-from execution_system_paths import WORKSPACE
+from execution_system_paths import STATE_ROOT
 
-CLOSEOUT = WORKSPACE / "memory/last-slice-closeout.json"
+CLOSEOUT = STATE_ROOT / "last-slice-closeout.json"
 
 
 def read_closeout() -> dict | None:

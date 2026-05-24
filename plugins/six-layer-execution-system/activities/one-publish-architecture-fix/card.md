@@ -1,0 +1,58 @@
+### Activity: one-publish-architecture-fix
+- activity_id: `one-publish-architecture-fix`
+- title: `fix one-publish architecture: P0→P1→P2 refactor`
+- type: `roadmap`
+- owner: `Spero`
+- status: `done`
+- priority: `P1`
+- autopilot: `false`
+- focus_rank: `0`
+- repo: `one-publish`
+- path: `/Users/erictao/source/repos/one-publish`
+- source_doc: `activities/one-publish-architecture-fix/0-demand.md`
+- roadmap_doc: `activities/one-publish-architecture-fix/2-roadmap.md`
+- tasks_dir: `tasks/one-publish-architecture-fix/`
+- current_tasks_file: `tasks/one-publish-architecture-fix/P2-3.md`
+- current_slice_id: `P2-3` ✅ done
+- next_slice_id: `none`
+- objective: `按 P0→P1→P2 顺序修复 one-publish 全部 10 个架构问题：移除双路径执行、消除 dotnet 类型污染、拆分超大文件、引入状态管理、建立中间件层、Provider 动态发现、事件总线`
+- done_when:
+  - P0: execute_publish 移除，PublishConfig 通用化，App.tsx < 200 行
+  - P1: 4 个超大文件拆至 < 300 行，Zustand 状态管理引入
+  - P2: 中间件层 + 动态 Provider + 事件总线
+  - 全量测试通过 + 冒烟验证
+- next_step:
+  - 🎉 全部 10 个 slice 完成！P0/P1/P2 架构修复完工。
+- validation:
+  - `pnpm typecheck` (前端)
+  - `cargo check && cargo clippy` (后端)
+  - `pnpm vitest run` (前端测试)
+  - `cargo test` (后端测试)
+  - Phase 完成: 启动冒烟验证
+- blocked_by:
+  - none
+- last_commit: `d1b756d`
+- retrieval_keys:
+  - `one-publish-architecture-fix`
+  - `one-publish P0 P1 P2`
+  - `roadmaps/one-publish-architecture-fix-roadmap.md`
+  - `tasks/one-publish-architecture-fix-tasks.md`
+  - `contracts/one-publish-architecture-fix-contract.md`
+- query_recipe:
+  - exact anchors first:
+    - `one-publish-architecture-fix`
+    - `roadmaps/one-publish-architecture-fix-roadmap.md`
+    - `tasks/one-publish-architecture-fix-tasks.md`
+  - intent / constraint refinement:
+    - `one-publish refactor P0 remove execute_publish`
+    - `one-publish contract invariants`
+- last_decision:
+  - `使用六层执行系统治理 one-publish 架构修复，先建立完整 demand/contract/roadmap/tasks/ACTIVE 链再开始执行`
+  - `P0/P1/P2 严格按序执行，P0 内部 P0-1→P0-2→P0-3 串行，P1 同波并行，P2 先串行建中间件再并行铺开`
+- done_definition:
+  - 10 个已识别架构问题全部修复并验证
+  - 全量测试通过
+  - ACTIVE.md 活动标记 done
+- notes:
+  - 此活动使用六层执行系统的治理框架，但操作目标仓库为 one-publish
+  - 不改任何外部行为，纯低风险重构

@@ -1,0 +1,33 @@
+### Activity: waiting-ledger-review
+- activity_id: `waiting-ledger-review`
+- title: `wait for human review on multi-activity ledger direction`
+- type: `waiting`
+- owner: `Spero`
+- status: `blocked`
+- priority: `P2`
+- autopilot: `false`
+- focus_rank: `2`
+- waiting_on: `user`
+- unblock_condition: `用户给出结构反馈、改向或确认可以继续推进下一阶段`
+- next_step:
+  - 收到反馈后整理进 `ACTIVE.md` 或 roadmap/tasks
+- validation:
+  - `反馈已吸收并更新到账本或执行文档`
+- blocked_by:
+  - user feedback pending
+- retrieval_keys:
+  - `waiting-ledger-review`
+  - `multi-activity ledger feedback`
+- query_recipe:
+  - exact anchors first:
+    - `ACTIVE.md waiting-ledger-review`
+  - intent / constraint refinement:
+    - `ledger review feedback`
+- last_artifact:
+  - `three-layer ledger implementation discussion happened in direct session`
+- last_decision:
+  - `waiting activities should be first-class citizens in ACTIVE.md v2`
+- done_definition:
+  - feedback recorded and acted on
+- notes:
+  - this activity exists as a schema validation sample for non-roadmap work

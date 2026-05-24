@@ -7,6 +7,7 @@ with skill-based prompt rules. Verified targets:
 
 - **Claude Code** — loads `skills/six-layer-execution-system/SKILL.md` as the prompt authority
 - **Codex** — discovers the plugin via `.codex-plugin/plugin.json`
+- **Hermes** — loads the skill via `skill_view('six-layer-execution-system')`, uses `terminal()` for scripts, `session_search` for recovery context
 - **OpenAI Agents** — uses `agents/openai.yaml` for interface metadata
 
 ---

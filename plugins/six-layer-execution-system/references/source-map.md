@@ -1,4 +1,4 @@
-# Source Map
+# Source Map (v3)
 
 Use this file to jump to the owning source of an execution-system detail.
 Prefer repository-owned files first. Only consult local-install or upstream paths when the task genuinely depends on them.
@@ -13,50 +13,74 @@ Source checkout root for repo-local development assets:
 
 - `<repo-root>`
 
-Top-level control files:
+## Top-level Control Files
 
-- `<plugin-root>/skills/six-layer-execution-system/SKILL.md`
-- `<plugin-root>/ACTIVE.md`
-- `<plugin-root>/memory/working-buffer.md`
-- `<plugin-root>/demands/`
+- `<plugin-root>/ACTIVE.md` — thin index (v3), ~58 lines
+- `<plugin-root>/skills/six-layer-execution-system/SKILL.md` — prompt rule source of truth
+- `<plugin-root>/memory/working-buffer.md` — recovery buffer (archived: `_archive/memory/`)
 
-Execution-system docs:
+## Per-Activity Resources (v3)
+
+Activities live under `<plugin-root>/activities/<activity-id>/`:
+
+```
+activities/<activity-id>/
+  card.md          ← activity card (was inline in ACTIVE.md v2)
+  0-demand.md      ← demand intake (optional)
+  1-contract.md    ← contract (optional)
+  2-roadmap.md     ← roadmap
+  3-tasks/         ← per-slice tasks files
+  4-decisions/     ← decision records (optional)
+  5-memory/        ← activity-specific memory (optional)
+```
+
+Current activities:
+
+- `activities/ledger-v3-activity-isolation/` — active (in_progress)
+- `activities/one-publish-architecture-fix/` — done
+- `activities/execution-system-spec-v1/` — parked
+- `activities/execution-system-decomposition-upgrade/` — ready
+- `activities/active-ledger-v2/` — done
+- `activities/execution-system-testing/` — done
+- `activities/waiting-ledger-review/` — blocked
+- `activities/simple-ledger-docs/` — ready
+- `activities/auto-auto-decompose-natural-language-demand/` — blocked
+
+## Archived Resources
+
+Old layer-bucket files preserved in `<plugin-root>/_archive/`:
+
+- `_archive/demands/`
+- `_archive/contracts/`
+- `_archive/roadmaps/`
+- `_archive/tasks/`
+- `_archive/decisions/`
+- `_archive/memory/`
+
+## Cross-Activity Resources
+
+- `<plugin-root>/docs/` — specs and design documents
+- `<plugin-root>/references/` — templates, protocols, source maps
+- `<plugin-root>/scripts/` — checkers, runners, utilities
+- `<plugin-root>/skills/` — skill definitions
+
+## Execution-System Docs
 
 - `<plugin-root>/docs/execution-system-spec-v1.md`
 - `<plugin-root>/docs/execution-system-maintenance-guardrails.md`
-- `<repo-root>/tests/execution-system-testing-inventory.md`
-- `<plugin-root>/docs/execution-system-testing-inventory.md` (compatibility pointer)
 - `<plugin-root>/docs/execution-system-spec-v1-acceptance-checklist.md`
 - `<plugin-root>/docs/execution-system-decomposition-upgrade-plan.md`
 - `<plugin-root>/docs/active-ledger-v2.md`
+- `<plugin-root>/docs/execution-system-testing-inventory.md`
 
-Roadmaps:
-
-- `<plugin-root>/roadmaps/execution-system-spec-v1-roadmap.md`
-- `<plugin-root>/roadmaps/execution-system-testing-roadmap.md`
-- `<plugin-root>/roadmaps/execution-system-decomposition-upgrade-roadmap.md`
-- `<plugin-root>/roadmaps/active-ledger-v2-roadmap.md`
-
-Tasks:
-
-- `<plugin-root>/tasks/execution-system-spec-v1-tasks.md`
-- `<plugin-root>/tasks/execution-system-testing-tasks.md`
-- `<plugin-root>/tasks/execution-system-decomposition-upgrade-tasks.md`
-
-Decisions:
-
-- `<plugin-root>/decisions/runtime/2026-03-13-execution-system-focus-first.md`
-
-## Local Runtime Scripts
+## Scripts
 
 Ledger/parser:
-
-- `<plugin-root>/scripts/active_ledger.py`
+- `<plugin-root>/scripts/active_ledger.py` — v3: reads ACTIVE.md index + `activities/*/card.md`
 - `<plugin-root>/scripts/set_focus_activity.py`
 - `<plugin-root>/scripts/validate_focus_first.py`
 
 Checkers:
-
 - `<plugin-root>/scripts/check_active_consistency.py`
 - `<plugin-root>/scripts/check_demand_card_schema.py`
 - `<plugin-root>/scripts/check_task_slice_schema.py`
@@ -70,26 +94,22 @@ Checkers:
 - `<plugin-root>/scripts/check_slice_closeout.py`
 
 Runners:
-
 - `<plugin-root>/scripts/run_execution_system_checks.py`
-- `<repo-root>/tests/run_execution_system_checks.py`
 - `<plugin-root>/scripts/run_execution_system_full_tests.py`
-- `<plugin-root>/scripts/accept_active_ledger_v2.py`
 
 Closeout/handoff:
-
 - `<plugin-root>/scripts/complete_slice.py`
 - `<plugin-root>/scripts/create_slice_closeout.py`
 - `<plugin-root>/scripts/build_slice_handoff.py`
-- `<plugin-root>/scripts/check_slice_closeout.py`
 
 Demand decomposition:
-
 - `<plugin-root>/scripts/demand_card.py`
 - `<plugin-root>/scripts/decomposition_engine.py`
 - `<plugin-root>/scripts/exec_sys.py`
 
-Representative repo-local tests:
+## Repo-Local Tests
+
+These tests exist only in the source checkout and are not shipped inside a standalone plugin copy.
 
 - `<repo-root>/tests/test_check_active_consistency.py`
 - `<repo-root>/tests/test_execution_system_governance_consistency.py`
@@ -99,9 +119,6 @@ Representative repo-local tests:
 - `<repo-root>/tests/test_execution_system_path_parallel_wave.py`
 - `<repo-root>/tests/test_run_execution_system_checks.py`
 - `<repo-root>/tests/test_slice_closeout_state.py`
-
-These tests exist only in the source checkout and are not shipped inside a
-standalone plugin copy.
 
 ## Agent Runtime Reference
 

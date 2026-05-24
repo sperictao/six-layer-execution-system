@@ -1,0 +1,51 @@
+### Activity: ledger-v3-activity-isolation
+- activity_id: `ledger-v3-activity-isolation`
+- title: `refactor execution system to per-activity resource isolation`
+- type: `roadmap`
+- owner: `Spero`
+- status: `done`
+- priority: `P1`
+- autopilot: `false`
+- focus_rank: `0`
+- path: `.`
+- repo: `six-layer-execution-system`
+- source_doc: `activities/ledger-v3-activity-isolation/0-demand.md`
+- roadmap_doc: `activities/ledger-v3-activity-isolation/2-roadmap.md`
+- tasks_dir: `tasks/ledger-v3-activity-isolation/`
+- tasks_doc: `tasks/ledger-v3-activity-isolation/`
+- current_tasks_file: `tasks/ledger-v3-activity-isolation/G-1.md`
+- current_slice_id: `G-1`
+- next_slice_id: `M-1`
+- objective: `将六层执行系统资源组织从按层分桶重构为按活动隔离：每个 activity 自包含全部六层资源，ACTIVE.md 精简为薄索引`
+- done_when:
+  - `activities/` 目录含 8 个 activity 子目录，每个自包含六层资源
+  - ACTIVE.md 精简为 ~50 行索引表
+  - ~12 个 checker 适配并通过
+  - ~6 个规范文档同步
+  - 全 checker 绿 + 全测试绿 + 恢复链可走通
+- next_step:
+  - 执行 M-1：从 ACTIVE.md 提取 8 个活动卡片为独立 card.md
+- validation:
+  - `python3 scripts/run_execution_system_checks.py checks --timeout 60`
+  - `python3 scripts/run_execution_system_full_tests.py`
+- last_commit: `f983f87`
+- blocked_by:
+  - none
+- retrieval_keys:
+  - `ledger-v3-activity-isolation`
+  - `per-activity resource isolation`
+  - `activities directory`
+- query_recipe:
+  - exact anchors first:
+    - `ledger-v3-activity-isolation`
+    - `roadmaps/ledger-v3-activity-isolation-roadmap.md`
+    - `tasks/ledger-v3-activity-isolation/`
+  - intent / constraint refinement:
+    - `per-activity isolation refactor`
+    - `ACTIVE.md v3 thin index`
+- last_decision:
+  - `按活动隔离而非按层分桶；ACTIVE.md 改为薄索引表`
+- done_definition:
+  - 全 checker 绿 + 全测试绿 + 恢复链走通
+- notes:
+  - 这是一次对六层执行系统自身的重构，风险中等，需逐 slice 确认

@@ -1,0 +1,78 @@
+### Activity: active-ledger-v2
+- activity_id: `active-ledger-v2`
+- title: `implement ACTIVE.md v2 multi-activity ledger`
+- type: `roadmap`
+- owner: `Spero`
+- status: `done`
+- priority: `P1`
+- autopilot: `true`
+- focus_rank: `1`
+- path: `.`
+- source_doc: `activities/active-ledger-v2/3-tasks/active-ledger-v2-tasks.md`
+- roadmap_doc: `activities/active-ledger-v2/2-roadmap.md`
+- tasks_dir: `activities/active-ledger-v2/3-tasks/active-ledger-v2-tasks.md`
+- current_slice_id: `AL-E.E2`
+- objective: `完成 active-ledger-v2 的使用文档与验收清单，并在收官后把 focus 切回 maintenance review`
+- done_when:
+  - `docs/active-ledger-v2.md` 落地
+  - `accept_active_ledger_v2.py` 验收通过
+  - `active-ledger-v2` 状态可切为 `done`，focus 可安全切回非 execution-system 的维护态 focus
+- next_slice_id: `followup-ledger-review`
+- next_step:
+  - 写 active ledger v2 使用说明
+  - 跑正式验收脚本
+  - 将 `active-ledger-v2` 标记为完成并把 focus 切回 `waiting-ledger-review`
+- validation:
+  - `python3 scripts/check_active_consistency.py`
+  - `python3 scripts/validate_focus_first.py`
+  - `python3 scripts/accept_active_ledger_v2.py`
+- last_commit: `c7344bb`
+- last_validation:
+  - `python3 scripts/check_active_consistency.py` passed
+  - `python3 -m py_compile scripts/active_ledger.py` passed
+  - `python3 scripts/validate_focus_first.py` passed after switching focus back to `active-ledger-v2`
+  - focus switch negative test failed as expected when focus was moved away from `active-ledger-v2` before the closeout path was finalized
+- blocked_by:
+  - none
+- notify_on:
+  - current slice completed
+  - validation passed
+  - auto-switch to next slice
+  - real blocker or risk escalation
+- notify_suppression_window: `30m`
+- retrieval_keys:
+  - `ACTIVE.md`
+  - `active-ledger-v2`
+  - `three-layer ledger`
+  - `focus-first`
+  - `scripts/check_active_consistency.py`
+  - `scripts/active_ledger.py`
+- query_recipe:
+  - exact anchors first:
+    - `ACTIVE.md active-ledger-v2`
+    - `roadmaps/active-ledger-v2-roadmap.md`
+    - `tasks/active-ledger-v2-tasks.md`
+  - module / file refinement:
+    - `scripts/active_ledger.py`
+    - `scripts/check_active_consistency.py focus activity`
+  - intent / constraint refinement:
+    - `ACTIVE.md multi-activity three-layer ledger`
+    - `focus-first single source of truth`
+- last_artifact:
+  - `workspace repo HEAD: f022949 (feat: enforce focus-first activity controls)`
+  - `closeout artifact and handoff payload preserve activity_id/activity_type/current_focus_activity_id`
+  - `simple-ledger-docs` added as a real simple activity sample
+  - `set_focus_activity.py` and `validate_focus_first.py` landed; focus switch smoke test executed
+  - `docs/active-ledger-v2.md` and `accept_active_ledger_v2.py` landed; acceptance passed
+- last_decision:
+  - `ACTIVE.md v2 should use three-layer ledger + explicit focus activity, not a flat multi-task list`
+  - `closeout dedupe must move to activity_id + completed_slice_id + commit`
+  - `closeout handoff must stay activity-aware before true multi-activity closeout validation`
+- done_definition:
+  - schema skeleton landed
+  - parser skeleton landed
+  - focus-aware checker landed
+  - closeout handoff surfaces are activity-aware by default
+  - docs + acceptance checklist landed and passed
+- notes:
+  - this activity is complete; focus has been handed back to `waiting-ledger-review`

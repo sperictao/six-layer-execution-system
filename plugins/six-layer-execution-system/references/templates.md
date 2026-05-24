@@ -149,45 +149,35 @@ Rules:
 
 ---
 
-## 3. Tasks template
+## 3. Tasks: single-slice file template
+
+Each slice gets its own independent file under `tasks/<activity-id>/<slice-id>.md`.
+The file is the **plan artifact** for that slice — written before execution, updated after completion.
 
 ```md
-# <project> tasks
+# Slice <slice-id> — <名称>
 
-## Current phase
-- ...
-
-## PR queue
-
-### PR-A - <name>
-- goal:
-  - ...
-- validation:
-  - ...
-- done_definition:
-  - ...
-- risk:
-  - low|medium|high
-
-#### Slice A1 - <name>
-- phase_id: `PH-A`
+- activity_id: `<activity-id>`
+- phase_id: `<PH-X>`
+- status: `ready`
 - goal:
   - ...
 - scope:
   - ...
 - target_files:
   - ...
+- actual_execution_plan:
+  - Step 1: ...
+  - Step 2: ...
+  - Step 3: 验证...
 - depends_on:
   - ...
-- parallel_safe:
-  - `true|false`
+- parallel_safe: `true|false`
 - shared_write_targets:
   - ...
 - expected_artifacts:
   - ...
 - integration_notes:
-  - ...
-- handoff_output:
   - ...
 - validation:
   - ...
@@ -195,24 +185,119 @@ Rules:
   - ...
 - rollback_strategy:
   - ...
-- risk:
-  - low|medium|high
+- risk: `low|medium|high`
+- actual_outcome:
+  - commit: ...
+  - verification: ...
 ```
 
+Fields:
+
+| 字段 | 何时填写 | 说明 |
+|------|---------|------|
+| `status` | 始终 | `ready` → `in_progress` → `done` |
+| `actual_execution_plan` | **执行前必填** | 完整执行计划，含步骤和验证，不可只口头陈述 |
+| `actual_outcome` | 完成后填写 | commit + verification 结果 |
+
 Rules:
-- tasks own slice design and validation
-- slices may include dependency and parallel-safety metadata when the work is complex enough to need DAG semantics
-- every slice should be independently reviewable and rollbackable
-- do not use tasks as the current runtime truth
+
+- 每个 slice 一个独立文件，文件名即 slice 标识（如 `P0-1.md`）
+- `actual_execution_plan` 必须在用户确认前写入文件
+- 执行中若发现与初始评估不符，立即更新此文件
+- 完成后填写 `actual_outcome`，将 `status` 改为 `done`
+- 并行 wave 中，无写冲突的 slice 可同时执行
+- 文件的结束即是 slice 的完成——不需要额外 closeout 记录
 
 ---
 
-## 4. ACTIVE ledger meta template
+## 4. Activity directory template (v3)
+
+Each activity lives in `activities/<activity-id>/`:
+
+```
+activities/<activity-id>/
+  card.md          ← 活动卡片（必选）
+  0-demand.md      ← 需求摄入（可选）
+  1-contract.md    ← 合约（可选）
+  2-roadmap.md     ← 路线图（roadmap 类型必选）
+  3-tasks/         ← 任务切片文件（roadmap 类型必选）
+  4-decisions/     ← 决策记录（可选）
+  5-memory/        ← 活动记忆（可选）
+```
+
+### 4.1 card.md template
 
 ```md
+### Activity: <activity-id>
+- activity_id: `<activity-id>`
+- title: `...`
+- type: `roadmap|waiting|simple`
+- owner: `...`
+- status: `ready|in_progress|blocked|parked|done`
+- priority: `P1|P2|P3`
+- autopilot: `true|false`
+- focus_rank: `<int>`
+- path: `<repo path or .>`
+- repo: `<repo name>`
+- source_doc: `activities/<activity-id>/0-demand.md`
+- roadmap_doc: `activities/<activity-id>/2-roadmap.md`
+- tasks_dir: `activities/<activity-id>/3-tasks/`
+- tasks_doc: `activities/<activity-id>/3-tasks/`
+- current_tasks_file: `activities/<activity-id>/3-tasks/<slice>.md`
+- current_slice_id: `<slice-id>`
+- next_slice_id: `<slice-id>`
+- objective: `...`
+- done_when:
+  - ...
+- next_step:
+  - ...
+- validation:
+  - ...
+- last_commit: `<commit>`
+- blocked_by:
+  - none
+- retrieval_keys:
+  - ...
+- query_recipe:
+  - ...
+- last_decision:
+  - ...
+- done_definition:
+  - ...
+- notes:
+  - ...
+```
+
+## 5. ACTIVE ledger meta template (v3)
+
+```md
+# ACTIVE.md — Execution Ledger v3
+
 ## Ledger meta
-- version: `2`
+- version: `3`
 - mode: `multi-activity`
+- current_focus_activity_id: `<activity-id>`
+- default_reply_activity_id: `<activity-id>`
+- selection_policy: `focus-first`
+- activity_root: `activities/`
+- updated_at: `<timestamp>`
+
+## Status legend
+- ...
+
+## Activity index
+
+| activity_id | type | status | priority | path |
+|------------|------|--------|----------|------|
+| <id> | roadmap | in_progress | P1 | activities/<id>/ |
+
+## Focus: <activity-id>
+- card: `activities/<activity-id>/card.md`
+- status: `<status>`
+- current_slice_id: `<slice>`
+- next_slice_id: `<slice>`
+- last_commit: `<commit>`
+```
 - current_focus_activity_id: `<activity-id>`
 - default_reply_activity_id: `<activity-id>`
 - selection_policy: `focus-first`
@@ -235,7 +320,8 @@ Rules:
 - repo: `...`
 - path: `...`
 - roadmap_doc: `...`
-- tasks_doc: `...`
+- tasks_dir: `tasks/<activity-id>/`
+- current_tasks_file: `tasks/<activity-id>/<slice-id>.md`
 - current_slice_id: `...`
 - next_slice_id: `...`
 - objective: `...`

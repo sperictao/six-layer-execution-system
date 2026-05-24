@@ -1,0 +1,32 @@
+### Activity: simple-ledger-docs
+- activity_id: `simple-ledger-docs`
+- title: `document active ledger v2 usage notes`
+- type: `simple`
+- owner: `Spero`
+- status: `ready`
+- priority: `P3`
+- autopilot: `false`
+- focus_rank: `3`
+- goal: `补一份针对 future-you 的 active ledger v2 使用说明与切换约定`
+- scope: `总结 current focus、activity type、closeout 边界与切换规则`
+- next_step:
+  - 当 Phase 4/5 稳定后，整理成简洁说明写回文档
+- validation:
+  - `文档覆盖 focus-first、activity types、closeout 边界`
+- blocked_by:
+  - none
+- retrieval_keys:
+  - `simple-ledger-docs`
+  - `active ledger v2 usage notes`
+- query_recipe:
+  - exact anchors first:
+    - `ACTIVE.md simple-ledger-docs`
+  - intent / constraint refinement:
+    - `ledger docs usage`
+- last_artifact:
+  - `simple activity schema sample added to ACTIVE.md`
+- last_decision:
+  - `simple activities should not require repo/slice/commit but must still carry goal/next_step/validation`
+- done_definition: `文档草案完成并被吸收到工作流说明中`
+- notes:
+  - this activity exists as a schema validation sample for simple non-roadmap work

@@ -58,6 +58,13 @@ def expect_fail(name: str, proc: subprocess.CompletedProcess[str], needle: str) 
     expect(output, needle)
 
 
+def read_activity_card(workspace: Path, activity_id: str) -> str:
+    card_path = workspace / "activities" / activity_id / "card.md"
+    if not card_path.exists():
+        raise AssertionError(f"missing activity card: {card_path}")
+    return card_path.read_text(encoding="utf-8")
+
+
 def main() -> int:
     with cloned_workspace() as workspace:
         env = workspace_env(workspace)
@@ -86,7 +93,9 @@ def main() -> int:
             raise AssertionError("generated artifact files must exist")
 
         active_text = (workspace / "ACTIVE.md").read_text(encoding="utf-8")
-        expect(active_text, f"- activity_id: `{activity_id}`")
+        expect(active_text, f"| {activity_id} | roadmap |")
+        card_text = read_activity_card(workspace, activity_id)
+        expect(card_text, f"- activity_id: `{activity_id}`")
 
         demand_check = expect_ok(
             "demand-check",
@@ -226,7 +235,8 @@ def main() -> int:
         expect(output, "- activation_blocked_reason: manual review or explicit confirmation required before activation")
         active_text = (workspace / "ACTIVE.md").read_text(encoding="utf-8")
         expect(active_text, "- current_focus_activity_id: `waiting-ledger-review`")
-        expect(active_text, f"- activity_id: `{activity_id}`")
+        expect(active_text, f"| {activity_id} | roadmap |")
+        expect(read_activity_card(workspace, activity_id), f"- activity_id: `{activity_id}`")
         expect_ok(
             "generated-consistency-high-risk-no-confirm",
             run_script(workspace, env, "check_generated_decomposition_consistency.py"),
@@ -305,7 +315,7 @@ def main() -> int:
             ),
             "DEMAND_DECOMPOSE_OK",
         )
-        expect(output, "- demand_doc: demands/")
+        expect(output, "- demand_doc: activities/auto-realistic-demand-report/0-demand.md")
         expect(output, "realistic-demand-report")
 
     print("EXECUTION_SYSTEM_DEMAND_DECOMPOSE_PATH_OK")

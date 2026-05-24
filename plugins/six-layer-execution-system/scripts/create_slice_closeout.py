@@ -5,8 +5,8 @@ import argparse
 import json
 from datetime import datetime
 
-from execution_system_paths import WORKSPACE
-CLOSEOUT = WORKSPACE / "memory/last-slice-closeout.json"
+from execution_system_paths import STATE_ROOT
+CLOSEOUT = STATE_ROOT / "last-slice-closeout.json"
 
 
 def now_iso() -> str:
@@ -52,6 +52,7 @@ def create_closeout(
         ),
         "created_at": now_iso(),
     }
+    CLOSEOUT.parent.mkdir(parents=True, exist_ok=True)
     CLOSEOUT.write_text(json.dumps(artifact, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return artifact
 

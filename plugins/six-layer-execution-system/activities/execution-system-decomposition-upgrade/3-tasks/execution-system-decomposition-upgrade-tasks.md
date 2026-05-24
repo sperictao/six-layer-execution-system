@@ -1,0 +1,751 @@
+# execution system decomposition upgrade tasks
+
+## Repo-local test layout note
+- 所有 `tests/test_*.py` 路径都相对于 source checkout 根目录。
+- 需要直接运行单测时，统一使用仓库根视角命令，并显式注入 `PYTHONPATH="plugins/six-layer-execution-system:plugins/six-layer-execution-system/scripts"`。
+- `run_execution_system_full_tests.py` 只在 source checkout 根 `tests/` 存在时提供完整 suite。
+
+## Current phase
+- Phase 5 - Checker and workflow adoption (`DX-E / Slice E10 - hand implementation focus back to waiting-ledger-review while preserving execution-system reopen state`)
+
+## PR queue
+
+### DX-A - demand intake foundation
+- goal:
+  - 为复杂需求建立统一 intake 入口与最小模板
+- validation:
+  - spec 已定义 demand intake
+  - template 可复用
+  - task types 明确
+- done_definition:
+  - intake schema 落地并能映射到 contract / roadmap / tasks / ACTIVE
+- risk:
+  - medium
+
+#### Slice A1 - define minimal demand intake schema and template
+- phase_id: `PH-1`
+- goal:
+  - 把 demand intake 的最小字段集正式写入 spec 与模板参考
+- scope:
+  - `docs/execution-system-spec-v1.md`
+  - `docs/execution-system-decomposition-upgrade-plan.md`
+  - `references/templates.md`
+- target_files:
+  - `docs/execution-system-spec-v1.md`
+  - `references/templates.md`
+  - `docs/execution-system-decomposition-upgrade-plan.md`
+- depends_on:
+  - none
+- parallel_safe:
+  - false
+- shared_write_targets:
+  - `docs/execution-system-spec-v1.md`
+  - `references/templates.md`
+- expected_artifacts:
+  - demand intake section in spec
+  - reusable demand-card template
+  - task-type taxonomy reference
+- integration_notes:
+  - 与现有 contract/roadmap/tasks/ACTIVE 分层边界一起校对，避免 demand intake 抢占 runtime truth
+- handoff_output:
+  - changed_files
+  - schema_summary
+  - followup_fields_for_phase2
+- validation:
+  - `python3 scripts/run_execution_system_checks.py`
+  - spec wording 与分层规则不冲突
+- done_definition:
+  - 最小 demand intake schema 成稿
+  - template 可供后续真实 activity 试点
+- rollback_strategy:
+  - revert demand-intake wording if it duplicates runtime truth or overcomplicates simple work
+- risk:
+  - medium
+
+### DX-B - contract and roadmap decomposition guards
+- goal:
+  - 让 contract/roadmap 明确承载分解护栏与波次建议
+- validation:
+  - contract 有 decomposition guardrails
+  - roadmap 有 decomposition strategy / recommended wave shape
+- done_definition:
+  - phase-level decomposition guidance 成型
+- risk:
+  - medium
+
+#### Slice B1 - define contract decomposition guardrails
+- phase_id: `PH-2`
+- goal:
+  - 为 contract 增加允许/禁止 slice 形状与并行策略约束
+- scope:
+  - `docs/execution-system-spec-v1.md`
+  - `references/templates.md`
+- target_files:
+  - `docs/execution-system-spec-v1.md`
+  - `references/templates.md`
+- depends_on:
+  - `DX-A.A1`
+- parallel_safe:
+  - false
+- shared_write_targets:
+  - `docs/execution-system-spec-v1.md`
+  - `references/templates.md`
+- expected_artifacts:
+  - decomposition-guardrails contract section
+- integration_notes:
+  - 与 execution-system contract 现有约束语义保持兼容
+- handoff_output:
+  - guardrail_fields
+  - compatibility_notes
+- validation:
+  - spec 不与现有 contract role 冲突
+- done_definition:
+  - contract 层能正式回答“如何拆才算合法”
+- rollback_strategy:
+  - revert if contract starts carrying phase/runtime truth
+- risk:
+  - medium
+
+#### Slice B2 - define roadmap decomposition strategy and wave shape
+- phase_id: `PH-2`
+- goal:
+  - 为 roadmap 增加 phase-level decomposition strategy 与 wave-shape 字段
+- scope:
+  - `docs/execution-system-spec-v1.md`
+  - `references/templates.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+- target_files:
+  - `docs/execution-system-spec-v1.md`
+  - `references/templates.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+- depends_on:
+  - `DX-B.B1`
+- parallel_safe:
+  - false
+- shared_write_targets:
+  - `docs/execution-system-spec-v1.md`
+  - `references/templates.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+- expected_artifacts:
+  - roadmap field definitions for decomposition strategy and recommended wave shape
+- integration_notes:
+  - roadmap 只能描述 phase skeleton，不能偷带 live wave state
+- handoff_output:
+  - roadmap_field_set
+  - phase_guidance_examples
+- validation:
+  - roadmap remains phase-only truth
+- done_definition:
+  - roadmap 层能表达 phase 级拆解建议与波次建议
+- rollback_strategy:
+  - revert if roadmap starts duplicating ACTIVE wave state
+- risk:
+  - medium
+
+### DX-C - task DAG schema
+- goal:
+  - 把 slice 升级为显式依赖与并行安全节点
+- validation:
+  - slices 显式表达 depends_on / parallel_safe / expected_artifacts
+- done_definition:
+  - tasks 具备 DAG 语义
+- risk:
+  - medium-to-high
+
+#### Slice C1 - add dependency and parallel-safety fields to task schema
+- phase_id: `PH-3`
+- goal:
+  - 正式定义 task slice 的 dependency / parallel safety 字段集
+- scope:
+  - `docs/execution-system-spec-v1.md`
+  - `references/templates.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+- target_files:
+  - `docs/execution-system-spec-v1.md`
+  - `references/templates.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+- depends_on:
+  - `DX-B.B2`
+- parallel_safe:
+  - false
+- shared_write_targets:
+  - `docs/execution-system-spec-v1.md`
+  - `references/templates.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+- expected_artifacts:
+  - task schema with depends_on / parallel_safe / shared_write_targets / expected_artifacts / integration_notes / handoff_output
+- integration_notes:
+  - 与现有 task-slice checker 的未来演进方向对齐，但本 slice 不直接改 checker
+- handoff_output:
+  - task_schema_fields
+  - checker_followups
+- validation:
+  - tasks layer still owns slice design, not runtime state
+- done_definition:
+  - task slice schema 正式具备 DAG 基础字段
+- rollback_strategy:
+  - revert if schema becomes too heavy for practical migration
+- risk:
+  - medium-to-high
+
+### DX-D - ACTIVE wave-state model
+- goal:
+  - 为 roadmap activity 提供波次调度状态视图
+- validation:
+  - ACTIVE 保持 runtime truth
+  - 新字段不把 ACTIVE 重新写回厚文档
+- done_definition:
+  - ACTIVE 可表达当前波次与集成步骤
+- risk:
+  - high
+
+#### Slice D1 - define minimal ACTIVE wave-state fields
+- phase_id: `PH-4`
+- goal:
+  - 为 ACTIVE roadmap activity 引入最小波次字段集
+- scope:
+  - `docs/execution-system-spec-v1.md`
+  - `ACTIVE.md`
+  - `references/templates.md`
+- target_files:
+  - `docs/execution-system-spec-v1.md`
+  - `ACTIVE.md`
+  - `references/templates.md`
+- depends_on:
+  - `DX-C.C1`
+- parallel_safe:
+  - false
+- shared_write_targets:
+  - `docs/execution-system-spec-v1.md`
+  - `ACTIVE.md`
+  - `references/templates.md`
+- expected_artifacts:
+  - minimal wave-state field definitions
+  - first ACTIVE guidance for execution_mode/current_wave_id/ready_slices/integration_step
+- integration_notes:
+  - 必须证明这些字段不会破坏 lean runtime truth 边界
+- handoff_output:
+  - active_wave_fields
+  - runtime_boundary_notes
+- validation:
+  - `python3 scripts/check_active_consistency.py`
+  - ACTIVE 仍是唯一 runtime truth
+- done_definition:
+  - ACTIVE roadmap activity 可表达最小波次状态
+- rollback_strategy:
+  - revert if ACTIVE becomes too thick or duplicates roadmap/tasks structure
+- risk:
+  - high
+
+### DX-E - checker and pilot adoption
+- goal:
+  - 把分解升级方案推进成可校验、可试点的真实实施 backlog，并为 active-wave-state checker 建立从 pilot 到 unified runner 的清晰升级路径
+- validation:
+  - checker backlog 明确
+  - 至少一个 parallel-wave path test 被定义为候选
+  - active-wave-state pilot 结果已写回 docs/acceptance
+  - active-wave-state checker 的 runner-promotion gate 已明确
+- done_definition:
+  - implementation backlog 可直接转入后续执行 activity
+  - active-wave-state checker 的推广门槛已明确
+  - `DX-E.E2` / `DX-E.E3` 的边界清楚，不会把 pilot 收口和 runner 集成混成一刀
+- risk:
+  - medium
+
+#### Slice E1 - define decomposition checker backlog and pilot path
+- phase_id: `PH-5`
+- goal:
+  - 列出 dependency graph / parallel safety / active wave-state checkers 与首个 parallel-wave 试点路径
+- scope:
+  - `docs/execution-system-decomposition-upgrade-plan.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+- target_files:
+  - `docs/execution-system-decomposition-upgrade-plan.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+- depends_on:
+  - `DX-D.D1`
+- parallel_safe:
+  - false
+- shared_write_targets:
+  - `docs/execution-system-decomposition-upgrade-plan.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+- expected_artifacts:
+  - checker backlog
+  - pilot-path definition
+  - acceptance deltas for decomposition engine v1
+  - recommended first checker cut
+- integration_notes:
+  - 明确哪些项进入 next implementation wave，哪些继续保持 planning state；优先把 dependency graph / parallel safety 作为首批 checker cut，并把 active-wave-state / parallel-wave path test 延后到 pilot 证明之后
+- handoff_output:
+  - checker_queue
+  - pilot_activity_candidates
+  - recommended_v1_cut
+  - deferred_items
+- validation:
+  - backlog 足以支撑后续真实 implementation wave
+  - first checker cut 与 deferred items 的边界明确
+  - pilot path 具备低风险、低共享写面、易回滚、易验证特征
+- done_definition:
+  - decomposition upgrade 从方案文档进入正式实施 backlog
+  - 已明确 first checker cut 与 first pilot path
+- rollback_strategy:
+  - revert if backlog overcommits unstable ideas into immediate enforcement
+- risk:
+  - medium
+
+#### Slice E2 - close active-wave-state pilot docs loop and define runner-promotion gate
+- phase_id: `PH-5`
+- goal:
+  - 将 active-wave-state pilot 的真实结果收口进 acceptance/testing docs，并明确何时可把 checker 接入 unified runner
+- scope:
+  - `ACTIVE.md`
+  - `docs/execution-system-spec-v1-acceptance-checklist.md`
+  - `docs/execution-system-testing-inventory.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+- target_files:
+  - `ACTIVE.md`
+  - `docs/execution-system-spec-v1-acceptance-checklist.md`
+  - `docs/execution-system-testing-inventory.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+- depends_on:
+  - `DX-E.E1`
+- parallel_safe:
+  - false
+- shared_write_targets:
+  - `ACTIVE.md`
+  - `docs/execution-system-spec-v1-acceptance-checklist.md`
+  - `docs/execution-system-testing-inventory.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+- expected_artifacts:
+  - active-wave-state pilot recorded in acceptance docs
+  - testing inventory updated with pilot semantics and non-runner status
+  - explicit promotion gate for `check_active_wave_state.py`
+  - a short checklist that `DX-E.E3` can consume directly
+  - a concrete `DX-E.E3` promotion gate checklist captured in `docs/execution-system-decomposition-upgrade-plan.md`
+- integration_notes:
+  - 这一步只收口 pilot 结论，不立即把 checker 接入 `run_execution_system_checks.py`；要同时更新 roadmap/tasks 当前阶段，使执行真相与 backlog 对齐
+  - promotion gate 必须写成可执行清单，而不是抽象描述，避免 E3 重新解释一次门槛
+- handoff_output:
+  - pilot_doc_delta
+  - runner_promotion_gate
+  - promotion_gate_checklist
+  - drafted_runner_recovery_hint (`repair invalid ACTIVE wave-state fields or revert the pilot activity to lean non-wave execution before continuing`)
+  - next_slice_recommendation
+- validation:
+  - `python3 scripts/check_active_wave_state.py`
+  - `PYTHONPATH="plugins/six-layer-execution-system:plugins/six-layer-execution-system/scripts" python3 tests/test_check_active_wave_state.py`
+  - `python3 scripts/check_active_consistency.py`
+  - `python3 scripts/run_execution_system_checks.py`
+  - promotion gate checklist items are all satisfiable from current workspace state
+- done_definition:
+  - active-wave-state pilot 已被正式记录
+  - runner-promotion gate 已明确
+  - roadmap/tasks/ACTIVE 对当前阶段的表述一致
+  - 当前 focus activity 的 wave-state 与 backlog slice 状态不再互相打架
+  - `DX-E.E3` 所需 promotion gate checklist 已可以直接复用，而不是再次临时解释
+  - `DX-E.E3` 所需 runner failure recovery hint 已提前成稿，不需要在接入 runner 时再临场补写
+- rollback_strategy:
+  - revert if doc updates overstate pilot maturity or imply mandatory runner integration too early
+- risk:
+  - medium
+
+#### Slice E3 - promote active-wave-state checker into unified runner
+- phase_id: `PH-5`
+- goal:
+  - 在 pilot 足够稳定后，将 `check_active_wave_state.py` 与其 smoke test 接入 unified runner
+- scope:
+  - `scripts/run_execution_system_checks.py`
+  - `tests/test_run_execution_system_checks.py`
+  - `docs/execution-system-spec-v1-acceptance-checklist.md`
+  - `docs/execution-system-testing-inventory.md`
+- target_files:
+  - `scripts/run_execution_system_checks.py`
+  - `tests/test_run_execution_system_checks.py`
+  - `docs/execution-system-spec-v1-acceptance-checklist.md`
+  - `docs/execution-system-testing-inventory.md`
+- depends_on:
+  - `DX-E.E2`
+- parallel_safe:
+  - false
+- shared_write_targets:
+  - `scripts/run_execution_system_checks.py`
+  - `tests/test_run_execution_system_checks.py`
+  - `docs/execution-system-spec-v1-acceptance-checklist.md`
+  - `docs/execution-system-testing-inventory.md`
+- expected_artifacts:
+  - unified runner integration for active-wave-state checker
+  - runner summary recovery hint using the drafted ACTIVE wave-state repair wording
+  - updated acceptance/testing docs reflecting promoted status
+- integration_notes:
+  - 只有在 pilot 结论足够稳定、误报风险可接受时才做；若 runner 接入导致波次语义仍不稳，应继续停留在 E2 状态
+  - 进入本 slice 的前置 gate 至少包括：pilot 已写回 acceptance/testing docs、当前 focus activity 的 wave-state 已稳定、`test_check_active_wave_state.py` 连续通过、且不存在需要先修复的 schema 对齐漂移
+  - E3 应直接消费 E2 产出的 promotion gate checklist；如果 checklist 仍不完整，则说明 E2 尚未真正完成
+- handoff_output:
+  - runner_diff
+  - promotion_result
+  - followup_test_needs
+- validation:
+  - `python3 scripts/check_active_wave_state.py`
+  - `PYTHONPATH="plugins/six-layer-execution-system:plugins/six-layer-execution-system/scripts" python3 tests/test_check_active_wave_state.py`
+  - `PYTHONPATH="plugins/six-layer-execution-system:plugins/six-layer-execution-system/scripts" python3 tests/test_run_execution_system_checks.py`
+  - `python3 scripts/run_execution_system_checks.py`
+- done_definition:
+  - active-wave-state checker 已成为 unified hard-fail runner 的正式一部分
+  - smoke 与 summary footer 一致通过
+- rollback_strategy:
+  - revert runner integration if active-wave-state still proves too brittle for hard-fail enforcement
+- risk:
+  - medium-to-high
+
+#### Slice E4 - define the first execution-system parallel-wave path test cut
+- phase_id: `PH-5`
+- goal:
+  - 定义并收口第一刀 `test_execution_system_path_parallel_wave.py` 的最小范围、夹具策略与验收边界
+- scope:
+  - `docs/execution-system-decomposition-upgrade-plan.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - `docs/execution-system-testing-inventory.md`
+- target_files:
+  - `docs/execution-system-decomposition-upgrade-plan.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - `docs/execution-system-testing-inventory.md`
+- depends_on:
+  - `DX-E.E3`
+- parallel_safe:
+  - false
+- shared_write_targets:
+  - `docs/execution-system-decomposition-upgrade-plan.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - `docs/execution-system-testing-inventory.md`
+- expected_artifacts:
+  - minimal scope for `test_execution_system_path_parallel_wave.py`
+  - fixture strategy for low-risk wave-state simulation
+  - explicit non-goals preventing product-repo runtime coupling
+  - recommendation on whether the test should land in the next implementation wave
+  - a concrete go/no-go rule for the implementation wave
+- integration_notes:
+  - 这一刀先定义并行波次路径测试的最小实现边界，不直接实现测试；必须避免把还不稳定的业务 repo runtime 行为绑进 execution-system test harness
+  - first cut 必须保持 synthetic fixture、单 wave、单 focus activity，不引入多 wave 编排或真实产品 repo 行为
+- handoff_output:
+  - parallel_wave_test_scope
+  - fixture_strategy
+  - non_goals
+  - go_no_go_rule
+  - implementation_recommendation (`go` for a synthetic single-wave implementation cut)
+- validation:
+  - `python3 scripts/run_execution_system_checks.py`
+  - docs/roadmap/tasks 对下一刀的定义一致
+  - minimal scope, fixture strategy, non-goals, and go/no-go rule can all be read directly from workspace docs without re-deriving intent from chat
+- done_definition:
+  - 下一刀 `test_execution_system_path_parallel_wave.py` 的最小 cut 已明确
+  - fixture strategy 与 non-goals 已成稿
+  - go/no-go rule 已明确
+  - implementation recommendation is explicitly `go` for the synthetic single-wave cut
+  - roadmap/tasks/ACTIVE 对后续 implementation wave 的预期一致
+- rollback_strategy:
+  - revert if the proposed parallel-wave path test still depends on unstable runtime semantics or broad workspace mutation
+- risk:
+  - medium
+
+#### Slice E5 - close out the first decomposition-engine implementation wave
+- phase_id: `PH-5`
+- goal:
+  - 将 `DX-E.E3` 与 synthetic single-wave `DX-E.E4` 的结果正式写回 roadmap/tasks/ACTIVE/testing inventory，形成可恢复的阶段性收官状态
+- scope:
+  - `ACTIVE.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - `docs/execution-system-testing-inventory.md`
+- target_files:
+  - `ACTIVE.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - `docs/execution-system-testing-inventory.md`
+- depends_on:
+  - `DX-E.E4`
+- parallel_safe:
+  - false
+- shared_write_targets:
+  - `ACTIVE.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - `docs/execution-system-testing-inventory.md`
+- expected_artifacts:
+  - formal closeout state for the first decomposition-engine implementation wave
+  - roadmap/tasks/ACTIVE alignment on the post-E4 state
+  - testing inventory updated to reflect synthetic single-wave path coverage as landed, not only planned
+  - recommendation for the next major line after this wave
+- integration_notes:
+  - 这一步不再新增 checker 或测试实现；只收口并固化当前成果，避免下一轮工作继续依赖聊天记忆或中间态日志
+- handoff_output:
+  - closeout_summary
+  - next_major_line_recommendation
+  - updated_runtime_state
+- validation:
+  - `python3 scripts/run_execution_system_checks.py`
+  - `python3 scripts/run_execution_system_full_tests.py`
+- done_definition:
+  - `DX-E.E3` / `DX-E.E4` 已被正式记录为完成
+  - full suite green 状态已写回 execution-system docs
+  - 下一条主线已有明确建议
+- rollback_strategy:
+  - revert if closeout wording overstates maturity or hides remaining weak-coverage areas
+- risk:
+  - low
+
+#### Slice E6 - broaden governance-drift coverage beyond the current resume-trigger alignment cases
+- phase_id: `PH-5`
+- goal:
+  - 设计并启动下一条主线，扩展 governance-drift 测试覆盖，不再只围绕 resume-trigger recovery 与 parallel-dispatch 对齐
+- scope:
+  - `docs/execution-system-decomposition-upgrade-plan.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - `docs/execution-system-testing-inventory.md`
+- target_files:
+  - `docs/execution-system-decomposition-upgrade-plan.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - `docs/execution-system-testing-inventory.md`
+- depends_on:
+  - `DX-E.E5`
+- parallel_safe:
+  - false
+- shared_write_targets:
+  - `docs/execution-system-decomposition-upgrade-plan.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - `docs/execution-system-testing-inventory.md`
+- expected_artifacts:
+  - governance-drift expansion scope
+  - prioritized candidate contracts/rules beyond the current resume-trigger cases
+  - recommendation for the first new governance-drift test cut
+  - ranked candidate list with a named `governance-drift-test-cut-1`
+- integration_notes:
+  - 这一步先界定 broader governance-drift 的范围与优先级，不直接一次性铺开全部治理矩阵；必须优先选最能补盲区、且不会重复现有 coverage 的候选
+  - 当前第一优先级应锁定 focus/acceptance gate alignment drift；maintenance-mode drift 与 closeout-ready drift 作为后续候选保留在同一主线下
+- handoff_output:
+  - governance_drift_scope
+  - prioritized_candidates
+  - first_test_cut_recommendation
+  - governance_drift_test_cut_1_definition
+  - second_test_cut_candidate (`maintenance-mode vs approved non-execution-system focus drift`)
+  - governance_drift_test_cut_2_definition
+- validation:
+  - `python3 scripts/run_execution_system_checks.py`
+  - `python3 scripts/run_execution_system_full_tests.py`
+  - docs/roadmap/tasks 对新主线的范围与优先级一致
+  - `governance-drift-test-cut-1` 的最小切片定义能够直接映射到 `validate_focus_first.py` + `accept_active_ledger_v2.py` 的策略门控语义
+- done_definition:
+  - broader governance-drift 主线已正式启动
+  - 第一批扩展候选已排优先级
+  - 下一刀的最小测试切片已明确
+  - `governance-drift-test-cut-1` 已明确锁定为 focus/acceptance gate alignment drift
+  - 第一版 focus/acceptance gate alignment drift 测试已落地或已有明确实现入口
+  - 第二优先级候选已明确为 `maintenance-mode vs approved non-execution-system focus drift`
+  - `governance-drift-test-cut-2` 已具备明确实现入口，不再停留在抽象候选
+  - closeout-ready drift 与 runner/summary-hint drift 也都已有第一版实现入口
+  - 下一刀将围绕 `FOCUS_VALIDATION_POLICY_GATE` 与 `ACTIVE_LEDGER_V2_ACCEPTANCE_OK_WITH_POLICY_GATES` 的一致性展开，而不是重新发散到别的治理域
+- rollback_strategy:
+  - revert if the proposed governance-drift expansion is too vague, duplicates existing coverage, or tries to absorb unrelated protocol work
+- risk:
+  - medium
+
+#### Slice E7 - close out the first broader-governance-drift wave
+- phase_id: `PH-5`
+- goal:
+  - 将 broader-governance-drift 第一轮扩展的已落地产物正式写回 roadmap/tasks/ACTIVE/testing inventory，并给出下一条非重复主线建议
+- scope:
+  - `ACTIVE.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - `docs/execution-system-testing-inventory.md`
+- target_files:
+  - `ACTIVE.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - `docs/execution-system-testing-inventory.md`
+- depends_on:
+  - `DX-E.E6`
+- parallel_safe:
+  - false
+- shared_write_targets:
+  - `ACTIVE.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - `docs/execution-system-testing-inventory.md`
+- expected_artifacts:
+  - formal closeout state for the first broader-governance-drift wave
+  - explicit statement that four governance-drift entrypoints are now landed
+  - recommendation for the next non-duplicate major line after governance-drift wave 1
+- integration_notes:
+  - 这一步不再新增新的 governance-drift 测试入口；只收口第一轮扩展并避免继续重复同类 drift 覆盖，下一主线应转向真正不同的风险面
+- handoff_output:
+  - governance_drift_wave1_closeout
+  - landed_drift_entrypoints
+  - next_major_line_recommendation
+- validation:
+  - `python3 scripts/run_execution_system_checks.py`
+  - `python3 scripts/run_execution_system_full_tests.py`
+- done_definition:
+  - broader-governance-drift 第一轮扩展已被正式记录为完成
+  - 四类 governance-drift entrypoints 已在文档与运行态中同步承认
+  - 下一条主线已有明确建议，并且不只是重复扩更多同类 drift
+- rollback_strategy:
+  - revert if closeout wording overstates governance-drift maturity or hides remaining weak-coverage areas
+- risk:
+  - low
+
+#### Slice E8 - define the first later-multi-wave path design cut
+- phase_id: `PH-5`
+- goal:
+  - 将下一条主线正式切到 later multi-wave path design，并定义第一刀最小设计范围、non-goals 与 go/no-go 条件
+- scope:
+  - `docs/execution-system-decomposition-upgrade-plan.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - `ACTIVE.md`
+- target_files:
+  - `docs/execution-system-decomposition-upgrade-plan.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - `ACTIVE.md`
+- depends_on:
+  - `DX-E.E7`
+- parallel_safe:
+  - false
+- shared_write_targets:
+  - `docs/execution-system-decomposition-upgrade-plan.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - `ACTIVE.md`
+- expected_artifacts:
+  - later multi-wave path design scope
+  - explicit non-goals preventing premature runtime coupling
+  - minimal design-cut definition
+  - go/no-go rule for a future multi-wave implementation wave
+  - minimum invariant set for a future multi-wave test cut
+  - explicit two-wave state-transition invariants for `ready/inflight/blocked/integration_step/last_wave_result`
+- integration_notes:
+  - 这一步只定义 multi-wave 设计切片，不直接实现 multi-wave runner logic；必须避免把尚未稳定的 runtime orchestration 和产品 repo 行为一起拉进来
+  - first cut 只讨论 two-wave representation、wave-boundary invariants、以及 single-wave 与 multi-wave closeout 的兼容关系，不讨论真实执行编排
+- handoff_output:
+  - multi_wave_scope
+  - non_goals
+  - minimal_design_cut
+  - minimum_invariants
+  - wave_boundary_transition_rules
+  - go_no_go_rule (`no-go` for immediate implementation)
+  - defer_condition_for_future_multi_wave_line
+- validation:
+  - `python3 scripts/run_execution_system_checks.py`
+  - `python3 scripts/run_execution_system_full_tests.py`
+  - roadmap/tasks/ACTIVE 对新主线的切换一致
+  - minimal scope, non-goals, minimum invariants, and go/no-go rule can all be read directly from workspace docs without re-deriving intent from chat
+- done_definition:
+  - later multi-wave path design 已成为当前明确主线
+  - 第一刀最小设计切片已定义
+  - minimum invariant set 已明确
+  - two-wave boundary transition rules 已明确
+  - go/no-go rule 已明确
+  - 当前 recommendation 已明确为 `no-go`，后续只有在出现具体 multi-wave 需求时才重新开启实现波次
+- rollback_strategy:
+  - revert if the proposed multi-wave line widens into immediate runtime implementation or duplicates already-covered single-wave semantics
+- risk:
+  - medium
+
+#### Slice E9 - close out the later-multi-wave design discovery cut
+- phase_id: `PH-5`
+- goal:
+  - 将 later-multi-wave design discovery 的 `no-go` 结论正式写回 roadmap/tasks/ACTIVE，并给出下一条不同实现主线建议
+- scope:
+  - `ACTIVE.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - `docs/execution-system-decomposition-upgrade-plan.md`
+- target_files:
+  - `ACTIVE.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - `docs/execution-system-decomposition-upgrade-plan.md`
+- depends_on:
+  - `DX-E.E8`
+- parallel_safe:
+  - false
+- shared_write_targets:
+  - `ACTIVE.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - `docs/execution-system-decomposition-upgrade-plan.md`
+- expected_artifacts:
+  - formal closeout state for the later-multi-wave design discovery cut
+  - explicit no-go record and reopen condition
+  - recommendation for the next non-design implementation focus
+- integration_notes:
+  - 这一步不新增 multi-wave 实现或新测试；只收口当前 no-go 设计结论，并把未来 reopen 条件与下一条不同主线写清楚
+- handoff_output:
+  - multi_wave_closeout_summary
+  - reopen_condition
+  - next_major_line_recommendation
+- validation:
+  - `python3 scripts/run_execution_system_checks.py`
+  - `python3 scripts/run_execution_system_full_tests.py`
+- done_definition:
+  - later-multi-wave design discovery cut 已正式记录为 `no-go`
+  - future reopen condition 已明确
+  - 下一条不同实现主线已有明确建议
+- rollback_strategy:
+  - revert if closeout wording overstates the confidence of the no-go decision or hides the future reopen condition
+- risk:
+  - low
+
+#### Slice E10 - hand implementation focus back to waiting-ledger-review
+- phase_id: `PH-5`
+- goal:
+  - 在不丢失 execution-system 上下文的前提下，将下一条默认 review focus 切回 `waiting-ledger-review`
+- scope:
+  - `ACTIVE.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+- target_files:
+  - `ACTIVE.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+- depends_on:
+  - `DX-E.E9`
+- parallel_safe:
+  - false
+- shared_write_targets:
+  - `ACTIVE.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+- expected_artifacts:
+  - formal handoff state from decomposition-upgrade to waiting-ledger-review
+  - retained retrieval path for future execution-system reopen
+  - clear statement that execution-system line is no longer the immediate implementation focus
+- integration_notes:
+  - 这一步不关闭 execution-system activity 本身；只把默认 review focus 明确交回 `waiting-ledger-review`，并保留当前 activity 的可恢复痕迹
+- handoff_output:
+  - implementation_focus_handoff
+  - retained_reopen_path
+  - next_focus_recommendation
+- validation:
+  - `python3 scripts/check_active_consistency.py`
+  - `python3 scripts/run_execution_system_checks.py`
+- done_definition:
+  - decomposition-upgrade 当前轮已完成交接
+  - 下一条默认 review focus 明确为 `waiting-ledger-review`
+  - future reopen path 仍可从 roadmap/tasks/ACTIVE 直接恢复
+- rollback_strategy:
+  - revert if the handoff blurs execution-system recovery state or prematurely deletes the current focus trail
+- risk:
+  - low

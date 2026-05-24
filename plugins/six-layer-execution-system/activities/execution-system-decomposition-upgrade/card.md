@@ -1,0 +1,97 @@
+### Activity: execution-system-decomposition-upgrade
+- activity_id: `execution-system-decomposition-upgrade`
+- title: `upgrade execution system into a decomposition engine`
+- type: `roadmap`
+- owner: `Spero`
+- status: `ready`
+- priority: `P2`
+- autopilot: `false`
+- focus_rank: `1`
+- path: `.`
+- source_doc: `docs/execution-system-decomposition-upgrade-plan.md`
+- roadmap_doc: `activities/execution-system-decomposition-upgrade/2-roadmap.md`
+- tasks_dir: `activities/execution-system-decomposition-upgrade/3-tasks/execution-system-decomposition-upgrade-tasks.md`
+- current_slice_id: `DX-E.E10`
+- next_slice_id: `switch-focus-waiting-ledger-review`
+- objective: `把 execution system 从强执行账本升级为可分解、可调度、可校验、可恢复的需求分解引擎，并先完成 v1 的 schema + first checker cut`
+- done_when:
+  - demand intake / decomposition guardrails / roadmap wave guidance / task DAG fields / ACTIVE wave-state fields 已进入 spec 与模板
+  - first checker cut（dependency graph + parallel safety）已落地并接入 unified runner
+  - `check_active_wave_state.py` 已实现并在低风险 pilot activity 上验证通过
+  - active-wave-state checker 已接入 unified runner，并带有明确 recovery hint
+  - synthetic single-wave `test_execution_system_path_parallel_wave.py` 已落地并进入 full suite
+  - implementation backlog、pilot path、v1 acceptance deltas 已明确
+- execution_mode: `parallel-wave`
+- current_wave_id: `W1`
+- ready_slices:
+  - `switch-focus-waiting-ledger-review`
+- inflight_slices:
+  - `DX-E.E10`
+- blocked_slices:
+  - none
+- integration_step:
+  - 将 execution-system-decomposition-upgrade 当前轮的 closeout 状态保留下来，并把下一条默认 review focus 交回 `waiting-ledger-review`
+- last_wave_result:
+  - `W10 multi-wave no-go closeout complete: later-multi-wave remains documented as a no-go discovery cut with a future reopen condition`
+- next_step:
+  - 保留 execution-system-decomposition-upgrade 的可恢复状态
+  - 下一次仅在命中 concrete reopen trigger 时再回到 execution-system-decomposition-upgrade
+  - 默认 review focus 保持在 `waiting-ledger-review`，不继续扩 execution-system 设计线
+- validation:
+  - `python3 scripts/run_execution_system_checks.py`
+  - `python3 scripts/run_execution_system_full_tests.py`
+- last_validation:
+  - `python3 scripts/check_active_consistency.py` passed
+  - `python3 scripts/run_execution_system_checks.py` passed
+  - `PYTHONPATH="plugins/six-layer-execution-system:plugins/six-layer-execution-system/scripts" python3 tests/test_check_active_wave_state.py` passed
+- blocked_by:
+  - none
+- last_commit: `c7344bb`
+- retrieval_keys:
+  - `execution-system-decomposition-upgrade`
+  - `docs/execution-system-decomposition-upgrade-plan.md`
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+  - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - `check_task_dependency_graph.py`
+  - `check_parallel_safety.py`
+- query_recipe:
+  - exact anchors first:
+    - `execution-system-decomposition-upgrade`
+    - `roadmaps/execution-system-decomposition-upgrade-roadmap.md`
+    - `tasks/execution-system-decomposition-upgrade-tasks.md`
+  - intent / constraint refinement:
+    - `decomposition engine v1 first checker cut`
+    - `active wave state checker pilot path`
+- last_artifact:
+  - `docs/execution-system-decomposition-upgrade-plan.md` landed as the full six-layer proposal
+  - `roadmaps/execution-system-decomposition-upgrade-roadmap.md` + `tasks/execution-system-decomposition-upgrade-tasks.md` landed as the canonical execution backlog
+  - `scripts/check_task_dependency_graph.py` + `scripts/check_parallel_safety.py` and their smoke tests landed and are wired into `run_execution_system_checks.py`
+  - `scripts/check_active_wave_state.py` + `tests/test_check_active_wave_state.py` landed and now also run inside `run_execution_system_checks.py`
+  - `tests/test_execution_system_path_parallel_wave.py` landed as the first synthetic single-wave path test
+  - `tests/test_execution_system_path_focus_acceptance_drift.py` landed as the first broader-governance-drift test cut
+  - `tests/test_execution_system_path_maintenance_focus_drift.py` landed as the second governance-drift test cut candidate implementation entrypoint
+  - `tests/test_execution_system_path_closeout_ready_focus_drift.py` landed as the third governance-drift candidate implementation entrypoint
+  - `tests/test_execution_system_path_runner_hint_drift.py` landed as the runner/summary-hint drift implementation entrypoint
+  - `scripts/run_execution_system_full_tests.py` exists as the full-suite entrypoint; its result must be re-verified against the live ledger before quoting a clean pass
+  - `spec/templates/ACTIVE policy` now include demand intake, decomposition guardrails, roadmap wave guidance, task DAG fields, and optional ACTIVE wave-state fields
+- last_decision:
+  - first checker cut should stay narrow: dependency graph + parallel safety first
+  - active-wave-state enforcement and full parallel-wave path testing should wait until a low-risk pilot path exists
+  - `DX-E.E2` is now complete: pilot semantics, promotion gate checklist, and drafted runner recovery hint are all in place
+  - `DX-E.E3` is complete: active-wave-state checker is now inside the unified runner with the prewritten recovery hint
+  - `DX-E.E4` concluded `go`: the first parallel-wave path test should be implemented as a synthetic single-wave cut with explicit non-goals, not deferred and not widened
+  - the first decomposition-engine implementation wave is now closed out
+  - broader governance-drift expansion was selected as the next major line and now has its first wave landed
+  - `governance-drift-test-cut-1` is landed as focus/acceptance gate alignment drift coverage
+  - `governance-drift-test-cut-2` is landed as maintenance-mode drift coverage
+  - closeout-ready drift is landed as a focus-aware closeout coverage line
+  - runner/summary-hint drift is landed as summary-footer coverage
+  - the first broader-governance-drift wave is now formally closed out
+  - later multi-wave path design now has a first minimal design cut and a documented `no-go` result
+  - `DX-E.E10` completes the handoff: execution-system-decomposition-upgrade should stop expanding and return the default review focus to `waiting-ledger-review`
+- done_definition:
+  - decomposition-engine v1 planning and first checker cut are durable, recoverable, and no longer depend on chat history
+  - active-wave-state pilot has been successfully promoted from pilot-only checker to unified runner integration
+  - the next-parallel-wave-test line has a defined minimal-cut discovery slice before any broader implementation wave begins
+- notes:
+  - this activity remains the low-risk pilot path for wave-state semantics, but is no longer the immediate implementation focus after `DX-E.E10` handoff

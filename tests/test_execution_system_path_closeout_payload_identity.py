@@ -13,7 +13,7 @@ def main() -> int:
         create = workspace / "scripts" / "create_slice_closeout.py"
         check = workspace / "scripts" / "check_slice_closeout.py"
         payload_script = workspace / "scripts" / "build_slice_handoff.py"
-        closeout = workspace / "memory" / "last-slice-closeout.json"
+        closeout = workspace / "local-state" / "last-slice-closeout.json"
         subprocess.run(
             [
                 "python3",

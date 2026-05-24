@@ -20,7 +20,13 @@ The core principle is:
 
 ## 2. System layers
 
-The execution system uses six layers.
+The execution system uses six layers. As of v3, each activity's resources are isolated under `activities/<activity-id>/`.
+
+### 2.0 Activity isolation (v3)
+Each activity owns a self-contained directory: `activities/<activity-id>/`.
+ACTIVE.md is a thin index (~50 lines) pointing to per-activity `card.md` files.
+Recovery chain: `ACTIVE.md` → `activities/<focus>/card.md` → `3-tasks/<slice>.md`.
+Deleting or copying an activity is a single-directory operation.
 
 ### 2.1 Contract layer
 Owns long-lived project constraints and execution invariants.
@@ -37,7 +43,10 @@ Examples:
 Owns phase order, milestones, dependencies, exit criteria, and phase risks.
 
 ### 2.3 Tasks layer
-Owns PR queue, slices, per-slice validation, done definitions, and rollback strategy.
+Owns individual slice design files. Each slice gets its own file under `tasks/<activity-id>/<slice-id>.md`.
+Each file is a self-contained plan artifact: scope, target files, execution plan, validation, done definition, rollback strategy, and actual outcome.
+
+A tasks file is written **before** execution (as a plan), confirmed by the user, and updated **after** completion (with outcome).
 
 ### 2.4 ACTIVE layer
 Owns the only runtime truth about what is currently being executed.
@@ -255,42 +264,29 @@ Roadmap files must not contain:
 
 ## 5.3 Tasks files
 Recommended path:
-- `tasks/<project>-tasks.md`
+- `tasks/<activity-id>/<slice-id>.md` — one file per slice
 
-Tasks files contain:
-- current phase reference
-- PR queue
-- per-slice goal
+Each tasks file is a self-contained plan artifact for a single slice:
+- activity id
 - phase id
+- status (`ready` → `in_progress` → `done`)
+- goal
 - scope
 - target files
-- dependencies
+- `actual_execution_plan` (written before execution, confirmed by user)
+- dependencies (`depends_on`, `parallel_safe`, `shared_write_targets`)
+- expected artifacts
+- integration notes
 - validation
 - done definition
 - rollback strategy
 - risk
+- `actual_outcome` (filled after completion: commit + verification)
 
-Tasks files may also define executable slice-DAG metadata.
-
-Recommended per-slice DAG fields:
-- `depends_on`
-- `parallel_safe`
-- `shared_write_targets`
-- `expected_artifacts`
-- `integration_notes`
-- `handoff_output`
-
-DAG intent:
-- `depends_on` expresses upstream slice ids
-- `parallel_safe` declares whether the slice may run in the same wave as other independent slices
-- `shared_write_targets` makes same-wave conflicts visible
-- `expected_artifacts` defines what outputs should exist when a slice is done
-- `integration_notes` defines how the parent execution path should merge the slice output
-- `handoff_output` defines the expected return shape for completion
+The file is the plan and the record — no separate closeout artifact required for individual slices.
 
 Tasks files must not contain:
 - live focus activity selection
-- closeout handoff inflight state
 - daily recovery notes
 
 ## 5.4 ACTIVE
@@ -389,7 +385,7 @@ Required fields:
 - `autopilot`
 - `path` or `repo + path`
 - `roadmap_doc`
-- `tasks_doc`
+- `tasks_dir`
 - `current_slice_id`
 - `next_step`
 - `validation`
@@ -431,7 +427,7 @@ Forbidden fields:
 - `current_slice_id`
 - `last_commit`
 - `roadmap_doc`
-- `tasks_doc`
+- `tasks_dir`
 
 ### 6.3 simple activity
 Required fields:
@@ -450,7 +446,7 @@ Forbidden fields:
 - `current_slice_id`
 - `last_commit`
 - `roadmap_doc`
-- `tasks_doc`
+- `tasks_dir`
 
 ---
 
@@ -634,7 +630,7 @@ Migration should follow this order:
 The next likely automation candidates are:
 
 #### ACTIVE-focused candidates
-- require focus roadmap activities to carry `source_doc`, `roadmap_doc`, `tasks_doc`, and `last_commit`
+- require focus roadmap activities to carry `source_doc`, `roadmap_doc`, `tasks_dir`, and `last_commit`
 - detect repo HEAD drift against `last_commit`
 - warn when a roadmap activity stays on a broad slice after repeated heterogeneous progress
 
@@ -659,7 +655,7 @@ The first likely checker/workflow candidates should stay intentionally small:
 1. `ACTIVE` focus roadmap activities must carry:
    - `source_doc`
    - `roadmap_doc`
-   - `tasks_doc`
+   - `tasks_dir`
    - `last_commit`
 2. migrated roadmap-aligned task slices should carry:
    - `phase_id`
@@ -732,7 +728,7 @@ The first checker should initially hard-fail only on deterministic focus roadmap
 The focus roadmap activity must provide:
 - `source_doc`
 - `roadmap_doc`
-- `tasks_doc`
+- `tasks_dir`
 - `current_slice_id`
 - `next_slice_id`
 - `last_commit`
@@ -740,7 +736,7 @@ The focus roadmap activity must provide:
 - non-empty `validation`
 - non-empty `blocked_by`
 
-For the three doc pointer fields (`source_doc`, `roadmap_doc`, `tasks_doc`), the first checker wave should also require that the referenced file actually exists.
+For the three doc pointer fields (`source_doc`, `roadmap_doc`, `tasks_dir`), the first checker wave should also require that the referenced file or directory actually exists.
 
 These fields are hard-fail because they answer the minimum execution questions directly:
 - what spec/contract defines the work
@@ -820,10 +816,10 @@ The second checker should target migrated task slice schema only, not all task p
 #### Hard-fail scope
 The checker should evaluate only slices that already clearly claim migrated structure.
 
-A slice counts as in-scope when it is part of a roadmap-aligned task section and already includes at least one of:
+A slice counts as in-scope when it exists as an independent file under `tasks/<activity-id>/` and includes at least one of:
 - `phase_id`
 - `rollback_strategy`
-- an explicit slice heading under a PR queue section that is already being maintained in the migrated template style
+- `actual_execution_plan`
 
 #### Hard-fail requirements
 For in-scope migrated slices, the checker should require:

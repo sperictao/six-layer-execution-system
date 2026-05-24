@@ -31,6 +31,7 @@ def workspace_env(workspace: Path) -> dict[str, str]:
     env = os.environ.copy()
     env["SIX_LAYER_REPO_ROOT"] = str(workspace)
     env["SIX_LAYER_WORKSPACE"] = str(workspace)
+    env["SIX_LAYER_STATE_ROOT"] = str(workspace / "local-state")
     return env
 
 

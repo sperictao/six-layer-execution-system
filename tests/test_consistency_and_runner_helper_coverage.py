@@ -22,6 +22,10 @@ def expect(condition: bool, message: str) -> None:
         raise AssertionError(message)
 
 
+def fake_completed(returncode: int, stdout: str = "", stderr: str = "") -> SimpleNamespace:
+    return SimpleNamespace(returncode=returncode, stdout=stdout, stderr=stderr)
+
+
 def capture_main(fn) -> tuple[int, str]:
     buffer = io.StringIO()
     with contextlib.redirect_stdout(buffer):
@@ -386,8 +390,8 @@ def main() -> int:
                 "focus_rank": "0",
                 "path": str(active_consistency.WORKSPACE),
                 "source_doc": "ACTIVE.md",
-                "roadmap_doc": "roadmaps/execution-system-spec-v1-roadmap.md",
-                "tasks_doc": "tasks/execution-system-spec-v1-tasks.md",
+                "roadmap_doc": "docs/execution-system-spec-v1.md",
+                "tasks_doc": "ACTIVE.md",
                 "current_slice_id": "S1",
                 "next_slice_id": "S2",
                 "last_commit": "deadbeef",
@@ -514,7 +518,7 @@ def main() -> int:
         os.environ.pop("SIX_LAYER_SOURCE_REPO_ROOT", None)
         runner.discover_repo_tests_root = original_discover
 
-    with mock.patch.object(runner.subprocess, "run", return_value=SimpleNamespace(returncode=2)):
+    with mock.patch.object(runner.subprocess, "run", return_value=fake_completed(2)):
         buffer = io.StringIO()
         with contextlib.redirect_stdout(buffer):
             code, summary = runner.collect_summary(print_output=True)
@@ -523,7 +527,7 @@ def main() -> int:
         expect("EXECUTION_SYSTEM_CHECKS_FAILED" in buffer.getvalue(), buffer.getvalue())
 
     with mock.patch.object(runner, "discover_repo_tests_root", return_value=(None, "repo checkout not detected from plugin layout")):
-        with mock.patch.object(runner.subprocess, "run", return_value=SimpleNamespace(returncode=0)):
+        with mock.patch.object(runner.subprocess, "run", return_value=fake_completed(0)):
             buffer = io.StringIO()
             with contextlib.redirect_stdout(buffer):
                 code, summary = runner.collect_summary(print_output=True)
@@ -536,14 +540,15 @@ def main() -> int:
         tests_root.mkdir()
 
         call_count = {"value": 0}
+        hard_check_count = len(runner.all_check_commands())
 
         def fake_run(cmd, **kwargs):
             call_count["value"] += 1
-            if call_count["value"] <= len(runner.CHECKS):
-                return SimpleNamespace(returncode=0)
-            if call_count["value"] == len(runner.CHECKS) + len(runner.ADVISORIES) + 1:
-                return SimpleNamespace(returncode=1)
-            return SimpleNamespace(returncode=0)
+            if call_count["value"] <= hard_check_count:
+                return fake_completed(0)
+            if call_count["value"] == hard_check_count + len(runner.ADVISORIES) + 1:
+                return fake_completed(1)
+            return fake_completed(0)
 
         with mock.patch.object(runner, "discover_repo_tests_root", return_value=(tests_root, None)):
             with mock.patch.object(runner.subprocess, "run", side_effect=fake_run):
@@ -552,7 +557,7 @@ def main() -> int:
                     code, summary = runner.collect_summary(print_output=True)
         expect(code == 1, buffer.getvalue())
         expect(summary.repo_smoke_tests_status == "failed", str(summary))
-        expect("- repo_smoke_tests_total: 7" in buffer.getvalue(), buffer.getvalue())
+        expect(f"- repo_smoke_tests_total: {len(runner.REPO_SMOKE_TESTS)}" in buffer.getvalue(), buffer.getvalue())
 
     original_collect_closeout = closeout_ready.collect_summary
     original_parse_closeout = closeout_ready.parse_ledger

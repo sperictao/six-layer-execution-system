@@ -23,7 +23,7 @@ The six owned layers are:
 
 1. contract: long-lived constraints and invariants
 2. roadmap: phases, dependencies, exit criteria
-3. tasks: slices, validation, rollback shape
+3. tasks: individual slice plan/outcome files under `tasks/<activity-id>/<slice-id>.md`
 4. ACTIVE: current runtime truth
 5. decisions: durable rationale
 6. memory: history and recovery aids
@@ -42,8 +42,8 @@ When asked to recover or report status:
 
 1. read `ACTIVE.md`
 2. resolve the focus activity
-3. read its linked `source_doc`, `roadmap_doc`, and `tasks_doc`
-4. verify repo/workspace facts
+3. read its card at `activities/<focus>/card.md`
+4. read the linked `2-roadmap.md` and `3-tasks/<slice>.md` within the activity directory
 5. only then reply
 
 ## Focus-First and Parallel-Wave Semantics

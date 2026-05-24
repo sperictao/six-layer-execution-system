@@ -9,6 +9,10 @@ from typing import Dict, List, Optional
 
 from execution_system_paths import WORKSPACE
 ACTIVE = WORKSPACE / "ACTIVE.md"
+ACTIVITIES_ROOT = WORKSPACE / "activities"
+
+# Scalar keys that may appear in table rows or activity fields
+INDEX_TABLE_FIELDS = ("activity_id", "type", "status", "priority", "path")
 
 LEDGER_META_KEYS = (
     "version",
@@ -37,6 +41,8 @@ SCALAR_KEYS = (
     "source_doc",
     "roadmap_doc",
     "tasks_doc",
+    "tasks_dir",
+    "current_tasks_file",
     "current_slice_id",
     "objective",
     "next_slice_id",
@@ -54,6 +60,7 @@ class Activity:
     list_fields: Dict[str, List[str]]
     _raw_lines: List[str] = __import__("dataclasses").field(default_factory=list)
     _ledger: Optional['Ledger'] = None
+    _card_path: Optional[Path] = None
 
     @property
     def activity_id(self) -> Optional[str]:
@@ -127,10 +134,12 @@ class Activity:
                 self._raw_lines.insert(insert_idx, f"- {key}: `{value}`")
 
     def save(self) -> None:
-        if self._ledger:
+        if self._card_path:
+            self._card_path.write_text("\n".join(self._raw_lines) + "\n", encoding="utf-8")
+        elif self._ledger:
             self._ledger.save()
         else:
-            raise RuntimeError("Activity is not attached to a Ledger; cannot save.")
+            raise RuntimeError("Activity is not attached to a Ledger or card file; cannot save.")
 
     def to_lines(self) -> List[str]:
         lines = [f"### Activity: {self.heading}"]
@@ -255,6 +264,45 @@ class Ledger:
         if self._all_lines is None:
             raise RuntimeError("Ledger was not fully parsed with file content; cannot add activity.")
 
+        if self.meta.get("version") == "3":
+            root = (self._path.parent if self._path else WORKSPACE) / self.meta.get("activity_root", "activities/")
+            activity_dir = root / activity_id
+            activity_dir.mkdir(parents=True, exist_ok=True)
+            activity._card_path = activity_dir / "card.md"
+            if activity._card_path.exists():
+                raise RuntimeError(f"Activity card already exists: {activity._card_path}")
+            if not activity._raw_lines:
+                activity._raw_lines = activity.to_lines()
+            activity.save()
+
+            index_start = None
+            index_end = len(self._all_lines)
+            for idx, line in enumerate(self._all_lines):
+                if line.strip() == "## Activity index":
+                    index_start = idx + 1
+                    continue
+                if index_start is not None and idx > index_start - 1 and line.startswith("## "):
+                    index_end = idx
+                    break
+            if index_start is None:
+                raise RuntimeError("Ledger is missing the `Activity index` section.")
+
+            insert_idx = index_end
+            for idx in range(index_start, index_end):
+                stripped = self._all_lines[idx].strip()
+                if stripped.startswith("|") and stripped.count("|") >= 5:
+                    insert_idx = idx + 1
+
+            activity_type = activity.scalar("type") or ""
+            status = activity.scalar("status") or ""
+            priority = activity.scalar("priority") or ""
+            row = f"| {activity_id} | {activity_type} | {status} | {priority} | activities/{activity_id}/ |"
+            self._all_lines.insert(insert_idx, row)
+            self.activities[activity_id] = activity
+            self.activity_index.append(activity_id)
+            activity._ledger = self
+            return
+
         index_start = None
         index_end = len(self._all_lines)
         for idx, line in enumerate(self._all_lines):
@@ -279,9 +327,53 @@ class Ledger:
         self.activities[activity_id] = activity
         self.activity_index.append(activity_id)
                 
+    def _sync_v3_focus_section(self) -> None:
+        if self._all_lines is None:
+            return
+
+        focus_id = self.current_focus_activity_id
+        focus = self.get_current_focus_activity() if focus_id else None
+        if focus is None or focus_id is None:
+            return
+
+        start = None
+        end = len(self._all_lines)
+        for idx, line in enumerate(self._all_lines):
+            if line.startswith("## Focus:"):
+                start = idx
+                continue
+            if start is not None and idx > start and line.startswith("## "):
+                end = idx
+                break
+        if start is None:
+            return
+
+        focus_lines = [
+            f"## Focus: {focus_id}",
+            f"- card: `activities/{focus_id}/card.md`",
+            f"- status: `{focus.scalar('status') or ''}`",
+        ]
+        current_slice_id = focus.scalar("current_slice_id")
+        next_slice_id = focus.scalar("next_slice_id")
+        last_commit = focus.scalar("last_commit")
+        if current_slice_id:
+            focus_lines.append(f"- current_slice_id: `{current_slice_id}`")
+        if next_slice_id:
+            focus_lines.append(f"- next_slice_id: `{next_slice_id}`")
+        if last_commit:
+            focus_lines.append(f"- last_commit: `{last_commit}`")
+        focus_lines.append("")
+
+        self._all_lines = self._all_lines[:start] + focus_lines + self._all_lines[end:]
+
     def save(self) -> None:
         if not self._path or self._all_lines is None or self._activities_section_range is None:
             raise RuntimeError("Ledger was not fully parsed with file content; cannot save.")
+
+        if self.meta.get("version") == "3":
+            self._sync_v3_focus_section()
+            self._path.write_text("\n".join(self._all_lines) + "\n", encoding="utf-8")
+            return
             
         start, end = self._activities_section_range
         new_activities_lines = list(self._pre_activities_lines) if self._pre_activities_lines else []
@@ -324,9 +416,77 @@ def _extract_section(lines: List[str], title: str) -> List[str]:
     return _extract_section_with_range(lines, title)[0]
 
 
+def _parse_activity_from_lines(lines: List[str], heading: Optional[str] = None) -> Activity:
+    """Parse an Activity from raw lines (from a card.md file or section)."""
+    fields: Dict[str, str] = {}
+    list_fields: Dict[str, List[str]] = {}
+    current_list_key: Optional[str] = None
+    detected_heading = heading or ""
+
+    for raw in lines:
+        stripped = raw.rstrip()
+        if stripped.startswith("### Activity: "):
+            detected_heading = stripped[len("### Activity: "):].strip()
+            continue
+        if stripped.startswith("# "):
+            detected_heading = stripped[2:].strip()
+            continue
+        if stripped.startswith("- "):
+            current_list_key = None
+            matched = False
+            for key in SCALAR_KEYS:
+                value = _parse_backtick_value(stripped, key)
+                if value is not None:
+                    fields[key] = value
+                    matched = True
+                    break
+                value2 = _parse_simple_value(stripped, key)
+                if value2 is not None:
+                    fields[key] = value2
+                    matched = True
+                    break
+            if not matched:
+                m = re.match(r"^- ([^:]+):$", stripped)
+                if m:
+                    current_list_key = m.group(1).strip()
+                    list_fields[current_list_key] = []
+        elif stripped.startswith("  - ") and current_list_key:
+            list_fields[current_list_key].append(stripped[4:].strip())
+        else:
+            current_list_key = None
+
+    activity = Activity(detected_heading, fields, list_fields)
+    activity._raw_lines = lines.copy()
+    return activity
+
+
+def _parse_index_table(lines: List[str]) -> List[str]:
+    """Parse a markdown table in the Activity index section, extracting activity_id from each row."""
+    activity_ids: List[str] = []
+    in_table = False
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("|") and "activity_id" in stripped and "----" not in stripped.replace("-", ""):
+            in_table = True
+            continue
+        if in_table and stripped.startswith("|---"):
+            continue
+        if in_table and stripped.startswith("|"):
+            # Parse table row: | id | type | status | priority | path |
+            parts = [p.strip() for p in stripped.split("|") if p.strip()]
+            if parts:
+                activity_id = parts[0]
+                if activity_id and activity_id not in ("activity_id",):
+                    activity_ids.append(activity_id)
+        elif in_table and not stripped.startswith("|"):
+            in_table = False
+    return activity_ids
+
+
 def parse_ledger(path: Path = ACTIVE) -> Ledger:
     lines = path.read_text(encoding="utf-8").splitlines()
 
+    # Parse meta
     meta_lines = _extract_section(lines, "Ledger meta")
     meta: Dict[str, str] = {}
     for line in meta_lines:
@@ -335,6 +495,52 @@ def parse_ledger(path: Path = ACTIVE) -> Ledger:
             if value is not None:
                 meta[key] = value
 
+    # Try v3: per-activity card.md files
+    version = meta.get("version", "")
+    if version == "3":
+        return _parse_ledger_v3(path, lines, meta)
+
+    # v2 fallback: activities inlined in ACTIVE.md
+    return _parse_ledger_v2(path, lines, meta)
+
+
+def _parse_ledger_v3(path: Path, lines: List[str], meta: Dict[str, str]) -> Ledger:
+    """Parse v3 format: ACTIVE.md is a thin index, activities live in activities/<id>/card.md."""
+    index_lines = _extract_section(lines, "Activity index")
+    activity_index = _parse_index_table(index_lines)
+    activity_root = (path.parent / meta.get("activity_root", "activities/")).resolve()
+
+    # Fall back to bullet-list format if table parsing yields nothing
+    if not activity_index:
+        for line in index_lines:
+            m = re.match(r"^- `([^`]+)`$", line.strip())
+            if m:
+                activity_index.append(m.group(1))
+
+    activities: Dict[str, Activity] = {}
+    for aid in activity_index:
+        card_path = activity_root / aid / "card.md"
+        if card_path.exists():
+            card_lines = card_path.read_text(encoding="utf-8").splitlines()
+            activity = _parse_activity_from_lines(card_lines)
+            activity._card_path = card_path
+            if activity.activity_id:
+                activities[activity.activity_id] = activity
+
+    ledger = Ledger(meta=meta, activities=activities, activity_index=activity_index)
+    ledger._path = path
+    ledger._all_lines = lines
+    ledger._activities_section_range = (0, len(lines))
+    ledger._pre_activities_lines = []
+
+    for act in ledger.activities.values():
+        act._ledger = ledger
+
+    return ledger
+
+
+def _parse_ledger_v2(path: Path, lines: List[str], meta: Dict[str, str]) -> Ledger:
+    """Parse v2 format: activities inlined in ACTIVE.md under ## Activities section."""
     index_lines = _extract_section(lines, "Activity index")
     activity_index: List[str] = []
     for line in index_lines:
@@ -349,56 +555,24 @@ def parse_ledger(path: Path = ACTIVE) -> Ledger:
     block: List[str] = []
     pre_activities_lines: List[str] = []
 
-    def flush() -> None:
-        nonlocal current_heading, block
-        if not current_heading:
-            return
-        fields: Dict[str, str] = {}
-        list_fields: Dict[str, List[str]] = {}
-        current_list_key: Optional[str] = None
-        for raw in block:
-            stripped = raw.rstrip()
-            if stripped.startswith("- "):
-                current_list_key = None
-                matched = False
-                for key in SCALAR_KEYS:
-                    value = _parse_backtick_value(stripped, key)
-                    if value is not None:
-                        fields[key] = value
-                        matched = True
-                        break
-                    value2 = _parse_simple_value(stripped, key)
-                    if value2 is not None:
-                        fields[key] = value2
-                        matched = True
-                        break
-                if not matched:
-                    m = re.match(r"^- ([^:]+):$", stripped)
-                    if m:
-                        current_list_key = m.group(1).strip()
-                        list_fields[current_list_key] = []
-            elif stripped.startswith("  - ") and current_list_key:
-                list_fields[current_list_key].append(stripped[4:].strip())
-            else:
-                current_list_key = None
-        activity = Activity(current_heading, fields, list_fields)
-        activity._raw_lines = block.copy()
-        if activity.activity_id:
-            activities[activity.activity_id] = activity
-        current_heading = None
-        block = []
-
     for line in activities_lines:
         if line.startswith("### Activity: "):
-            flush()
-            current_heading = line[len("### Activity: ") :].strip()
+            if current_heading and block:
+                activity = _parse_activity_from_lines(block, current_heading)
+                if activity.activity_id:
+                    activities[activity.activity_id] = activity
+            current_heading = line[len("### Activity: "):].strip()
             block = [line]
         else:
             if current_heading is not None:
                 block.append(line)
             else:
                 pre_activities_lines.append(line)
-    flush()
+
+    if current_heading and block:
+        activity = _parse_activity_from_lines(block, current_heading)
+        if activity.activity_id:
+            activities[activity.activity_id] = activity
 
     ledger = Ledger(meta=meta, activities=activities, activity_index=activity_index)
     ledger._path = path

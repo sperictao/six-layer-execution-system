@@ -151,7 +151,7 @@ def validate_roadmap_activity(problems: list[str], activity: Activity) -> None:
     if not activity.scalar("path") and not activity.scalar("repo"):
         add_problem(problems, f"activity:{activity_id}", "roadmap activity must include `path` or `repo`")
 
-    doc_fields = ("roadmap_doc", "tasks_doc")
+    doc_fields = ("roadmap_doc", "tasks_doc", "tasks_dir")
     for field in doc_fields:
         if field in activity.fields and not activity.scalar(field):
             add_problem(problems, f"activity:{activity_id}", f"roadmap activity has empty `{field}`")
@@ -217,18 +217,23 @@ def validate_focus_level(problems: list[str], ledger) -> None:
         required_scalars = (
             "source_doc",
             "roadmap_doc",
-            "tasks_doc",
             "current_slice_id",
             "next_slice_id",
             "last_commit",
         )
         for field in required_scalars:
             require_scalar(problems, scope, focus, field)
+        if not (
+            focus.scalar("tasks_doc")
+            or focus.scalar("tasks_dir")
+            or focus.scalar("current_tasks_file")
+        ):
+            add_problem(problems, scope, "missing `tasks_doc` or `tasks_dir`")
 
         for field in ("next_step", "validation", "blocked_by"):
             require_list(problems, scope, focus, field)
 
-        doc_fields = ("source_doc", "roadmap_doc", "tasks_doc")
+        doc_fields = ("source_doc", "roadmap_doc", "tasks_doc", "tasks_dir", "current_tasks_file")
         for field in doc_fields:
             if field in focus.fields:
                 doc_path = focus.scalar(field)

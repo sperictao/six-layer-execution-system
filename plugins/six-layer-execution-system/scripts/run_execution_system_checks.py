@@ -122,8 +122,8 @@ def generated_task_docs() -> list[Path]:
         if activity.scalar("type") != "roadmap":
             continue
         source_doc = (activity.scalar("source_doc") or "").strip()
-        tasks_doc = (activity.scalar("tasks_doc") or "").strip()
-        if not source_doc.startswith("demands/") or not tasks_doc:
+        tasks_doc = (activity.scalar("tasks_doc") or activity.scalar("tasks_dir") or "").strip()
+        if not (source_doc.startswith("demands/") or source_doc.startswith("activities/")) or not tasks_doc:
             continue
         if not (activity.activity_id or "").startswith("auto-"):
             continue

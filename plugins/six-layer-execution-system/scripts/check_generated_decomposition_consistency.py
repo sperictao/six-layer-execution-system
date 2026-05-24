@@ -141,23 +141,24 @@ def validate_generated_activity(activity, problems: list[str]) -> None:
     scope = f"generated:{activity_id}"
     source_doc = normalize_ref(activity.scalar("source_doc") or "")
     roadmap_doc = normalize_ref(activity.scalar("roadmap_doc") or "")
-    tasks_doc = normalize_ref(activity.scalar("tasks_doc") or "")
+    tasks_doc = normalize_ref(activity.scalar("tasks_doc") or activity.scalar("tasks_dir") or "")
     current_slice_id = normalize_ref(activity.scalar("current_slice_id") or "")
     next_slice_id = normalize_ref(activity.scalar("next_slice_id") or "")
-    if not source_doc.startswith("demands/"):
+    if not source_doc.startswith("demands/") and not source_doc.startswith("activities/"):
         return
-
     demand_path = WORKSPACE / source_doc
     roadmap_path = WORKSPACE / roadmap_doc
-    tasks_path = WORKSPACE / tasks_doc
+    tasks_path = WORKSPACE / tasks_doc if tasks_doc else None
     for label, path in (("source_doc", demand_path), ("roadmap_doc", roadmap_path), ("tasks_doc", tasks_path)):
+        if path is None:
+            continue
         if not path.exists():
             add_problem(problems, scope, f"`{label}` points to missing file `{path.relative_to(WORKSPACE)}`")
             return
 
     demand_text = demand_path.read_text(encoding="utf-8")
     roadmap_text = roadmap_path.read_text(encoding="utf-8")
-    tasks_text = tasks_path.read_text(encoding="utf-8")
+    tasks_text = tasks_path.read_text(encoding="utf-8") if tasks_path else ""
     demand_fields, demand_lists = parse_markdown_fields(demand_text)
     demand_expected_artifacts = [normalize_ref(item) for item in demand_lists.get("expected_artifacts", [])]
 
@@ -232,7 +233,7 @@ def validate_generated_decomposition(active_path: Path) -> tuple[int, list[str]]
         if activity.scalar("type") != "roadmap":
             continue
         source_doc = normalize_ref(activity.scalar("source_doc") or "")
-        if not source_doc.startswith("demands/"):
+        if not source_doc.startswith("demands/") and not source_doc.startswith("activities/"):
             continue
         if not (activity.activity_id or "").startswith("auto-"):
             continue

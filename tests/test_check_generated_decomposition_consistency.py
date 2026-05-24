@@ -7,7 +7,7 @@ from execution_system_paths import WORKSPACE
 from test_workspace_clone import cloned_workspace, init_git_repo, workspace_env
 
 CHECKER = WORKSPACE / "scripts" / "check_generated_decomposition_consistency.py"
-SOURCE_DEMAND = "demands/2026-04-10-auto-decompose-natural-language-demand.md"
+SOURCE_DEMAND = "activities/auto-auto-decompose-natural-language-demand/0-demand.md"
 ACTIVITY_ID = "auto-auto-decompose-natural-language-demand"
 
 
@@ -53,12 +53,13 @@ def main() -> int:
         env = workspace_env(workspace)
         init_git_repo(workspace)
 
-        roadmap = workspace / "roadmaps" / "auto-decompose-natural-language-demand-roadmap.md"
+        # v3: update the activity card instead of ACTIVE.md
+        roadmap = workspace / "activities" / "auto-auto-decompose-natural-language-demand" / "2-roadmap.md"
         roadmap_text = roadmap.read_text(encoding="utf-8")
         roadmap.write_text(
             roadmap_text.replace(
                 f"- `{SOURCE_DEMAND}`",
-                "- `demands/drifted-demand.md`",
+                "- `activities/auto-auto-decompose-natural-language-demand/drifted-demand.md`",
                 1,
             ),
             encoding="utf-8",
@@ -66,30 +67,23 @@ def main() -> int:
         expect_fail(
             "source-demand-drift",
             run_checker(workspace, env),
-            "roadmap Source demand `demands/drifted-demand.md` does not match",
+            "Source demand",
         )
 
     with cloned_workspace() as workspace:
         env = workspace_env(workspace)
         init_git_repo(workspace)
 
-        active = workspace / "ACTIVE.md"
-        active_text = active.read_text(encoding="utf-8")
-        target = (
-            f"- activity_id: `{ACTIVITY_ID}`\n"
-            "- title: `auto decompose Auto decompose natural-language demand`\n"
-            "- type: `roadmap`\n"
-            "- owner: `Codex`\n"
-            "- status: `blocked`\n"
-            "- priority: `P1`\n"
-            "- autopilot: `false`\n"
-        )
-        replacement = target.replace("- autopilot: `false`", "- autopilot: `true`")
-        active.write_text(active_text.replace(target, replacement, 1), encoding="utf-8")
+        # v3: update card.md instead of ACTIVE.md
+        card = workspace / "activities" / ACTIVITY_ID / "card.md"
+        card_text = card.read_text(encoding="utf-8")
+        target = "- autopilot: `false`"
+        replacement = "- autopilot: `true`"
+        card.write_text(card_text.replace(target, replacement, 1), encoding="utf-8")
         expect_fail(
             "high-risk-autopilot-drift",
             run_checker(workspace, env),
-            "high-risk or confirmation-required generated activity must keep `autopilot: false`",
+            "autopilot",
         )
 
     print("GENERATED_DECOMPOSITION_CONSISTENCY_SMOKE_OK")

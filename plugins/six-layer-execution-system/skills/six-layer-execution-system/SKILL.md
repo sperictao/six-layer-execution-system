@@ -27,8 +27,8 @@ Follow this order unless the task is clearly narrower:
 
 1. Run `python3 scripts/inspect_execution_system.py --format markdown`.
 2. Read `ACTIVE.md`.
-3. Resolve the current focus activity and its `source_doc`, `roadmap_doc`, and `tasks_doc`.
-4. Read `references/checkers-and-protocols.md` if the task touches validation or closeout.
+3. Resolve the current focus activity ID, then read `activities/<focus>/card.md`.
+4. If the activity is in progress, read the current slice's tasks file at `activities/<focus>/3-tasks/<current_slice_id>.md`.
 5. Read `references/workspace-execution-system.md` for local conventions.
 6. Read `references/local-install.md` only if the task touches wrapper behavior, local installation, or upstream runtime handoff.
 7. Use `references/source-map.md` when you need exact file pointers before opening original files.
@@ -52,12 +52,11 @@ Examples:
 
 Required recovery sequence:
 
-1. read `memory/working-buffer.md` first when it exists
-2. read `ACTIVE.md`
-3. resolve `current_focus_activity_id`
-4. read the focus activity card
-5. if it is a roadmap activity, read its linked roadmap/tasks docs
-6. inspect repo/workspace facts before replying or acting
+1. read `ACTIVE.md`
+2. resolve `current_focus_activity_id`
+3. read `activities/<focus>/card.md`
+4. if it is a roadmap activity, read its linked roadmap (`2-roadmap.md`) and tasks (`3-tasks/<slice>.md`)
+5. inspect repo/workspace facts before replying or acting
 
 Forbidden recovery shortcuts:
 
@@ -155,8 +154,26 @@ Path and tool ownership facts:
 1. Read `memory/working-buffer.md` when it exists.
 2. Read `ACTIVE.md`.
 3. Resolve the current focus activity and its linked docs.
-4. Verify repository and workspace facts before reporting status.
-5. Read daily notes only after runtime truth is loaded.
+4. Read the current slice's tasks file at `tasks/<activity-id>/<current_slice_id>.md`.
+5. Verify repository and workspace facts before reporting status.
+6. Read daily notes only after runtime truth is loaded.
+
+### Execute a Slice (the canonical workflow)
+
+Every slice execution follows this exact sequence:
+
+1. **Evaluate** — read the focus activity, roadmap, and existing tasks files.
+2. **Plan** — derive the execution plan and write it as a new tasks file at `tasks/<activity-id>/<slice-id>.md` with `actual_execution_plan` filled.
+3. **Present** — show the complete plan to the user and wait for explicit confirmation.
+4. **Execute** — only after confirmation, carry out the plan.
+5. **Update** — if reality differs from the initial plan during execution, update the tasks file immediately.
+6. **Verify** — run the validation steps defined in the tasks file.
+7. **Complete** — update the tasks file: set `status: done`, fill `actual_outcome` (commit + verification). Update `ACTIVE.md`: advance `current_slice_id` / `next_slice_id` / `last_commit`.
+
+Forbidden shortcuts:
+- Do not execute without writing the plan to the tasks file first.
+- Do not execute without user confirmation.
+- Do not mark a slice done without filling `actual_outcome`.
 
 ### Modify The Execution System
 
@@ -194,6 +211,8 @@ Typical mapping:
 ## Resources
 
 - `ACTIVE.md`: live runtime truth
+- `tasks/<activity-id>/`: per-slice plan and outcome files
+- `references/templates.md`: canonical templates for all layers, including the single-slice tasks file format
 - `references/workspace-execution-system.md`: local six-layer model and maintenance semantics
 - `references/checkers-and-protocols.md`: checker, advisory, full-suite, and closeout pipeline map
 - `references/source-map.md`: exact file path index for the local repository

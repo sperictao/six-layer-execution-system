@@ -1,0 +1,28 @@
+### Activity: execution-system-testing
+- activity_id: `execution-system-testing`
+- title: `execution system testing roadmap and inventory`
+- type: `roadmap`
+- owner: `Spero`
+- status: `done`
+- priority: `P2`
+- autopilot: `false`
+- focus_rank: `5`
+- path: `.`
+- repo: `six-layer-execution-system`
+- roadmap_doc: `activities/execution-system-testing/2-roadmap.md`
+- tasks_doc: `activities/execution-system-testing/3-tasks/execution-system-testing-tasks.md`
+- objective: `建立 execution-system 的统一测试入口和清单`
+- done_when:
+  - testing roadmap/tasks/inventory + run_execution_system_full_tests.py aligned
+  - execution-system path naming unified across scripts and docs
+- next_step:
+  - archived — complete
+- validation:
+  - `python3 scripts/run_execution_system_checks.py`
+- last_commit: `c7344bb`
+- retrieval_keys:
+  - execution-system-testing
+- done_definition:
+  - testing inventory and full-suite entrypoint aligned
+- notes:
+  - this activity was completed and archived; kept for historical reference

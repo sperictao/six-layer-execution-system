@@ -3,13 +3,13 @@ import sys
 from pathlib import Path
 
 from active_ledger import parse_ledger
-from execution_system_paths import WORKSPACE
+from execution_system_paths import STATE_ROOT, WORKSPACE
 from run_execution_system_checks import collect_summary
 
 from build_slice_handoff import build_handoff_payload
 from create_slice_closeout import create_closeout
 
-LAST_CLOSEOUT = WORKSPACE / "memory/last-slice-closeout.json"
+LAST_CLOSEOUT = STATE_ROOT / "last-slice-closeout.json"
 ACTIVE = WORKSPACE / "ACTIVE.md"
 
 def check_closeout_ready() -> bool:

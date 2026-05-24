@@ -538,9 +538,10 @@ class DecompositionPlanner:
         date_prefix = today or datetime.now().astimezone().strftime("%Y-%m-%d")
         activity_id = f"auto-{slug}"
         project_code = build_project_code(slug)
-        demand_doc = f"demands/{date_prefix}-{slug}.md"
-        roadmap_doc = f"roadmaps/{slug}-roadmap.md"
-        tasks_doc = f"tasks/{slug}-tasks.md"
+        activity_root = f"activities/{activity_id}"
+        demand_doc = f"{activity_root}/0-demand.md"
+        roadmap_doc = f"{activity_root}/2-roadmap.md"
+        tasks_doc = f"{activity_root}/3-tasks/{slug}-tasks.md"
         contract_doc = CONTRACT_DOC
 
         strategy = self.select_strategy(classification)

@@ -1,0 +1,39 @@
+### Activity: auto-auto-decompose-natural-language-demand
+- activity_id: `auto-auto-decompose-natural-language-demand`
+- title: `auto decompose Auto decompose natural-language demand`
+- type: `roadmap`
+- owner: `Codex`
+- status: `blocked`
+- priority: `P1`
+- autopilot: `false`
+- focus_rank: `4`
+- repo: `six-layer-execution-system`
+- path: `.`
+- source_doc: `activities/auto-auto-decompose-natural-language-demand/0-demand.md`
+- roadmap_doc: `activities/auto-auto-decompose-natural-language-demand/2-roadmap.md`
+- tasks_dir: `activities/auto-auto-decompose-natural-language-demand/3-tasks/auto-decompose-natural-language-demand-tasks.md`
+- current_slice_id: `AD-A.A1`
+- next_slice_id: `AD-A.B1`
+- objective: `将自然语言需求“Auto decompose natural-language demand”自动拆成可执行 backlog，并保持 execution-system 约束不漂移`
+- last_commit: `cf6e83d`
+- done_when:
+  - generated demand / roadmap / tasks artifacts stay aligned
+  - generated tasks pass dependency and parallel-safety checks
+  - generated activity passes cross-artifact consistency checks
+  - the generated activity is safe to activate or continue manually
+- next_step:
+  - review the generated demand intake 'demands/2026-04-10-auto-decompose-natural-language-demand.md'
+  - confirm the guarded activity 'auto-auto-decompose-natural-language-demand' before switching focus or enabling autonomous execution
+- validation:
+  - python3 scripts/check_demand_card_schema.py
+  - python3 scripts/check_generated_decomposition_consistency.py
+  - python3 scripts/run_execution_checks.py checks --timeout 60
+- blocked_by:
+  - explicit confirmation required before activation
+- retrieval_keys:
+  - auto-auto-decompose-natural-language-demand
+  - demands/2026-04-10-auto-decompose-natural-language-demand.md
+  - roadmaps/auto-decompose-natural-language-demand-roadmap.md
+  - tasks/auto-decompose-natural-language-demand-tasks.md
+  - implementation
+  - implementation-review-gate

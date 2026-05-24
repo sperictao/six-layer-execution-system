@@ -1,0 +1,51 @@
+# ledger-v3-activity-isolation demand intake
+
+- request: 将六层执行系统从「按层分桶」重构为「按活动隔离」，每个 activity 自包含全部六层资源
+- task_type: `refactor`
+- desired_outcome:
+  - 每个 activity 拥有独立目录，包含 card.md + 六层资源文件
+  - ACTIVE.md 从 474 行大杂烩精简为 ~50 行薄索引表
+  - 删/归档/拷贝一个 activity 只需操作一个目录
+  - 所有 checker/脚本适配新结构
+  - 旧 tasks 单文件顺便拆成新格式
+- scope:
+  - plugins/six-layer-execution-system/ 内所有文件重组
+  - ACTIVE.md 格式 v2→v3
+  - ~12 个 checker/脚本路径适配
+  - ~6 个规范/文档同步更新
+  - Hermes skill 副本同步
+- constraints:
+  - ACTIVE.md focus-first 语义不变
+  - 恢复链必须可工作
+  - 不丢失任何现有数据
+  - 旧文件保留（归档而非删除）
+- non_goals:
+  - 不改变六层系统的执行语义（仍 demand→contract→roadmap→tasks→ACTIVE）
+  - 不改变 checker 的验证逻辑（只改路径解析）
+  - 不改变 closeout 协议
+- risk_level: `medium`
+- external_confirmation_required: `true`
+- dependency_graph:
+  - G-1 (治理链) → M-1 (提取卡片) → M-2~M-8 (迁移) → M-9 (清理) → A-1 (ACTIVE重写) → C-1~C-6 (checker适配) → D-1~D-6 (文档同步) → V-1~V-4 (验证)
+- parallelizable_units:
+  - M-2~M-8 可并行
+  - C-2~C-5 可并行（C-1 需先完成）
+  - D-1~D-6 可并行
+  - V-1~V-4 可并行
+- serial_units:
+  - G-1 必须先完成
+  - M-9 依赖 M-2~M-8
+  - A-1 依赖 M-9
+  - C-1 是后续 checker 适配的前提
+- expected_artifacts:
+  - `activities/` 目录含 8 个 activity 子目录
+  - 新 ACTIVE.md (~50 行)
+  - 更新后的 ~12 个 checker 脚本
+  - 更新后的 ~6 个规范文档
+- validation_plan:
+  - `python3 scripts/run_execution_system_checks.py checks --timeout 60` 全绿
+  - `python3 scripts/run_execution_system_full_tests.py` 全量测试绿（需 source checkout）
+  - 手动验证恢复链：ACTIVE.md → activities/<focus>/card.md → 3-tasks/<slice>.md
+  - 手动验证所有 card.md 可被 active_ledger.py 解析
+- closeout_condition:
+  - 全 checker 绿 + 全测试绿 + 恢复链可走通

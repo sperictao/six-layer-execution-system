@@ -63,8 +63,7 @@ Current implemented boundary:
 
 ## Decomposition and Parallel-Wave Checkers
 
-- `scripts/check_task_slice_schema.py`
-- `scripts/check_generated_decomposition_consistency.py`
+- `scripts/check_task_slice_schema.py` — validates per-slice files under `tasks/<activity-id>/` for required fields (`phase_id`, `rollback_strategy`) and status-aware checks (`actual_execution_plan` when in_progress, `actual_outcome` when done)
 - `scripts/check_task_dependency_graph.py`
 - `scripts/check_parallel_safety.py`
 - `scripts/check_active_wave_state.py`

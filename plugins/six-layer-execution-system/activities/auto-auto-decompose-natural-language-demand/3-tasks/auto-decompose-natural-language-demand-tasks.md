@@ -1,0 +1,219 @@
+# Auto decompose natural-language demand tasks
+
+## Source demand
+- `activities/auto-auto-decompose-natural-language-demand/0-demand.md`
+
+## Current phase
+- Phase 1 - Demand normalization (`AD-A` / Slice A1 - normalize demand and review boundary)
+
+## PR queue
+
+### AD-A - automated demand decomposition
+- goal:
+  - 将 `Auto decompose natural-language demand` 自动拆成可执行、可验证的 execution-system backlog
+- validation:
+  - generated demand card is schema-valid
+  - generated artifacts satisfy dependency, parallel-safety, and consistency checks
+- done_definition:
+  - roadmap/tasks/ACTIVE stay aligned and the next slice is explicit
+- risk:
+  - high
+
+#### Slice A1 - normalize demand and review boundary
+- phase_id: `PH-1`
+- goal:
+  - capture request, constraints, and the first high-risk review boundary in generated artifacts
+- scope:
+  - `activities/auto-auto-decompose-natural-language-demand/0-demand.md`
+  - `roadmaps/auto-decompose-natural-language-demand-roadmap.md`
+  - `tasks/auto-decompose-natural-language-demand-tasks.md`
+  - `ACTIVE.md`
+- target_files:
+  - `activities/auto-auto-decompose-natural-language-demand/0-demand.md`
+  - `roadmaps/auto-decompose-natural-language-demand-roadmap.md`
+  - `tasks/auto-decompose-natural-language-demand-tasks.md`
+  - `ACTIVE.md`
+- depends_on:
+  - none
+- parallel_safe:
+  - false
+- shared_write_targets:
+  - `activities/auto-auto-decompose-natural-language-demand/0-demand.md`
+  - `roadmaps/auto-decompose-natural-language-demand-roadmap.md`
+  - `tasks/auto-decompose-natural-language-demand-tasks.md`
+  - `ACTIVE.md`
+- expected_artifacts:
+  - normalized demand card
+  - high-risk review baseline
+- integration_notes:
+  - keep runtime truth inside ACTIVE and keep the first wave strictly bounded
+- handoff_output:
+  - generated_paths
+  - activity_id
+- validation:
+  - `python3 scripts/check_demand_card_schema.py`
+- done_definition:
+  - 'AD-A.A1' leaves a reviewable high-risk baseline for downstream slices
+- rollback_strategy:
+  - remove generated artifacts together if the high-risk baseline is rejected
+- risk:
+  - high
+
+#### Slice B1 - freeze review gate and activation policy
+- phase_id: `PH-2`
+- goal:
+  - translate contract guardrails and review triggers into an explicit activation gate
+- scope:
+  - `contracts/execution-system-contract.md`
+  - `activities/auto-auto-decompose-natural-language-demand/0-demand.md`
+  - `roadmaps/auto-decompose-natural-language-demand-roadmap.md`
+  - `tasks/auto-decompose-natural-language-demand-tasks.md`
+  - `ACTIVE.md`
+- target_files:
+  - `activities/auto-auto-decompose-natural-language-demand/0-demand.md`
+  - `roadmaps/auto-decompose-natural-language-demand-roadmap.md`
+  - `tasks/auto-decompose-natural-language-demand-tasks.md`
+  - `ACTIVE.md`
+- depends_on:
+  - `AD-A.A1`
+- parallel_safe:
+  - false
+- shared_write_targets:
+  - `activities/auto-auto-decompose-natural-language-demand/0-demand.md`
+  - `roadmaps/auto-decompose-natural-language-demand-roadmap.md`
+  - `tasks/auto-decompose-natural-language-demand-tasks.md`
+  - `ACTIVE.md`
+- expected_artifacts:
+  - review gate notes
+  - activation policy
+- integration_notes:
+  - do not activate or widen scope without an explicit confirmation boundary
+- handoff_output:
+  - review_triggers
+  - activation_policy
+- validation:
+  - `python3 scripts/check_generated_decomposition_consistency.py`
+- done_definition:
+  - 'AD-A.B1' freezes the review gate before primary delivery planning
+- rollback_strategy:
+  - revert the generated review gate together if the activation policy is not explicit enough
+- risk:
+  - high
+
+#### Slice C1 - generate primary implementation artifacts under review guardrails
+- phase_id: `PH-3`
+- goal:
+  - shape the high-risk 'implementation' backlog into bounded executable artifacts
+- scope:
+  - `roadmaps/auto-decompose-natural-language-demand-roadmap.md`
+  - `tasks/auto-decompose-natural-language-demand-tasks.md`
+- target_files:
+  - `roadmaps/auto-decompose-natural-language-demand-roadmap.md`
+  - `tasks/auto-decompose-natural-language-demand-tasks.md`
+- depends_on:
+  - `AD-A.B1`
+- parallel_safe:
+  - false
+- shared_write_targets:
+  - `roadmaps/auto-decompose-natural-language-demand-roadmap.md`
+  - `tasks/auto-decompose-natural-language-demand-tasks.md`
+- expected_artifacts:
+  - primary delivery slice
+  - validation-ready dependency chain
+- integration_notes:
+  - keep the first generated wave serial until the guarded write surface is understood
+- handoff_output:
+  - current_slice_id
+  - next_slice_id
+- validation:
+  - `python3 scripts/check_task_dependency_graph.py`
+  - `python3 scripts/check_parallel_safety.py`
+- done_definition:
+  - 'AD-A.C1' becomes a guarded primary-delivery boundary
+- rollback_strategy:
+  - revert the generated roadmap and tasks pair together if the guarded dependency shape is invalid
+- risk:
+  - high
+
+#### Slice D1 - validate cross-artifact consistency and activation safety
+- phase_id: `PH-4`
+- goal:
+  - verify generated artifacts stay aligned before any activation or handoff
+- scope:
+  - `activities/auto-auto-decompose-natural-language-demand/0-demand.md`
+  - `roadmaps/auto-decompose-natural-language-demand-roadmap.md`
+  - `tasks/auto-decompose-natural-language-demand-tasks.md`
+  - `ACTIVE.md`
+- target_files:
+  - `activities/auto-auto-decompose-natural-language-demand/0-demand.md`
+  - `roadmaps/auto-decompose-natural-language-demand-roadmap.md`
+  - `tasks/auto-decompose-natural-language-demand-tasks.md`
+  - `ACTIVE.md`
+- depends_on:
+  - `AD-A.C1`
+- parallel_safe:
+  - false
+- shared_write_targets:
+  - `activities/auto-auto-decompose-natural-language-demand/0-demand.md`
+  - `roadmaps/auto-decompose-natural-language-demand-roadmap.md`
+  - `tasks/auto-decompose-natural-language-demand-tasks.md`
+  - `ACTIVE.md`
+- expected_artifacts:
+  - checker-accepted decomposition baseline
+  - confirmation-safe activation boundary
+- integration_notes:
+  - run the cross-artifact consistency gate before canonical checks
+- handoff_output:
+  - validation_commands
+  - activation_guard
+- validation:
+  - `python3 scripts/check_generated_decomposition_consistency.py`
+  - `python3 scripts/check_task_dependency_graph.py`
+  - `python3 scripts/check_parallel_safety.py`
+- done_definition:
+  - 'AD-A.D1' proves the guarded backlog is internally consistent
+- rollback_strategy:
+  - revert the generated activity and artifacts together if any consistency gate fails
+- risk:
+  - high
+
+#### Slice E1 - finalize handoff-ready review notes
+- phase_id: `PH-5`
+- goal:
+  - verify the high-risk backlog can enter the canonical execution flow without hidden review drift
+- scope:
+  - `activities/auto-auto-decompose-natural-language-demand/0-demand.md`
+  - `roadmaps/auto-decompose-natural-language-demand-roadmap.md`
+  - `tasks/auto-decompose-natural-language-demand-tasks.md`
+  - `ACTIVE.md`
+- target_files:
+  - `activities/auto-auto-decompose-natural-language-demand/0-demand.md`
+  - `roadmaps/auto-decompose-natural-language-demand-roadmap.md`
+  - `tasks/auto-decompose-natural-language-demand-tasks.md`
+  - `ACTIVE.md`
+- depends_on:
+  - `AD-A.D1`
+- parallel_safe:
+  - false
+- shared_write_targets:
+  - `activities/auto-auto-decompose-natural-language-demand/0-demand.md`
+  - `roadmaps/auto-decompose-natural-language-demand-roadmap.md`
+  - `tasks/auto-decompose-natural-language-demand-tasks.md`
+  - `ACTIVE.md`
+- expected_artifacts:
+  - handoff-ready activity metadata
+  - manual review packet
+- integration_notes:
+  - keep autonomous execution disabled and preserve the review gate in ACTIVE metadata
+- handoff_output:
+  - activation_notes
+  - manual_review_packet
+- validation:
+  - `python3 scripts/check_generated_decomposition_consistency.py`
+  - `python3 scripts/run_execution_checks.py checks --timeout 60`
+- done_definition:
+  - 'AD-A.E1' makes the guarded backlog safe to pick up manually after explicit review
+- rollback_strategy:
+  - revert the generated guarded backlog together if canonical checks fail
+- risk:
+  - high

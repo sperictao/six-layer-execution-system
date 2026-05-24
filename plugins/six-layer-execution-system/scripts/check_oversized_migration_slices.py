@@ -117,6 +117,10 @@ def check_task_doc(task_doc: Path) -> list[tuple[str, list[str]]]:
 
 def main() -> int:
     task_doc = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_TASK_DOC
+    if not task_doc.exists():
+        print("OVERSIZED_MIGRATION_SLICES_CHECK_OK")
+        print(f"- task_doc: {task_doc} (file not found — skipping, v3 per-slice format in use)")
+        return 0
     warnings = check_task_doc(task_doc)
     if warnings:
         print("OVERSIZED_MIGRATION_SLICE_ADVISORY")

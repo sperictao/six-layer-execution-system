@@ -5,9 +5,10 @@ from __future__ import annotations
 from execution_system_paths import WORKSPACE
 
 SPEC = WORKSPACE / "docs/execution-system-spec-v1.md"
-ROADMAP = WORKSPACE / "roadmaps/execution-system-spec-v1-roadmap.md"
-TASKS = WORKSPACE / "tasks/execution-system-spec-v1-tasks.md"
+ROADMAP = WORKSPACE / "activities/execution-system-spec-v1/2-roadmap.md"
+TASKS = WORKSPACE / "activities/execution-system-spec-v1/3-tasks/execution-system-spec-v1-tasks.md"
 ACTIVE = WORKSPACE / "ACTIVE.md"
+CARD_SPEC_V1 = WORKSPACE / "activities/execution-system-spec-v1/card.md"
 ACCEPTANCE = WORKSPACE / "docs/execution-system-spec-v1-acceptance-checklist.md"
 SKILL = WORKSPACE / "skills" / "six-layer-execution-system" / "SKILL.md"
 DELETED_PROMPT_FILES = [
@@ -29,6 +30,7 @@ def main() -> int:
     roadmap = ROADMAP.read_text(encoding="utf-8")
     tasks = TASKS.read_text(encoding="utf-8")
     active = ACTIVE.read_text(encoding="utf-8")
+    card_spec_v1 = CARD_SPEC_V1.read_text(encoding="utf-8")
     acceptance = ACCEPTANCE.read_text(encoding="utf-8")
     skill = SKILL.read_text(encoding="utf-8")
 
@@ -53,13 +55,13 @@ def main() -> int:
     expect_contains(tasks, "Slice F32 - define maintenance-mode re-entry protocol", "tasks", problems)
     expect_contains(tasks, "Slice F33 - plan acceptance / summary / closeout integration wave", "tasks", problems)
 
-    expect_contains(active, "status: `parked`", "ACTIVE", problems)
-    expect_contains(active, "maintenance mode until a concrete reopen trigger appears", "ACTIVE", problems)
-    expect_contains(active, "current_slice_id: `ES-F.F33`", "ACTIVE", problems)
+    expect_contains(card_spec_v1, "status: `parked`", "execution-system-spec-v1 card", problems)
+    expect_contains(card_spec_v1, "maintenance mode until a concrete reopen trigger appears", "execution-system-spec-v1 card", problems)
+    expect_contains(card_spec_v1, "current_slice_id: `ES-F.F33`", "execution-system-spec-v1 card", problems)
     expect_contains(
-        active,
-        "roadmap_closeout_entrypoint: `scripts/complete_slice.py`",
-        "ACTIVE",
+        card_spec_v1,
+        "roadmaps/execution-system-spec-v1-roadmap.md",
+        "execution-system-spec-v1 card",
         problems,
     )
 
